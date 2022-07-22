@@ -1,6 +1,7 @@
 {
   "name": "@quarkcss/react",
   "version": "0.0.0",
+  "author": "Chris Pakken",
   "type": "module",
   "typings": "dist/types",
   "main": "dist/index.umd.cjs",
