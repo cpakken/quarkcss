@@ -1,0 +1,14 @@
+{
+  "name": "@quarkcss/core",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "vite dev",
+    "test": "vitest --globals"
+  },
+  "devDependencies": {
+    "vite": "^3.0.2",
+    "vitest": "^0.18.1"
+  }
+}
