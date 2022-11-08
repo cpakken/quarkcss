@@ -1,4 +1,4 @@
-import { createSeparateQuarkPropsFn, shallowMemoPrev } from '.'
+import { createSeparateQuarkPropsFn } from '.'
 
 describe('createSeparateQuarkPropsFn', () => {
   const config = { variants: { color: { red: 'red', blue: 'blue' }, size: { small: 'small', large: 'large' } } }
@@ -23,25 +23,25 @@ describe('createSeparateQuarkPropsFn', () => {
   })
 })
 
-describe('shallowMemoPrev', () => {
-  test('basic', () => {
-    const memoedFn = shallowMemoPrev((obj) => ({ ...obj }))
+// describe('shallowMemoPrev', () => {
+//   test('basic', () => {
+//     const memoedFn = shallowMemoPrev((obj) => ({ ...obj }))
 
-    const arg1 = { foo: 'bar' }
-    const result1 = memoedFn(arg1)
-    const result2 = memoedFn({ foo: 'bar' })
+//     const arg1 = { foo: 'bar' }
+//     const result1 = memoedFn(arg1)
+//     const result2 = memoedFn({ foo: 'bar' })
 
-    const result3 = memoedFn({ foo: 'baz' })
-    const result4 = memoedFn(arg1)
+//     const result3 = memoedFn({ foo: 'baz' })
+//     const result4 = memoedFn(arg1)
 
-    expect(arg1).not.toBe(result1)
-    expect(result1).toBe(result2)
+//     expect(arg1).not.toBe(result1)
+//     expect(result1).toBe(result2)
 
-    expect(result1).not.toBe(result3)
+//     expect(result1).not.toBe(result3)
 
-    expect(result3).not.toBe(result4)
-    expect(result4).not.toBe(result1)
+//     expect(result3).not.toBe(result4)
+//     expect(result4).not.toBe(result1)
 
-    expect(result4).toEqual(result1)
-  })
-})
+//     expect(result4).toEqual(result1)
+//   })
+// })

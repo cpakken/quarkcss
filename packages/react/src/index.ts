@@ -5,11 +5,12 @@ import {
   createElement,
   forwardRef,
   ForwardRefExoticComponent,
+  memo,
   PropsWithChildren,
   ReactHTML,
 } from 'react'
 
-export interface UnoComponent<Element extends keyof ReactHTML | ComponentType, VariantsMap extends QuarkVariantsMap>
+export interface QuarkComponent<Element extends keyof ReactHTML | ComponentType, VariantsMap extends QuarkVariantsMap>
   extends ForwardRefExoticComponent<
     PropsWithChildren<Assign<ComponentPropsWithRef<Element>, PropsOfVariantsMap<VariantsMap>>>
   > {}
@@ -19,22 +20,23 @@ type Assign<A, B> = Omit<A, keyof B> & B
 export function styled<Element extends keyof ReactHTML | ComponentType, VariantsMap extends QuarkVariantsMap = {}>(
   element: Element,
   config: QuarkConfig<VariantsMap>
-): UnoComponent<Element, VariantsMap> {
-  const quark = shallowMemoPrev(css(config))
-  const separateQuarkProps = shallowMemoPrev(createSeparateQuarkPropsFn(config))
+): QuarkComponent<Element, VariantsMap> {
+  const quark = css(config)
+  const separateQuarkProps = createSeparateQuarkPropsFn(config)
 
-  return forwardRef<
-    Element,
-    PropsWithChildren<{ [variant in keyof VariantsMap]?: any } & ComponentPropsWithRef<Element>>
-  >(({ children, className: _className, ...props }, ref) => {
-    const [quarkProps, rest] = separateQuarkProps(props)
+  return memo(
+    forwardRef<Element, PropsWithChildren<{ [variant in keyof VariantsMap]?: any } & ComponentPropsWithRef<Element>>>(
+      ({ children, className: _className, ...props }, ref) => {
+        const [quarkProps, rest] = separateQuarkProps(props)
 
-    const cssClassString = quark(quarkProps)
-    const className = _className ? `${_className} ${cssClassString}` : cssClassString
+        const cssClassString = quark(quarkProps)
+        const className = _className ? `${_className} ${cssClassString}` : cssClassString
 
-    // @ts-ignore
-    return createElement(element, { ref, className, ...rest }, children)
-  }) as any
+        // @ts-ignore
+        return createElement(element, { ref, className, ...rest }, children)
+      }
+    )
+  ) as any
 }
 
 export function createSeparateQuarkPropsFn<Config extends QuarkConfig>({ variants }: Config) {
@@ -58,21 +60,21 @@ export function createSeparateQuarkPropsFn<Config extends QuarkConfig>({ variant
   }
 }
 
-export function shallowMemoPrev<FN extends (arg: Record<string, any>) => any>(fn: FN): FN {
-  let prevArg: Record<string, any> | undefined
-  let prevResult: any | undefined
+// export function shallowMemoPrev<FN extends (arg: Record<string, any>) => any>(fn: FN): FN {
+//   let prevArg: Record<string, any> | undefined
+//   let prevResult: any | undefined
 
-  return ((arg: Record<string, any>) => {
-    if (prevArg !== undefined && isShallowEqual(arg, prevArg)) return prevResult
-    prevArg = arg
-    prevResult = fn(arg)
-    return prevResult
-  }) as any
-}
+//   return ((arg: Record<string, any>) => {
+//     if (prevArg !== undefined && isShallowEqual(arg, prevArg)) return prevResult
+//     prevArg = arg
+//     prevResult = fn(arg)
+//     return prevResult
+//   }) as any
+// }
 
-function isShallowEqual(a: Record<string, any>, b: Record<string, any>) {
-  for (const key in a) {
-    if (a[key] !== b[key]) return false
-  }
-  return true
-}
+// function isShallowEqual(a: Record<string, any>, b: Record<string, any>) {
+//   for (const key in a) {
+//     if (a[key] !== b[key]) return false
+//   }
+//   return true
+// }
