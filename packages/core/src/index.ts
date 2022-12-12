@@ -43,7 +43,7 @@ export function css<VariantsMap extends QuarkVariantsMap>(
 
     //Process Variants
     for (const [key, map] of variantsEntries) {
-      const className = map[keyToString(props[key])] ?? defaultVariants?.[key]
+      const className = map[normalize(props[key])] ?? defaultVariants?.[key]
 
       if (className) classNames.push(...arrayify(className))
     }
@@ -53,10 +53,9 @@ export function css<VariantsMap extends QuarkVariantsMap>(
       let match = true
 
       for (const key in variant) {
-        const propKey = keyToString(key)
+        if (key === 'value') continue
 
-        if (propKey === 'value') continue
-        if (props[propKey] !== variant[propKey]) {
+        if (normalize(props[key]) !== normalize(variant[key])) {
           match = false
           break
         }
@@ -73,7 +72,7 @@ export function css<VariantsMap extends QuarkVariantsMap>(
 
 const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value])
 
-const keyToString = (key: string | boolean | null | undefined): string => {
-  //If falsey, return 'null' as the prop key
+const normalize = (key: string | boolean | null | undefined): string => {
+  //If falsey, return 'null' as the prop key, if true, return 'true'
   return !key ? 'null' : key.toString()
 }

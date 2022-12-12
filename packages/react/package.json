@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/react",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Chris Pakken",
   "type": "module",
   "typings": "dist/types",
@@ -31,6 +31,6 @@
     "vitest": "^0.25.7"
   },
   "dependencies": {
-    "@quarkcss/core": "workspace:^0.0.2"
+    "@quarkcss/core": "workspace:^0.0.3"
   }
 }
