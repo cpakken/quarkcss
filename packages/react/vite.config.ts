@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/index.ts',
-      formats: ['cjs', 'es', 'umd'],
+      formats: ['cjs', 'es'],
       name: 'index',
       fileName: 'index',
     },
@@ -20,7 +20,7 @@ export default defineConfig({
   plugins: [
     dts({
       outputDir: 'dist/types',
-      // rollupTypes: true,
+      exclude: ['**/vite-env.d.ts'],
     }),
   ],
 })

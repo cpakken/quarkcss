@@ -4,13 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "pnpm -r run build",
-    "test": "pnpm -r run test run"
+    "test": "pnpm -r test run",
+    "build": "turbo build",
+    "publish-packages": "turbo test build && changeset version && changeset publish"
   },
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
-    "@changesets/cli": "^2.25.2"
+    "@changesets/cli": "^2.25.2",
+    "turbo": "^1.6.3"
   }
 }
