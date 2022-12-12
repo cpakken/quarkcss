@@ -75,13 +75,18 @@ describe('core', () => {
         },
         {
           color: 'blue',
-          isDragging: false,
-          value: 'blueNotDrag',
+          isDragging: null,
+          value: ['blueNotDrag'],
+        },
+        {
+          color: 'red',
+          exact: 'redOnly',
         },
       ],
     })
 
     expect(className({ color: 'blue' })).toEqual('baseClass blue blueNotDrag')
+    expect(className({ color: 'red' })).toEqual('baseClass red redOnly')
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red', size: 'small' })).toEqual('baseClass red small redSmall')
