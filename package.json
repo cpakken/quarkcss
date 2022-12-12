@@ -4,9 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test": "pnpm -r test run",
     "build": "turbo build",
-    "publish-packages": "turbo test build && changeset version && changeset publish"
+    "publish-packages": "turbo build && changeset version && changeset publish"
   },
   "workspaces": [
     "packages/*"
