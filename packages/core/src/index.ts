@@ -34,7 +34,7 @@ export type GetQuarkVariants<Quark extends QuarkCss<{}>> = PropsOfVariantsMap<Ge
 export function css<VariantsMap extends QuarkVariantsMap>(
   config: QuarkConfig<VariantsMap>
 ): QuarkCss<VariantsMap> {
-  const { base, variants, defaults, compound = [] } = config
+  const { base, variants, defaults, compound } = config
   const baseClass = Array.isArray(base) ? base.join(' ') : base
   const variantsEntries = Object.entries(variants || {})
 
@@ -43,30 +43,34 @@ export function css<VariantsMap extends QuarkVariantsMap>(
 
     //Process Variants
     for (const [key, map] of variantsEntries) {
-      const className = map[normalize(props[key])] ?? defaults?.[key]
+      const className = Object.hasOwn(props, key)
+        ? map[normalize(props[key])]
+        : map[normalize(defaults?.[key])]
 
       if (className) classNames.push(...arrayify(className))
     }
 
     //Process Compound Variants
-    for (const variant of compound) {
-      let match = true
+    if (compound) {
+      for (const variant of compound) {
+        let match = true
 
-      //if only is true, only match if all props are present
-      const iterator = variant.exact ? props : variant
+        //if only is true, only match if all props are present
+        const iterator = variant.exact ? props : variant
 
-      for (const key in iterator) {
-        if (compoundPropKeywords.has(key)) continue
+        for (const key in iterator) {
+          if (compoundPropKeywords.has(key)) continue
 
-        if (normalize(props[key]) !== normalize(variant[key])) {
-          match = false
-          break
+          if (normalize(props[key]) !== normalize(variant[key])) {
+            match = false
+            break
+          }
         }
-      }
 
-      if (match) {
-        const className = variant.exact ?? variant.value
-        classNames.push(...arrayify(className))
+        if (match) {
+          const className = variant.exact ?? variant.value
+          classNames.push(...arrayify(className))
+        }
       }
     }
 

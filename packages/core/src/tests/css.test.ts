@@ -22,7 +22,7 @@ describe('core', () => {
     const className = css({
       base: 'baseClass',
       variants: {
-        color: { red: 'red', blue: 'blue' },
+        color: { red: 'red', blue: 'blueValue' },
         size: { small: 'small', large: 'large' },
       },
       defaults: {
@@ -30,9 +30,9 @@ describe('core', () => {
       },
     })
 
-    expect(className()).toEqual('baseClass blue')
+    expect(className()).toEqual('baseClass blueValue')
     expect(className({ color: 'red' })).toEqual('baseClass red')
-    expect(className({ size: 'large' })).toEqual('baseClass blue large')
+    expect(className({ size: 'large' })).toEqual('baseClass blueValue large')
   })
 
   test('true boolean', () => {
