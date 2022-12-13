@@ -4,10 +4,6 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
-    },
-    "test": {
-      "outputs": ["src/**"],
-      "env": ["CI=true"]
     }
   }
 }
