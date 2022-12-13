@@ -20,7 +20,7 @@ export type QuarkComponentVariants<C> = PropsOfVariantsMap<QuarkComponentVariant
 
 export function styled<
   Element extends keyof JSX.IntrinsicElements | ComponentType<any>,
-  VariantsMap extends QuarkVariantsMap
+  VariantsMap extends QuarkVariantsMap = {}
 >(element: Element, config: QuarkConfig<VariantsMap>): QuarkComponent<Element, VariantsMap> {
   const quark = css(config)
   const separateQuarkProps = createSeparateQuarkPropsFn(config)

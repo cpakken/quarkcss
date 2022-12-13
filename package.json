@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "turbo build",
-    "publish-packages": "turbo build && changeset version && pnpm -r publish"
+    "test": "cross-env CI=true turbo test",
+    "publish-packages": "cross-env CI=true turbo test build && changeset version && pnpm -r publish"
   },
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
     "@changesets/cli": "^2.25.2",
+    "cross-env": "^7.0.3",
     "turbo": "^1.6.3"
   }
 }
