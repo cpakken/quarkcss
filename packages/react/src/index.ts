@@ -38,7 +38,7 @@ export function styled<
   ) as any
 }
 
-export function createSeparateQuarkPropsFn<Config extends QuarkConfig>({ variants }: Config) {
+function createSeparateQuarkPropsFn<Config extends QuarkConfig>({ variants }: Config) {
   return <Props extends Record<string, any>>(
     props: Props
   ): [Pick<Props, keyof Config['variants']>, Omit<Props, keyof Config['variants']>] => {
