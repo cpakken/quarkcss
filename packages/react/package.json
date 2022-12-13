@@ -1,14 +1,15 @@
 {
   "name": "@quarkcss/react",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": "Chris Pakken",
   "type": "module",
-  "typings": "dist/types",
+  "types": "dist/types/index.d.ts",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.umd.cjs"
+      "require": "./dist/index.cjs"
     }
   },
   "scripts": {
@@ -31,6 +32,6 @@
     "vitest": "^0.25.7"
   },
   "dependencies": {
-    "@quarkcss/core": "workspace:^0.0.7"
+    "@quarkcss/core": "workspace:^0.0.8"
   }
 }
