@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/core",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "author": "Chris Pakken",
   "type": "module",
   "types": "dist/types/index.d.ts",
