@@ -1,4 +1,4 @@
-import { css } from '..'
+import { css, GetQuarkVariants } from '..'
 
 describe('core', () => {
   test('classname', () => {
@@ -25,7 +25,7 @@ describe('core', () => {
         color: { red: 'red', blue: 'blue' },
         size: { small: 'small', large: 'large' },
       },
-      defaultVariants: {
+      defaults: {
         color: 'blue',
       },
     })
@@ -57,7 +57,7 @@ describe('core', () => {
         size: { small: 'small', large: 'large' },
         isDragging: { true: 'dragging' },
       },
-      compoundVariants: [
+      compound: [
         {
           color: 'red',
           size: 'small',
@@ -85,11 +85,16 @@ describe('core', () => {
       ],
     })
 
+    type Variants = GetQuarkVariants<typeof className>
+
     expect(className({ color: 'blue' })).toEqual('baseClass blue blueNotDrag')
     expect(className({ color: 'red' })).toEqual('baseClass red redOnly')
+
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
+
     expect(className({ color: 'red', size: 'small' })).toEqual('baseClass red small redSmall')
+
     expect(className({ color: 'blue', size: 'large' })).toEqual('baseClass blue large blueLarge blueNotDrag')
     expect(className({ color: 'blue', isDragging: true })).toEqual('baseClass blue dragging blueDragging')
   })

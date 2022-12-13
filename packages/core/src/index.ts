@@ -11,33 +11,30 @@ export type PropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
   [Key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[Key] & string>
 }
 
-export type DefaultVariants<VariantsMap extends QuarkVariantsMap> = {
-  [key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[key] & string>
-}
-
-export type CompoundVariantProps<VariantsMap extends QuarkVariantsMap> = {
-  [key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[key] & string>
-}
-
-export type CompoundVariant<VariantsMap extends QuarkVariantsMap> =
-  | (CompoundVariantProps<VariantsMap> & { value: string | string[]; exact?: never })
-  | (CompoundVariantProps<VariantsMap> & { exact: string | string[]; value?: never })
+export type CompoundVariants<VariantsMap extends QuarkVariantsMap> =
+  | (PropsOfVariantsMap<VariantsMap> & { value: string | string[]; exact?: never })
+  | (PropsOfVariantsMap<VariantsMap> & { exact: string | string[]; value?: never })
 
 export type QuarkConfig<VariantsMap extends QuarkVariantsMap = {}> = {
   base?: string | string[]
   variants?: VariantsMap
-  compoundVariants?: CompoundVariant<VariantsMap>[]
-  defaultVariants?: DefaultVariants<VariantsMap>
+
+  compound?: CompoundVariants<VariantsMap>[]
+  defaults?: PropsOfVariantsMap<VariantsMap>
 }
 
 export type QuarkCss<VariantsMap extends QuarkVariantsMap> = (
   variantValues?: PropsOfVariantsMap<VariantsMap>
 ) => string
 
+export type GetQuarkVariantsMap<Quark extends QuarkCss<{}>> = Quark extends QuarkCss<infer V> ? V : never
+
+export type GetQuarkVariants<Quark extends QuarkCss<{}>> = PropsOfVariantsMap<GetQuarkVariantsMap<Quark>>
+
 export function css<VariantsMap extends QuarkVariantsMap>(
   config: QuarkConfig<VariantsMap>
 ): QuarkCss<VariantsMap> {
-  const { base, variants, defaultVariants, compoundVariants = [] } = config
+  const { base, variants, defaults, compound = [] } = config
   const baseClass = Array.isArray(base) ? base.join(' ') : base
   const variantsEntries = Object.entries(variants || {})
 
@@ -46,13 +43,13 @@ export function css<VariantsMap extends QuarkVariantsMap>(
 
     //Process Variants
     for (const [key, map] of variantsEntries) {
-      const className = map[normalize(props[key])] ?? defaultVariants?.[key]
+      const className = map[normalize(props[key])] ?? defaults?.[key]
 
       if (className) classNames.push(...arrayify(className))
     }
 
     //Process Compound Variants
-    for (const variant of compoundVariants) {
+    for (const variant of compound) {
       let match = true
 
       //if only is true, only match if all props are present
