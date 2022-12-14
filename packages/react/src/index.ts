@@ -7,6 +7,7 @@ import {
   ForwardRefExoticComponent,
   memo,
 } from 'react'
+import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
 export interface QuarkComponent<
   Element extends keyof JSX.IntrinsicElements | ComponentType<any> = ComponentType<any>,
@@ -37,43 +38,3 @@ export function styled<
     })
   ) as any
 }
-
-function createSeparateQuarkPropsFn<Config extends QuarkConfig>({ variants }: Config) {
-  return <Props extends Record<string, any>>(
-    props: Props
-  ): [Pick<Props, keyof Config['variants']>, Omit<Props, keyof Config['variants']>] => {
-    const quarkProps = {} as any
-    const rest = {} as any
-
-    if (!variants) return [quarkProps, props] as any
-
-    for (const propKey in props) {
-      if (Object.hasOwn(variants, propKey)) {
-        quarkProps[propKey] = props[propKey]
-      } else {
-        rest[propKey] = props[propKey]
-      }
-    }
-
-    return [quarkProps, rest] as any
-  }
-}
-
-// export function shallowMemoPrev<FN extends (arg: Record<string, any>) => any>(fn: FN): FN {
-//   let prevArg: Record<string, any> | undefined
-//   let prevResult: any | undefined
-
-//   return ((arg: Record<string, any>) => {
-//     if (prevArg !== undefined && isShallowEqual(arg, prevArg)) return prevResult
-//     prevArg = arg
-//     prevResult = fn(arg)
-//     return prevResult
-//   }) as any
-// }
-
-// function isShallowEqual(a: Record<string, any>, b: Record<string, any>) {
-//   for (const key in a) {
-//     if (a[key] !== b[key]) return false
-//   }
-//   return true
-// }

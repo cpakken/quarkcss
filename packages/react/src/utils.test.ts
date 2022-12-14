@@ -1,7 +1,9 @@
-import { createSeparateQuarkPropsFn } from '.'
+import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
 describe('createSeparateQuarkPropsFn', () => {
-  const config = { variants: { color: { red: 'red', blue: 'blue' }, size: { small: 'small', large: 'large' } } }
+  const config = {
+    variants: { color: { red: 'red', blue: 'blue' }, size: { small: 'small', large: 'large' } },
+  }
   const separateProps = createSeparateQuarkPropsFn(config)
 
   test('basic ', () => {
