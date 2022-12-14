@@ -12,8 +12,7 @@ export type PropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
 }
 
 export type CompoundVariants<VariantsMap extends QuarkVariantsMap> =
-  | (PropsOfVariantsMap<VariantsMap> & { value: string | string[]; exact?: never })
-  | (PropsOfVariantsMap<VariantsMap> & { exact: string | string[]; value?: never })
+  | PropsOfVariantsMap<VariantsMap> & { value: string | string[] }
 
 export type QuarkConfig<VariantsMap extends QuarkVariantsMap = {}> = {
   base?: string | string[]
@@ -38,37 +37,36 @@ export function css<VariantsMap extends QuarkVariantsMap>(
   const baseClass = Array.isArray(base) ? base.join(' ') : base
   const variantsEntries = Object.entries(variants || {})
 
+  const getNormalizedProp = <T extends PropsOfVariantsMap<VariantsMap>>(props: T, key: keyof T) => {
+    return normalize(Object.hasOwn(props, key) ? props[key] : defaults?.[key])
+  }
+
   return (props: PropsOfVariantsMap<VariantsMap> = {}) => {
     const classNames: string[] = baseClass ? [baseClass] : []
 
     //Process Variants
     for (const [key, map] of variantsEntries) {
-      const className = Object.hasOwn(props, key)
-        ? map[normalize(props[key])]
-        : map[normalize(defaults?.[key])]
-
+      const className = map[getNormalizedProp(props, key)]
       if (className) classNames.push(...arrayify(className))
     }
 
     //Process Compound Variants
     if (compound) {
+      //Value
       for (const variant of compound) {
         let match = true
 
-        //if only is true, only match if all props are present
-        const iterator = variant.exact ? props : variant
-
-        for (const key in iterator) {
+        for (const key in variant) {
           if (compoundPropKeywords.has(key)) continue
 
-          if (normalize(props[key]) !== normalize(variant[key])) {
+          if (getNormalizedProp(props, key) !== normalize(variant[key])) {
             match = false
             break
           }
         }
 
         if (match) {
-          const className = variant.exact ?? variant.value
+          const className = variant.value ?? ''
           classNames.push(...arrayify(className))
         }
       }
@@ -85,4 +83,4 @@ const normalize = (key: string | boolean | null | undefined): string => {
   return !key ? 'null' : key.toString()
 }
 
-const compoundPropKeywords = new Set(['exact', 'value'])
+const compoundPropKeywords = new Set(['value', 'negate'])

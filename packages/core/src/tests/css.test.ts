@@ -78,17 +78,16 @@ describe('core', () => {
           isDragging: null,
           value: ['blueNotDrag'],
         },
-        {
-          color: 'red',
-          exact: 'redOnly',
-        },
       ],
+      defaults: {
+        size: 'large',
+      },
     })
 
     type Variants = GetQuarkVariants<typeof className>
 
-    expect(className({ color: 'blue' })).toEqual('baseClass blue blueNotDrag')
-    expect(className({ color: 'red' })).toEqual('baseClass red redOnly')
+    expect(className({ color: 'blue' })).toEqual('baseClass blue large blueLarge blueNotDrag')
+    expect(className({ color: 'red' })).toEqual('baseClass red large')
 
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
@@ -96,6 +95,8 @@ describe('core', () => {
     expect(className({ color: 'red', size: 'small' })).toEqual('baseClass red small redSmall')
 
     expect(className({ color: 'blue', size: 'large' })).toEqual('baseClass blue large blueLarge blueNotDrag')
-    expect(className({ color: 'blue', isDragging: true })).toEqual('baseClass blue dragging blueDragging')
+    expect(className({ color: 'blue', isDragging: true })).toEqual(
+      'baseClass blue large dragging blueLarge blueDragging'
+    )
   })
 })
