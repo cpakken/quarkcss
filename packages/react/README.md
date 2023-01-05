@@ -7,9 +7,15 @@ pnpm install @quarkcss/react
 
 yarn add @quarkcss/react
 ```
+## Size
+`@quarkcss/core` 
+minified 0.84KB gzipped 0.46KB
+
+`@quarkcss/react`
+minified 0.61KB gzipped 0.37KB
+
 
 # Description
-
 Fully typed component styling for React with atomic css classes.
 
 Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api for atomic style css classes

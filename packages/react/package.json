@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/react",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -44,6 +44,6 @@
     "vitest": "^0.25.7"
   },
   "dependencies": {
-    "@quarkcss/core": "workspace:^0.1.3"
+    "@quarkcss/core": "workspace:^0.2.0"
   }
 }
