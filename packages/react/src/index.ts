@@ -3,49 +3,62 @@ import {
   ComponentProps,
   ComponentType,
   createElement,
+  ElementType,
   forwardRef,
-  ForwardRefExoticComponent,
   memo,
+  ReactElement,
 } from 'react'
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
-export interface QuarkComponent<
-  Element extends keyof JSX.IntrinsicElements | ComponentType<any> = ComponentType<any>,
+type QuarkComponentPolymorphicProps<
+  As extends ElementType,
+  Element extends ElementType = ComponentType<any>,
   VariantsMap extends QuarkVariantsMap = {},
-  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>,
-> extends ForwardRefExoticComponent<
-    Assign<Assign<ComponentProps<Element>, DefaultProps>, PropsOfVariantsMap<VariantsMap>>
-  > {}
+  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
+> = { as?: As } & Assign<Assign<ComponentProps<Element>, DefaultProps>, PropsOfVariantsMap<VariantsMap>>
+
+export interface QuarkComponent<
+  Element extends ElementType = ComponentType<any>,
+  VariantsMap extends QuarkVariantsMap = {},
+  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
+> {
+  <As extends ElementType | never = never>(
+    props: QuarkComponentPolymorphicProps<As, IsNever<As, Element>, VariantsMap, DefaultProps>
+  ): ReactElement | null
+}
+
+type IsNever<T, A> = [T] extends [never] ? A : T
 
 type Assign<A, B> = Omit<A, keyof B> & B
 
 export type QuarkComponentVariantsMap<C> = C extends QuarkComponent<any, infer V> ? V : never
 export type QuarkComponentVariants<C> = PropsOfVariantsMap<QuarkComponentVariantsMap<C>>
 
-export type DefaultComponentPropsConfig<Element extends keyof JSX.IntrinsicElements | ComponentType<any>> =
-  Partial<Omit<ComponentProps<Element>, 'className'>>
+export type DefaultComponentPropsConfig<Element extends ElementType> = Partial<
+  Omit<ComponentProps<Element>, 'className'>
+>
 
 export function styled<
-  Element extends keyof JSX.IntrinsicElements | ComponentType<any>,
+  Element extends ElementType,
   VariantsMap extends QuarkVariantsMap = {},
-  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>,
+  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
 >(
   element: Element,
   config: QuarkConfig<VariantsMap>,
-  defaultComponentProps?: DefaultProps,
+  defaultComponentProps?: DefaultProps
 ): QuarkComponent<Element, VariantsMap> {
   const quark = css(config)
   const separateQuarkProps = createSeparateQuarkPropsFn(config)
 
   return memo(
-    forwardRef<any, any>(({ children, className: _className, ...props }, ref) => {
+    forwardRef<any, any>(({ children, className: _className, as, ...props }, ref) => {
       const [quarkProps, rest] = separateQuarkProps(props)
 
       const cssClassString = quark(quarkProps)
-      const className = _className ? `${cssClassString} ${_className}` : cssClassString
+      const className = _className ? `${_className} ${cssClassString}` : cssClassString
 
       // @ts-ignore
-      return createElement(element, { ...defaultComponentProps, className, ...rest, ref }, children)
-    }),
+      return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
+    })
   ) as any
 }
