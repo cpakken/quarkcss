@@ -21,7 +21,6 @@ For framerwork-agnostic styling, use [@quarkcss/core](...)
 # Usage
 
 ```tsx
-
 import { styled } from '@quarkcss/react'
 
 //Basic
@@ -74,7 +73,6 @@ const App = () => {
     </StyledButton>
   )
 }
-
 ```
 
 
@@ -84,7 +82,6 @@ For components like framer-motion (motion.div)
 Radix Primatives
 
 ```tsx
-
 import { styled } from '@quarkcss/react'
 import { motion } from 'framer-motion'
 
@@ -109,9 +106,30 @@ const MotionBox = styled(motion.div, {
 const StyledSlider = styled(Slider.Root, {
   /* ... */
 })
-
-
-
 ```
+
+
+## Polymorphic Components
+Use the `as` prop to change the underlying component. Typescript will automatically infer the correct props for the new component.
+
+```tsx
+const StyledComponet = styled('span', {
+  /* ... */
+})
+
+const App = () => {
+  return (
+    <div>
+      <StyledComponent as="button">
+        Click Me
+      </StyledComponent>
+      <StyledComponent as={motion.div}>
+        Click Me
+      </StyledComponent>
+    </div>
+  )
+}
+```
+
 
 
