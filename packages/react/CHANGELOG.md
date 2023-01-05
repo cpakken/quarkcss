@@ -1,5 +1,19 @@
 # @quarkcss/react
 
+## 0.3.0
+
+### Minor Changes
+
+- Polymorphic As with Types!
+
+### Patch Changes
+
+- PropsOf type to extract QuarkComponent props
+- Default Component Prop Config
+- Updated dependencies
+- Updated dependencies
+  - @quarkcss/core@0.2.1
+
 ## 0.2.1
 
 ### Patch Changes

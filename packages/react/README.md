@@ -148,6 +148,16 @@ type QuarkVariantsMap = QuarkComponentVariantsMap<typeof StyledContainer>
 interface QuarkVariants extends QuarkComponentVariants<typeof StyledContainer> {}
 interface QuarkVariantsMap extends QuarkComponentVariantsMap<typeof StyledContainer> {}
 
+//To Extract Props from Styled Component use ✔️
+import { PropsOf } from '@quarkcss/react'
+type StyledComponentProps = PropsOf<typeof StyledContainer>
+
+//instead of reacts ComponentProps ❌
+import { ComponentProps } from 'react'
+type StyledComponentProps = ComponentProps<typeof StyledContainer>
+
+//The polymorphic 'as' prop makes ComponentProps infer all undeclared props as `any` even thought the declared props are typed correctly.
+
 ``` 
 
 

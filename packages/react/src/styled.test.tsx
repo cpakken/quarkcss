@@ -2,7 +2,7 @@
 
 import { render } from '@testing-library/react'
 import React, { ComponentProps } from 'react'
-import { QuarkComponentVariants, styled } from '.'
+import { PropsOf, QuarkComponentVariants, styled } from '.'
 
 describe('styled', () => {
   const Container = styled('div', {
@@ -22,6 +22,9 @@ describe('styled', () => {
     const Center = styled('div', {
       base: 'flex items-center justify-center',
     })
+
+    type Props = ComponentProps<typeof Center>
+    type A = Props['disab']
 
     const { container } = render(
       <Center>
@@ -48,6 +51,13 @@ describe('styled', () => {
     )
 
     type QuarkVariants = QuarkComponentVariants<typeof StyledCustomButton>
+    type Props = ComponentProps<typeof StyledCustomButton>
+    type P = PropsOf<typeof StyledCustomButton>
+    // type PB = P['style']
+    // type PB = P['style']
+
+    // type A = Props['disab']
+    // type B = Props['as']
 
     const StyledCustomButton = styled(
       CustomButton,
@@ -93,7 +103,7 @@ describe('styled', () => {
   })
 
   test('base', () => {
-    const { container, baseElement } = render(
+    const { container } = render(
       <Container color="red" size="large" className="custom">
         <div>Child</div>
       </Container>

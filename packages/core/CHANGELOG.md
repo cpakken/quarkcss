@@ -1,5 +1,12 @@
 # @quarkcss/core
 
+## 0.2.1
+
+### Patch Changes
+
+- PropsOf type to extract QuarkComponent props
+- Default Component Prop Config
+
 ## 0.2.0
 
 ### Minor Changes

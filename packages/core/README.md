@@ -7,14 +7,13 @@ pnpm install @quarkcss/core
 
 yarn add @quarkcss/core
 ```
-## Size
 `@quarkcss/core` 
 minified **0.84KB** gzipped **0.46KB**
 
 `@quarkcss/react`
 minified **0.61KB** gzipped **0.37KB**
 
-# Description
+## Description
 Fully typed framework-agnostic generator for atomic css classes.
 
 Inspired by [`@stitches/core`](https://stitches.dev/docs/variants) api for atomic style css classes
