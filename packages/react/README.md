@@ -10,13 +10,13 @@ yarn add @quarkcss/react
 
 # Description
 
-Fully typed component styling for React with atomic css classes
+Fully typed component styling for React with atomic css classes.
 
-Inspired by stitches api for atomic style css classes
+Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api for atomic style css classes
   - Taiiwind, unocss, windicss
   - use stitches css-in-js api for atomic css classes
 
-For framerwork-agnostic styling, use [@quarkcss/core](...)
+For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
 # Usage
 
@@ -60,7 +60,8 @@ const StyledButton = styled('button', {
     color: 'red'
   }
 }, {
-  //Default Component Props 
+  //Use second argument to initialize default props for your base component <button />
+  disabled: true,
   onClick: () => console.log('Button is clicked')
 })
 
@@ -78,8 +79,7 @@ const App = () => {
 
 ## Wrap Components
 
-For components like framer-motion (motion.div) 
-Radix Primatives
+For components like framer-motion (motion.div) and Radix Primatives
 
 ```tsx
 import { styled } from '@quarkcss/react'
@@ -88,7 +88,7 @@ import { motion } from 'framer-motion'
 const MotionBox = styled(motion.div, {
   /* Style Config */
 }, {
-  //Default Props for motion.div
+  //Use second argument to initialize default props for your base component <motion.div />
   variants: {
     initial: { opacity: 0, x: -100},
     animate: { opacity: 1, x: 0}
