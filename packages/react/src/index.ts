@@ -12,13 +12,13 @@ import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
 type QuarkComponentPolymorphicProps<
   As extends ElementType,
-  Element extends ElementType = ComponentType<any>,
+  Element extends ElementType = ComponentType,
   VariantsMap extends QuarkVariantsMap = {},
   DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
 > = { as?: As } & Assign<Assign<ComponentProps<Element>, DefaultProps>, PropsOfVariantsMap<VariantsMap>>
 
 export interface QuarkComponent<
-  Element extends ElementType = ComponentType<any>,
+  Element extends ElementType = ComponentType,
   VariantsMap extends QuarkVariantsMap = {},
   DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
 > {

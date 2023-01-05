@@ -1,4 +1,4 @@
-# Install
+## Install
 
 ```bash
 npm install @quarkcss/core
@@ -12,7 +12,7 @@ yarn add @quarkcss/core
 minified **0.84KB** gzipped **0.46KB**
 
 `@quarkcss/react`
-minified 0.61KB gzipped 0.37KB
+minified **0.61KB** gzipped **0.37KB**
 
 # Description
 Fully typed framework-agnostic generator for atomic css classes.
@@ -23,7 +23,7 @@ Inspired by [`@stitches/core`](https://stitches.dev/docs/variants) api for atomi
 
 For React styling, use [`@quarkcss/react`](https://github.com/cpakken/quarkcss/tree/master/packages/react)
 
-# Usage
+## Usage
 ```tsx
 import { css } from '@quarkcss/core'
 
@@ -72,3 +72,16 @@ const classnames = button({
 })
 
 ```
+## Typescript
+```ts
+//Extract QuarkVariants from css generator
+const button = css({ /* ... */ }})
+
+type Variants = GetQuarkVariants<typeof button>
+
+//Or interface version
+interface Variants extends GetQuarkVariants<typeof button> {}
+
+``` 
+
+

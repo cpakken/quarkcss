@@ -1,4 +1,4 @@
-# Install
+## Install
 
 ```bash
 npm install @quarkcss/react
@@ -7,15 +7,14 @@ pnpm install @quarkcss/react
 
 yarn add @quarkcss/react
 ```
-## Size
 `@quarkcss/core` 
-minified 0.84KB gzipped 0.46KB
+minified **0.84KB** gzipped **0.46KB**
 
 `@quarkcss/react`
-minified 0.61KB gzipped 0.37KB
+minified **0.61KB** gzipped **0.37KB**
 
 
-# Description
+## Description
 Fully typed component styling for React with atomic css classes.
 
 Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api for atomic style css classes
@@ -24,7 +23,7 @@ Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api for atom
 
 For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
-# Usage
+## Usage
 
 ```tsx
 import { styled } from '@quarkcss/react'
@@ -137,5 +136,18 @@ const App = () => {
 }
 ```
 
+## Typescript
+```ts
+//Extract QuarkVariants from styled component
+const StyledContainer = styled({ /* ... */ }})
+
+type QuarkVariants = QuarkComponentVariants<typeof StyledContainer>
+type QuarkVariantsMap = QuarkComponentVariantsMap<typeof StyledContainer>
+
+//Or Interface Version
+interface QuarkVariants extends QuarkComponentVariants<typeof StyledContainer> {}
+interface QuarkVariantsMap extends QuarkComponentVariantsMap<typeof StyledContainer> {}
+
+``` 
 
 

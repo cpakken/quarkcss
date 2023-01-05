@@ -85,6 +85,7 @@ describe('core', () => {
     })
 
     type Variants = GetQuarkVariants<typeof className>
+    interface VariantInterface extends GetQuarkVariants<typeof className> {}
 
     expect(className({ color: 'blue' })).toEqual('baseClass blue large blueLarge blueNotDrag')
     expect(className({ color: 'red' })).toEqual('baseClass red large')
