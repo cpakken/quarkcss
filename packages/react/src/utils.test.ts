@@ -1,10 +1,11 @@
+import { css } from '@quarkcss/core'
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
 describe('createSeparateQuarkPropsFn', () => {
   const config = {
     variants: { color: { red: 'red', blue: 'blue' }, size: { small: 'small', large: 'large' } },
   }
-  const separateProps = createSeparateQuarkPropsFn(config)
+  const separateProps = createSeparateQuarkPropsFn(css(config))
 
   test('basic ', () => {
     const [quarkProps, rest] = separateProps({ color: 'red', size: 'large' })

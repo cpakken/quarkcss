@@ -153,6 +153,29 @@ describe('styled', () => {
         </StyledDiv>
       </div>
     )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <div>
+          <div
+            class=""
+            style="transform: none;"
+          >
+            <div>
+              Testing
+            </div>
+          </div>
+          <div
+            class=""
+            style="transform: none;"
+          >
+            <div>
+              Testing
+            </div>
+          </div>
+        </div>
+      </div>
+    `)
   })
 
   test('polymorphic', () => {
@@ -188,6 +211,31 @@ describe('styled', () => {
         >
           <div>
             Testing
+          </div>
+        </button>
+      </div>
+    `)
+  })
+
+  test('compose', () => {
+    const Composed = styled('button', Container.CSS, {
+      style: { top: 0 },
+    })
+
+    const { container } = render(
+      <Composed color="red" size="large" className="custom">
+        <div>Child</div>
+      </Composed>
+    )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <button
+          class="custom baseClass red large"
+          style="top: 0px;"
+        >
+          <div>
+            Child
           </div>
         </button>
       </div>

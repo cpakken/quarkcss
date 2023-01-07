@@ -1,5 +1,12 @@
 # @quarkcss/core
 
+## 0.3.0
+
+### Minor Changes
+
+- - Expose base quark function from styled component.
+  - Can compose with quark css in addition to quark config.
+
 ## 0.2.1
 
 ### Patch Changes

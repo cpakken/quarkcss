@@ -7,12 +7,12 @@ pnpm install @quarkcss/react
 
 yarn add @quarkcss/react
 ```
-`@quarkcss/core` 
-minified **0.84KB** gzipped **0.46KB**
+| Package           | Minified | Gzipped |
+| ----------------- | -------- | ------- |
+| `@quarkcss/core`  | 1.02KB   | 0.54KB  |
+| `@quarkcss/react` | 0.81KB   | 0.45KB  |
 
-`@quarkcss/react`
-minified **0.61KB** gzipped **0.37KB**
-
+Less than 1KB gzipped!?! 😲
 
 ## Description
 Fully typed component styling for React with atomic css classes.
@@ -134,6 +134,44 @@ const App = () => {
     </div>
   )
 }
+```
+
+## Compose with @quark/core `css` function
+
+```tsx
+
+import { styled, css } from '@quarkcss/react'
+
+// `css` re-exported from @quarkcss/core
+const container = css({
+  base: /* ... */
+  variants: { /* ... */ }
+  compound: [ /* ... */ ]
+  defaults: { /* ... */ }
+})
+
+// Directly pass quark css function to styled
+const StyledContainer = styled('div', container)
+
+// Retrieve quark core css from Styled Component
+const container_ = StyledContainer.CSS // container_ === container
+```
+Now we can re-use quark config without using `as`, and pass different default component props
+
+```tsx
+//example with framer-motion
+
+const MotionContainer = styled(motion.div, StyledContainer.CSS, {
+  //Declare default props for your base component <motion.div />
+  initial: { x: -100 },
+  animate: { x: 0 },
+  transition: {
+    type: 'spring',
+    stiffness: 500,
+    damping: 30
+  }
+})
+
 ```
 
 ## Typescript

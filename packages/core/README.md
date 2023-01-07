@@ -7,11 +7,13 @@ pnpm install @quarkcss/core
 
 yarn add @quarkcss/core
 ```
-`@quarkcss/core` 
-minified **0.84KB** gzipped **0.46KB**
 
-`@quarkcss/react`
-minified **0.61KB** gzipped **0.37KB**
+| Package           | Minified | Gzipped |
+| ----------------- | -------- | ------- |
+| `@quarkcss/core`  | 1.02KB   | 0.54KB  |
+| `@quarkcss/react` | 0.81KB   | 0.45KB  |
+
+Less than 1KB gzipped!?! 😲
 
 ## Description
 Fully typed framework-agnostic generator for atomic css classes.

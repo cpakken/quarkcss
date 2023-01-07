@@ -1,4 +1,4 @@
-import { css, PropsOfVariantsMap, QuarkConfig, QuarkVariantsMap } from '@quarkcss/core'
+import { css, isQuarkCss, PropsOfVariantsMap, QuarkConfig, QuarkCss, QuarkVariantsMap } from '@quarkcss/core'
 import { ComponentProps, createElement, ElementType, forwardRef, memo, ReactElement } from 'react'
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
@@ -22,6 +22,7 @@ export interface QuarkComponent<
   <As extends ElementType | never = never>(
     props: QuarkComponentPolymorphicProps<As, Element, VariantsMap, DefaultProps>
   ): ReactElement<any, any> | null
+  CSS: QuarkCss<VariantsMap>
 }
 
 type IsNever<T, A> = [T] extends [never] ? A : T
@@ -43,21 +44,31 @@ export function styled<
   DefaultProps extends PartialComponentProps<Element> = {}
 >(
   element: Element,
-  config: QuarkConfig<VariantsMap>,
+  configOrCss: QuarkConfig<VariantsMap> | QuarkCss<VariantsMap>,
   defaultComponentProps?: DefaultProps
 ): QuarkComponent<Element, VariantsMap, DefaultProps> {
-  const quark = css(config)
-  const separateQuarkProps = createSeparateQuarkPropsFn(config)
+  const quark = isQuarkCss(configOrCss)
+    ? (configOrCss as QuarkCss<VariantsMap>)
+    : css(configOrCss as QuarkConfig<VariantsMap>)
 
-  return memo(
-    forwardRef<any, any>(({ children, className: _className, as, ...props }, ref) => {
-      const [quarkProps, rest] = separateQuarkProps(props)
+  const separateQuarkProps = createSeparateQuarkPropsFn(quark)
 
-      const cssClassString = quark(quarkProps)
-      const className = _className ? `${_className} ${cssClassString}` : cssClassString
+  return Object.assign(
+    memo(
+      forwardRef<any, any>(({ children, className: _className, as, ...props }, ref) => {
+        const [quarkProps, rest] = separateQuarkProps(props)
 
-      // @ts-ignore
-      return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
-    })
+        const cssClassString = quark(quarkProps as any)
+        const className = _className ? `${_className} ${cssClassString}` : cssClassString
+
+        // @ts-ignore
+        return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
+      })
+    ),
+    { CSS: quark }
   ) as any
 }
+
+//Re-export @quark/core
+export { css, isQuarkCss }
+export type { QuarkConfig, QuarkCss, QuarkVariantsMap }

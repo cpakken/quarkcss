@@ -22,9 +22,12 @@ export type QuarkConfig<VariantsMap extends QuarkVariantsMap = {}> = {
   defaults?: PropsOfVariantsMap<VariantsMap>
 }
 
-export type QuarkCss<VariantsMap extends QuarkVariantsMap> = (
-  variantValues?: PropsOfVariantsMap<VariantsMap>
-) => string
+const $quark = Symbol('quark')
+
+export interface QuarkCss<VariantsMap extends QuarkVariantsMap> {
+  (variantValues?: PropsOfVariantsMap<VariantsMap>): string
+  [$quark]: QuarkConfig<VariantsMap>
+}
 
 export type GetQuarkVariantsMap<Quark extends QuarkCss<{}>> = Quark extends QuarkCss<infer V> ? V : never
 
@@ -41,7 +44,7 @@ export function css<VariantsMap extends QuarkVariantsMap>(
     return normalize(Object.hasOwn(props, key) ? props[key] : defaults?.[key])
   }
 
-  return (props: PropsOfVariantsMap<VariantsMap> = {}) => {
+  const css = (props: PropsOfVariantsMap<VariantsMap> = {}) => {
     const classNames: string[] = baseClass ? [baseClass] : []
 
     //Process Variants
@@ -74,6 +77,20 @@ export function css<VariantsMap extends QuarkVariantsMap>(
 
     return classNames.join(' ')
   }
+
+  return Object.assign(css, {
+    [$quark]: config,
+  })
+}
+
+export function isQuarkCss<VariantsMap extends QuarkVariantsMap>(value: any): value is QuarkCss<VariantsMap> {
+  return !!value?.[$quark]
+}
+
+export function getQuarkConfig<VariantsMap extends QuarkVariantsMap>(
+  quark: QuarkCss<VariantsMap>
+): QuarkConfig<VariantsMap> {
+  return quark[$quark]
 }
 
 const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value])

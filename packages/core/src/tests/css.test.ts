@@ -1,4 +1,4 @@
-import { css, GetQuarkVariants } from '..'
+import { css, getQuarkConfig, GetQuarkVariants, isQuarkCss, QuarkCss } from '..'
 
 describe('core', () => {
   test('classname', () => {
@@ -99,5 +99,21 @@ describe('core', () => {
     expect(className({ color: 'blue', isDragging: true })).toEqual(
       'baseClass blue large dragging blueLarge blueDragging'
     )
+  })
+
+  test('utils', () => {
+    const config = {
+      base: 'baseClass',
+      variants: {
+        color: { red: 'red', blue: 'blue' },
+        size: { small: 'small', large: 'large' },
+      },
+    }
+
+    const className = css(config)
+    expect(isQuarkCss(className)).toEqual(true)
+    expect(isQuarkCss({})).toEqual(false)
+
+    expect(getQuarkConfig(className)).toEqual(config)
   })
 })
