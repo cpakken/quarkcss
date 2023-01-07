@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.4.1
+
+### Patch Changes
+
+- Match @quark/react version
+
 ## 0.3.0
 
 ### Minor Changes

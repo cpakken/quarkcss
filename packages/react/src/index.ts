@@ -1,5 +1,13 @@
 import { css, isQuarkCss, PropsOfVariantsMap, QuarkConfig, QuarkCss, QuarkVariantsMap } from '@quarkcss/core'
-import { ComponentProps, createElement, ElementType, forwardRef, memo, ReactElement } from 'react'
+import {
+  ComponentProps,
+  createElement,
+  ElementType,
+  forwardRef,
+  ForwardRefRenderFunction,
+  memo,
+  ReactElement,
+} from 'react'
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
 export type QuarkComponentPolymorphicProps<
@@ -38,6 +46,14 @@ export type PropsOf<C extends ElementType> = C extends QuarkComponent<infer E, i
 
 export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
 
+type AnyQuarkCss = QuarkCss<any>
+
+export function styled<Element extends ElementType, DefaultProps extends PartialComponentProps<Element> = {}>(
+  element: Element,
+  baseClasses: string | string[],
+  defaultComponentProps?: DefaultProps
+): QuarkComponent<Element, {}, DefaultProps>
+
 export function styled<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap = {},
@@ -46,27 +62,45 @@ export function styled<
   element: Element,
   configOrCss: QuarkConfig<VariantsMap> | QuarkCss<VariantsMap>,
   defaultComponentProps?: DefaultProps
-): QuarkComponent<Element, VariantsMap, DefaultProps> {
-  const quark = isQuarkCss(configOrCss)
-    ? (configOrCss as QuarkCss<VariantsMap>)
-    : css(configOrCss as QuarkConfig<VariantsMap>)
+): QuarkComponent<Element, VariantsMap, DefaultProps>
 
-  const separateQuarkProps = createSeparateQuarkPropsFn(quark)
+export function styled<Element extends ElementType>(
+  element: Element,
+  configOrCssOrClassStrings: string | string[] | QuarkConfig | AnyQuarkCss,
+  defaultComponentProps?: PartialComponentProps<Element>
+) {
+  const quark = isQuarkCss(configOrCssOrClassStrings)
+    ? (configOrCssOrClassStrings as AnyQuarkCss)
+    : !isStrings(configOrCssOrClassStrings)
+    ? css(configOrCssOrClassStrings as QuarkConfig)
+    : null
 
-  return Object.assign(
-    memo(
-      forwardRef<any, any>(({ children, className: _className, as, ...props }, ref) => {
-        const [quarkProps, rest] = separateQuarkProps(props)
+  let Component: ForwardRefRenderFunction<any, any>
 
-        const cssClassString = quark(quarkProps as any)
-        const className = _className ? `${_className} ${cssClassString}` : cssClassString
+  if (quark) {
+    const separateQuarkProps = createSeparateQuarkPropsFn(quark)
+    Component = ({ children, className: _className, as, ...props }, ref) => {
+      const [quarkProps, rest] = separateQuarkProps(props)
+      const cssClassString = quark(quarkProps as any)
+      const className = _className ? `${_className} ${cssClassString}` : cssClassString
 
-        // @ts-ignore
-        return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
-      })
-    ),
-    { CSS: quark }
-  ) as any
+      // @ts-ignore
+      return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
+    }
+  } else {
+    Component = ({ children, className: _className, as, ...props }, ref) => {
+      const className = _className ? `${_className} ${configOrCssOrClassStrings}` : configOrCssOrClassStrings
+
+      // @ts-ignore
+      return createElement(as || element, { ...defaultComponentProps, className, ...props, ref }, children)
+    }
+  }
+
+  return Object.assign(memo(forwardRef(Component)), { CSS: quark || css({}) }) as any
+}
+
+const isStrings = (value: any): value is string | string[] => {
+  return typeof value === 'string' || Array.isArray(value)
 }
 
 //Re-export @quark/core

@@ -242,3 +242,26 @@ describe('styled', () => {
     `)
   })
 })
+
+test('className string', () => {
+  const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
+
+  const { container } = render(
+    <Center>
+      <div>Testing</div>
+    </Center>
+  )
+
+  expect(container).toMatchInlineSnapshot(`
+    <div>
+      <div
+        aria-label="center"
+        class="flex items-center justify-center"
+      >
+        <div>
+          Testing
+        </div>
+      </div>
+    </div>
+  `)
+})

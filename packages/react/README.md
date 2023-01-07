@@ -10,7 +10,7 @@ yarn add @quarkcss/react
 | Package           | Minified | Gzipped |
 | ----------------- | -------- | ------- |
 | `@quarkcss/core`  | 1.02KB   | 0.54KB  |
-| `@quarkcss/react` | 0.81KB   | 0.45KB  |
+| `@quarkcss/react` | 1.09KB   | 0.55KB  |
 
 Less than 1KB gzipped!?! 😲
 
@@ -69,18 +69,20 @@ const StyledButton = styled('button', {
   onClick: () => console.log('Button is clicked')
 })
 
+// If you don't need variants, you can also declare your base class names as a `string` or `string[]`
+const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
 
 // Declare Variants as Props
 const App = () => {
   return (
+  <Center>
     <StyledButton size="medium" color="blue" rounded>
       Click Me
     </StyledButton>
+  </Center>
   )
 }
 ```
-
-
 ## Wrap Components
 
 For components like framer-motion (motion.div) and Radix Primatives

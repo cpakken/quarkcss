@@ -7,11 +7,10 @@ pnpm install @quarkcss/core
 
 yarn add @quarkcss/core
 ```
-
 | Package           | Minified | Gzipped |
 | ----------------- | -------- | ------- |
 | `@quarkcss/core`  | 1.02KB   | 0.54KB  |
-| `@quarkcss/react` | 0.81KB   | 0.45KB  |
+| `@quarkcss/react` | 1.09KB   | 0.55KB  |
 
 Less than 1KB gzipped!?! 😲
 

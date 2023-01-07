@@ -1,5 +1,13 @@
 # @quarkcss/react
 
+## 0.4.1
+
+### Patch Changes
+
+- Directly declare base classnames as string or string[] if you don't need variants
+- Updated dependencies
+  - @quarkcss/core@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes

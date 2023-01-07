@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/react",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -14,6 +14,7 @@
     "atomiccss",
     "styled-components"
   ],
+  "sideEffects": false,
   "type": "module",
   "types": "dist/types/index.d.ts",
   "main": "dist/index.js",
@@ -45,6 +46,6 @@
     "vitest": "^0.25.7"
   },
   "dependencies": {
-    "@quarkcss/core": "workspace:^0.4.0"
+    "@quarkcss/core": "workspace:^0.4.1"
   }
 }
