@@ -19,8 +19,8 @@ Less than 1KB gzipped!?! 😲
 Fully typed framework-agnostic generator for atomic css classes.
 
 Inspired by [`@stitches/core`](https://stitches.dev/docs/variants) api for atomic style css classes
-  - Taiiwind, unocss, windicss
-  - use stitches css-in-js api for atomic css classes
+  - Tailwind, unocss, windicss
+  - use stitches css-in-js api to generate atomic css classes
 
 For React styling, use [`@quarkcss/react`](https://github.com/cpakken/quarkcss/tree/master/packages/react)
 
@@ -66,11 +66,21 @@ const button = css({
   }
 })
 
+//Usage
 const classnames = button({
   size: 'medium',
   color: 'blue',
   rounded: true
 })
+//classnames: 'bg-blue-500 w-8 h-8 rounded-full border-2 border-blue-500'
+
+const App = () => {
+  return (
+    <button className={button({size: 'medium', color: 'blue', rounded: true})}>
+      Click Me
+    </button>
+  )
+}
 
 ```
 ## Typescript

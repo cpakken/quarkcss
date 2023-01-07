@@ -17,9 +17,8 @@ Less than 1KB gzipped!?! 😲
 ## Description
 Fully typed component styling for React with atomic css classes.
 
-Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api for atomic style css classes
-  - Taiiwind, unocss, windicss
-  - use stitches css-in-js api for atomic css classes
+Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api for generating react StyledComponents using atomic style css classes
+  - Tailwind, unocss, windicss
 
 For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
