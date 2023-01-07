@@ -1,5 +1,11 @@
 # @quarkcss/react
 
+## 0.4.2
+
+### Patch Changes
+
+- Fixed styled baseClass string array initialize
+
 ## 0.4.1
 
 ### Patch Changes

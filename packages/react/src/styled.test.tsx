@@ -244,7 +244,7 @@ describe('styled', () => {
 })
 
 test('className string', () => {
-  const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
+  const Center = styled('div', ['flex items-center', 'justify-center'], { 'aria-label': 'center' })
 
   const { container } = render(
     <Center>

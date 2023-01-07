@@ -89,7 +89,11 @@ export function styled<Element extends ElementType>(
     }
   } else {
     Component = ({ children, className: _className, as, ...props }, ref) => {
-      const className = _className ? `${_className} ${configOrCssOrClassStrings}` : configOrCssOrClassStrings
+      const baseClass = Array.isArray(configOrCssOrClassStrings)
+        ? configOrCssOrClassStrings.join(' ')
+        : configOrCssOrClassStrings
+
+      const className = _className ? `${_className} ${baseClass}` : baseClass
 
       // @ts-ignore
       return createElement(as || element, { ...defaultComponentProps, className, ...props, ref }, children)
