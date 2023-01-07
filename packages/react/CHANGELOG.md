@@ -1,5 +1,11 @@
 # @quarkcss/react
 
+## 0.3.1
+
+### Patch Changes
+
+- Fixed typescript polymorphic component prop types
+
 ## 0.3.0
 
 ### Minor Changes

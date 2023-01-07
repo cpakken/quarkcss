@@ -3,19 +3,24 @@ import { ComponentProps, createElement, ElementType, forwardRef, memo, ReactElem
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
 export type QuarkComponentPolymorphicProps<
-  As extends ElementType | never = never,
-  Element extends ElementType = ElementType,
-  VariantsMap extends QuarkVariantsMap = {},
-  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
-> = { as?: As } & Assign<Assign<ComponentProps<Element>, DefaultProps>, PropsOfVariantsMap<VariantsMap>>
+  As extends ElementType | never,
+  Element extends ElementType,
+  VariantsMap extends QuarkVariantsMap,
+  DefaultProps extends PartialComponentProps<Element>
+> = { as?: As } & Assign<
+  // ComponentProps<IsNever<As, Element>>,
+  Assign<ComponentProps<IsNever<As, Element>>, Partial<DefaultProps>>,
+  // Assign<IsNever<ComponentProps<As>, ComponentProps<Element>>, Partial<DefaultProps>>,
+  PropsOfVariantsMap<VariantsMap>
+>
 
 export interface QuarkComponent<
-  Element extends ElementType = ElementType,
-  VariantsMap extends QuarkVariantsMap = {},
-  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
+  Element extends ElementType,
+  VariantsMap extends QuarkVariantsMap,
+  DefaultProps extends PartialComponentProps<Element>
 > {
   <As extends ElementType | never = never>(
-    props: QuarkComponentPolymorphicProps<As, IsNever<As, Element>, VariantsMap, DefaultProps>
+    props: QuarkComponentPolymorphicProps<As, Element, VariantsMap, DefaultProps>
   ): ReactElement<any, any> | null
 }
 
@@ -24,25 +29,23 @@ type IsNever<T, A> = [T] extends [never] ? A : T
 // type Assign<A, B> = Omit<A, keyof B> & B
 type Assign<A, B> = Omit<A, keyof B | 'as'> & B
 
-export type QuarkComponentVariantsMap<C> = C extends QuarkComponent<any, infer V> ? V : never
+export type QuarkComponentVariantsMap<C> = C extends QuarkComponent<any, infer V, any> ? V : never
 export type QuarkComponentVariants<C> = PropsOfVariantsMap<QuarkComponentVariantsMap<C>>
 export type PropsOf<C extends ElementType> = C extends QuarkComponent<infer E, infer V, infer D>
-  ? QuarkComponentPolymorphicProps<any, E, V, D>
+  ? QuarkComponentPolymorphicProps<never, E, V, D>
   : ComponentProps<C>
 
-export type DefaultComponentPropsConfig<Element extends ElementType> = Partial<
-  Omit<ComponentProps<Element>, 'className'>
->
+export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
 
 export function styled<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap = {},
-  DefaultProps extends DefaultComponentPropsConfig<Element> = DefaultComponentPropsConfig<Element>
+  DefaultProps extends PartialComponentProps<Element> = {}
 >(
   element: Element,
   config: QuarkConfig<VariantsMap>,
   defaultComponentProps?: DefaultProps
-): QuarkComponent<Element, VariantsMap> {
+): QuarkComponent<Element, VariantsMap, DefaultProps> {
   const quark = css(config)
   const separateQuarkProps = createSeparateQuarkPropsFn(config)
 

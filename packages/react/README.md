@@ -156,7 +156,8 @@ type StyledComponentProps = PropsOf<typeof StyledContainer>
 import { ComponentProps } from 'react'
 type StyledComponentProps = ComponentProps<typeof StyledContainer>
 
-//The polymorphic 'as' prop makes ComponentProps infer all undeclared props as `any` even thought the declared props are typed correctly.
+//The polymorphic 'as' prop makes ComponentProps infer all undeclared props as `any` 
+//even thought the declared props are typed correctly.
 
 ``` 
 

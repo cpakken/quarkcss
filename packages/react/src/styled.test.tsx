@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
 
 import { render } from '@testing-library/react'
-import React, { ComponentProps } from 'react'
+import { m } from 'framer-motion'
+import React, { ComponentProps, ReactNode } from 'react'
 import { PropsOf, QuarkComponentVariants, styled } from '.'
 
 describe('styled', () => {
@@ -39,6 +40,25 @@ describe('styled', () => {
         >
           <div>
             Testing
+          </div>
+        </div>
+      </div>
+    `)
+  })
+
+  test('base', () => {
+    const { container } = render(
+      <Container color="red" size="large" className="custom">
+        <div>Child</div>
+      </Container>
+    )
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <div
+          class="custom baseClass red large"
+        >
+          <div>
+            Child
           </div>
         </div>
       </div>
@@ -102,23 +122,37 @@ describe('styled', () => {
   `)
   })
 
-  test('base', () => {
-    const { container } = render(
-      <Container color="red" size="large" className="custom">
-        <div>Child</div>
-      </Container>
+  test('HOC / Polymorphic Framer Motion Types', () => {
+    // const StyledMotion = styled(motion.div, {
+    // const Styled = styled('div', {})
+
+    const StyledMotion = styled(
+      m.div,
+      {},
+      {
+        animate: {},
+      }
     )
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <div
-          class="custom baseClass red large"
-        >
-          <div>
-            Child
-          </div>
+
+    const StyledDiv = styled('div', {})
+    const Custom = ({ children, style }: { children: ReactNode; style: string; crazy: number }) => {
+      return (
+        <div>
+          {children} {style}
         </div>
+      )
+    }
+
+    const { container } = render(
+      <div>
+        <StyledMotion style={{ x: 0 }}>
+          <div>Testing</div>
+        </StyledMotion>
+        <StyledDiv as={m.div} style={{ x: 0 }}>
+          <div>Testing</div>
+        </StyledDiv>
       </div>
-    `)
+    )
   })
 
   test('polymorphic', () => {
