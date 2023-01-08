@@ -117,7 +117,6 @@ const StyledSlider = styled(Slider.Root, {
 
 ## Polymorphic Components
 Use the `as` prop to change the underlying component. Typescript will automatically infer the correct props for the new component.
-
 ```tsx
 const StyledComponet = styled('span', {
   /* ... */
@@ -136,6 +135,7 @@ const App = () => {
   )
 }
 ```
+⚠️ **Warning**: If you declared default props, make sure they are compatible with the new component. Otherwise compose with its core css. 
 
 ## Compose with @quark/core `css` function
 
@@ -155,7 +155,7 @@ const container = css({
 const StyledContainer = styled('div', container)
 
 // Retrieve quark core css from Styled Component
-const container_ = StyledContainer.CSS // container_ === container
+expect(StyledContainer.CSS).toBe(container)
 ```
 Now we can re-use quark config without using `as`, and pass different default component props
 

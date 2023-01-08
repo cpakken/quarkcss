@@ -60,7 +60,17 @@ export function styled<
   DefaultProps extends PartialComponentProps<Element> = {}
 >(
   element: Element,
-  configOrCss: QuarkConfig<VariantsMap> | QuarkCss<VariantsMap>,
+  configOrCss: QuarkConfig<VariantsMap>,
+  defaultComponentProps?: DefaultProps
+): QuarkComponent<Element, VariantsMap, DefaultProps>
+
+export function styled<
+  Element extends ElementType,
+  VariantsMap extends QuarkVariantsMap = {},
+  DefaultProps extends PartialComponentProps<Element> = {}
+>(
+  element: Element,
+  configOrCss: QuarkCss<VariantsMap>,
   defaultComponentProps?: DefaultProps
 ): QuarkComponent<Element, VariantsMap, DefaultProps>
 
