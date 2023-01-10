@@ -222,6 +222,8 @@ describe('styled', () => {
       style: { top: 0 },
     })
 
+    type QuarkVariants = QuarkComponentVariants<typeof Composed>
+
     const { container } = render(
       <Composed color="red" size="large" className="custom">
         <div>Child</div>
@@ -245,6 +247,9 @@ describe('styled', () => {
 
 test('className string', () => {
   const Center = styled('div', ['flex items-center', 'justify-center'], { 'aria-label': 'center' })
+  // const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
+
+  type QuarkVariants = QuarkComponentVariants<typeof Center>
 
   const { container } = render(
     <Center>

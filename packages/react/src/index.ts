@@ -48,11 +48,12 @@ export type PartialComponentProps<Element extends ElementType> = Partial<Compone
 
 type AnyQuarkCss = QuarkCss<any>
 
-export function styled<Element extends ElementType, DefaultProps extends PartialComponentProps<Element> = {}>(
-  element: Element,
-  baseClasses: string | string[],
-  defaultComponentProps?: DefaultProps
-): QuarkComponent<Element, {}, DefaultProps>
+type MaybeQuarkConfig<VariantsMap extends QuarkVariantsMap> =
+  | QuarkConfig<VariantsMap>
+  | QuarkCss<VariantsMap>
+  | string[]
+  //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
+  | (string & { quark?: VariantsMap })
 
 export function styled<
   Element extends ElementType,
@@ -60,25 +61,9 @@ export function styled<
   DefaultProps extends PartialComponentProps<Element> = {}
 >(
   element: Element,
-  configOrCss: QuarkConfig<VariantsMap>,
+  configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap>,
   defaultComponentProps?: DefaultProps
-): QuarkComponent<Element, VariantsMap, DefaultProps>
-
-export function styled<
-  Element extends ElementType,
-  VariantsMap extends QuarkVariantsMap = {},
-  DefaultProps extends PartialComponentProps<Element> = {}
->(
-  element: Element,
-  configOrCss: QuarkCss<VariantsMap>,
-  defaultComponentProps?: DefaultProps
-): QuarkComponent<Element, VariantsMap, DefaultProps>
-
-export function styled<Element extends ElementType>(
-  element: Element,
-  configOrCssOrClassStrings: string | string[] | QuarkConfig | AnyQuarkCss,
-  defaultComponentProps?: PartialComponentProps<Element>
-) {
+): QuarkComponent<Element, VariantsMap, DefaultProps> {
   const quark = isQuarkCss(configOrCssOrClassStrings)
     ? (configOrCssOrClassStrings as AnyQuarkCss)
     : !isStrings(configOrCssOrClassStrings)
