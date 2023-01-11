@@ -15,10 +15,14 @@ yarn add @quarkcss/react
 Less than 1KB gzipped!?! 😲
 
 ## Description
-Fully typed component styling for React with atomic css classes.
+Create fully-typed React styled-components using atomic css classes.
 
-Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api for generating react StyledComponents using atomic style css classes
-  - Tailwind, unocss, windicss
+Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) variants api to generate atomic css classes
+
+Use with your favorite atomic css library:
+  - [Tailwindcss](https://tailwindcss.com/)
+  - [unocss](https://github.com/unocss/unocss)
+  - [windicss](https://github.com/windicss/windicss)
 
 For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
@@ -33,19 +37,26 @@ const StyledButton = styled('button', {
   variants: {
     size: {
       small: 'w-4 h-4',
-      medium: ['w-8', 'h-8'], //Use arrays to organize multiple classes
+      medium: ['w-8', 'h-8'], //use arrays to organize multiple classes
       large: 'w-12 h-12'
     },
     color: {
       red: 'bg-red-500',
       blue: 'bg-blue-500'
     },
-    rounded: {
-      true: 'rounded-full', //`rounded` will accept Truthy types (true | false | null | undefined)
-      null: 'rounded-none'  //Default if no variant is passed
+    //boolean variants (when `true` or `null` keys are declared, variant prop will have `true | falsey` type)
+    rounded: { 
+      true: 'rounded-full', //`rounded === true`
+      null: 'rounded-none'  //`rounded === falsey` (undefined | false | null | 0) or undeclared
+      
+      //❌ false: 'rounded-none' (Since `null` encompasses `falsey` and undeclared values)
+
+      //Define additional keys in addition to boolean keys
+      small: 'rounded-sm',
+      medium: 'rounded-md',
     }
   },
-  //Compound Variants
+  //compound variants
   compound: [
     {
       size: 'small',
@@ -58,15 +69,15 @@ const StyledButton = styled('button', {
       value: 'border-2 border-blue-500'
     }
   ],
-  //Default Variants
+  //default variants
   defaults: {
     size: 'small',
     color: 'red'
   }
 }, {
-  //Use second argument to initialize default props for your base component <button />
+  //default component props - initialize default props for your base component <button />
   disabled: true,
-  onClick: () => console.log('Button is clicked')
+  onclick: () => console.log('button is clicked')
 })
 
 // If you don't need variants, you can also declare your base class names as a `string` or `string[]`
@@ -94,7 +105,7 @@ import { motion } from 'framer-motion'
 const MotionBox = styled(motion.div, {
   /* Style Config */
 }, {
-  //Use second argument to initialize default props for your base component <motion.div />
+  //Initialize default props for your base component <motion.div />
   variants: {
     initial: { opacity: 0, x: -100},
     animate: { opacity: 1, x: 0}
@@ -107,6 +118,12 @@ const MotionBox = styled(motion.div, {
     damping: 30
   }
 })
+```
+
+```tsx
+
+import { styled } from '@quarkcss/react'
+import * as Slider from '@radix-ui/react-slider'
 
 //Radix Primatives
 const StyledSlider = styled(Slider.Root, {
@@ -154,7 +171,7 @@ const container = css({
 // Directly pass quark css function to styled
 const StyledContainer = styled('div', container)
 
-// Retrieve quark core css from Styled Component
+// Retrieve quark css from Styled Component
 expect(StyledContainer.CSS).toBe(container)
 ```
 Now we can re-use quark config without using `as`, and pass different default component props
