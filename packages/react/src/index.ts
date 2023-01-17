@@ -1,4 +1,13 @@
-import { css, isQuarkCss, PropsOfVariantsMap, QuarkConfig, QuarkCss, QuarkVariantsMap } from '@quarkcss/core'
+import {
+  arrayify,
+  cleanMultiLine,
+  css,
+  isQuarkCss,
+  PropsOfVariantsMap,
+  QuarkConfig,
+  QuarkCss,
+  QuarkVariantsMap,
+} from '@quarkcss/core'
 import {
   ComponentProps,
   createElement,
@@ -101,9 +110,9 @@ function _styled<
     }
   } else {
     Component = ({ children, className: _className, as, ...props }, ref) => {
-      const baseClass = Array.isArray(configOrCssOrClassStrings)
-        ? configOrCssOrClassStrings.join(' ')
-        : configOrCssOrClassStrings
+      const baseClass = arrayify(configOrCssOrClassStrings as string | string[])
+        .map(cleanMultiLine)
+        .join(' ')
 
       const className = _className ? `${_className} ${baseClass}` : baseClass
 

@@ -298,16 +298,31 @@ test('proxy intrinsic elements', () => {
 
   type QuarkVariants = QuarkComponentVariants<typeof Button>
 
+  const Center = styled.div(`
+    flex 
+    items-center
+    justify-center
+  `)
+
   const { container } = render(
-    <Button color="blue" size="small" className="test">
-      hello
-    </Button>
+    <Center>
+      <Button color="blue" size="small" className="test">
+        hello
+      </Button>
+    </Center>
   )
-  expect(container.firstChild).toMatchInlineSnapshot(`
-    <button
-      class="test baseClass blue small"
-    >
-      hello
-    </button>
+
+  expect(container).toMatchInlineSnapshot(`
+    <div>
+      <div
+        class="flex items-center justify-center"
+      >
+        <button
+          class="test baseClass blue small"
+        >
+          hello
+        </button>
+      </div>
+    </div>
   `)
 })

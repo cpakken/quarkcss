@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "turbo build",
-    "publish-packages": "turbo build && changeset version && pnpm -r publish"
+    "publish-packages": "turbo build && changeset publish"
   },
   "workspaces": [
     "packages/*"

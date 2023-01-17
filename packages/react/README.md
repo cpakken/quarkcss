@@ -1,7 +1,6 @@
 <!-- omit from toc -->
 ## Table of Contents
 - [Introduction](#introduction)
-- [Motivation](#motivation)
 - [Install](#install)
 - [Usage](#usage)
 - [Wrap Components](#wrap-components)
@@ -29,21 +28,6 @@ Use with your favorite atomic css library:
 
 For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
-## Motivation
-I was big on using css-in-js to style my React apps and my weapon of choice was [stitches](https://stitches.dev/). 
-
-The api was a joy to use and their Typescript DX worked like magic. But as frameworks started trending towards Server Components, css-in-js became increasingly difficult to play nice with these newer features. 
-- https://github.com/reactwg/react-18/discussions/110
-- https://dev.to/srmagura/why-were-breaking-up-wiht-css-in-js-4g9b
-
-I've always had my eye on tailwindcss but I never really gave it a fair shake because I thought polluting jsx with long class names was not a good pattern. 
-
-Despite this, I liked how tailwind worked with a constraint styled system and its one of the reasons I was drawn to stitches. When I finally bit the bullet, I was pleasantly surprised by how much I enjoyed tailwindcss. It was extermely easy to use and just 'worked' with every project I tried it on.
-
-I wanted to have the best of both worlds. I wanted to be able to use atomic css classes and still use styled components with stitche's api. 
-
-**👶 = `@quarkcss/react`**
-
 ## Install
 
 ```bash
@@ -58,9 +42,6 @@ yarn add @quarkcss/react
 | `@quarkcss/core`  | 1.02KB   | 0.54KB  |
 | `@quarkcss/react` | 1.09KB   | 0.55KB  |
 
-Less than 1KB gzipped!?! 😲
-
-
 ## Usage
 
 ```tsx
@@ -72,8 +53,15 @@ const StyledButton = styled('button', {
   variants: {
     size: {
       small: 'w-4 h-4',
-      medium: ['w-8', 'h-8'], //use arrays to organize multiple classes
-      large: 'w-12 h-12'
+
+      //use arrays to organize multiple classes
+      medium: ['w-8', 'h-8'], 
+
+      //template strings multi-line support
+      large: ` 
+        w-12
+        h-12
+      `
     },
     color: {
       red: 'bg-red-500',
@@ -84,9 +72,9 @@ const StyledButton = styled('button', {
       true: 'rounded-full', //`rounded === true`
       null: 'rounded-none'  //`rounded === falsey` (undefined | false | null | 0) or undeclared
       
-      //❌ false: 'rounded-none' (Since `null` encompasses `falsey` and undeclared values)
+      //❌ false: 'rounded-none' (Don't use 'false', Since `null` encompasses `falsey` and undeclared values)
 
-      //Define additional keys in addition to boolean keys
+      //Define additional keys along with boolean keys (true / null)
       small: 'rounded-sm',
       medium: 'rounded-md',
     }
@@ -118,12 +106,15 @@ const StyledButton = styled('button', {
 // If you don't need variants, you can also declare your base class names as a `string` or `string[]`
 const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
 
+//Intrinsic React Elements (div, span, button, etc) are also proxied and can be instantiated like:
+const Bold = styled.span('font-bold')
+
 // Declare Variants as Props
 const App = () => {
   return (
   <Center>
     <StyledButton size="medium" color="blue" rounded>
-      Click Me
+      <Bold>Click Me</Bold>
     </StyledButton>
   </Center>
   )
@@ -192,7 +183,6 @@ const App = () => {
 ## Compose with @quark/core `css` function
 
 ```tsx
-
 import { styled, css } from '@quarkcss/react'
 
 // `css` re-exported from @quarkcss/core
@@ -224,7 +214,6 @@ const MotionContainer = styled(motion.div, StyledContainer.CSS, {
     damping: 30
   }
 })
-
 ```
 
 ## Typescript

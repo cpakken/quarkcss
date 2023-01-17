@@ -2,7 +2,7 @@
 ## Table of Contents
 - [Introduction](#introduction)
 - [Install](#install)
-- [Description](#description)
+- [Introduction](#introduction-1)
 - [Usage](#usage)
 - [Typescript](#typescript)
 - [Caveats](#caveats)
@@ -41,9 +41,7 @@ yarn add @quarkcss/core
 | `@quarkcss/core`  | 1.02KB   | 0.54KB  |
 | `@quarkcss/react` | 1.09KB   | 0.55KB  |
 
-Less than 1KB gzipped!?! 😲
-
-## Description
+## Introduction
 Fully typed framework-agnostic generator for atomic css classes.
 
 Inspired by [`@stitches/core`](https://stitches.dev/docs/variants) variants api to generate atomic css classes

@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.5.1
+
+### Patch Changes
+
+- Fix multiline when base string instead of config
+
 ## 0.5.0
 
 ### Minor Changes

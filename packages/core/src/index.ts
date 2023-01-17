@@ -93,13 +93,13 @@ export function getQuarkConfig<VariantsMap extends QuarkVariantsMap>(
   return quark[$quark]
 }
 
-const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value])
-
 const normalize = (key: string | boolean | null | undefined): string => {
   //If falsey, return 'null' as the prop key, if true, return 'true'
   return !key ? 'null' : key.toString()
 }
 
-const cleanMultiLine = (str: string) => str.replace(/\s+/g, ' ').trim()
+export const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value])
+
+export const cleanMultiLine = (str: string) => str.replace(/\s+/g, ' ').trim()
 
 const compoundPropKeywords = new Set(['value', 'negate'])
