@@ -1,3 +1,32 @@
+<!-- omit from toc -->
+## Table of Contents
+- [Introduction](#introduction)
+- [Install](#install)
+- [Description](#description)
+- [Usage](#usage)
+- [Typescript](#typescript)
+- [Caveats](#caveats)
+
+## Introduction
+**I ❤️ stitches && ❤️ tailwind**
+
+**What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
+
+- Create fully-typed React styled components using atomic css classes.
+- Organize your atomic css with variants props 
+  - Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api to generate atomic css classes
+- Declare default props for your base component
+- Polymorphic and composable. Reuse quark styles from one component to another.
+
+
+Use with your favorite atomic css library:
+  - [Tailwindcss](https://tailwindcss.com/)
+  - [unocss](https://github.com/unocss/unocss)
+  - [windicss](https://github.com/windicss/windicss)
+  - (+ many more...)
+
+For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
+
 ## Install
 
 ```bash
@@ -104,5 +133,15 @@ type Variants = GetQuarkVariants<typeof button>
 interface Variants extends GetQuarkVariants<typeof button> {}
 
 ``` 
-
+## Caveats
+- Specificity
+  - css classes are not applied based on ordering specificity (unlike css-in-js / stitches)
+    - design your variants such that atomic classes do not conflict 
+    - if all else fails, overide with `!important` (i.e. `"!bg-red-500"`)
+- Set Tailwind VSCode plugin to recognize atomic class names outside of `<... className="">`
+  - in VSCode settings.json:
+  ```json
+  "tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"],
+  //TODO: Need to find more surgical regex to match atomic class names in QuarkConfig
+  ```
 

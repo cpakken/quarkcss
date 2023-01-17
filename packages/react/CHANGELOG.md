@@ -1,5 +1,13 @@
 # @quarkcss/react
 
+## 0.4.4
+
+### Patch Changes
+
+- Update readme
+- Updated dependencies
+  - @quarkcss/core@0.4.4
+
 ## 0.4.3
 
 ### Patch Changes

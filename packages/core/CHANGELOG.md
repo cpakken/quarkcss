@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.4.4
+
+### Patch Changes
+
+- Update readme
+
 ## 0.4.1
 
 ### Patch Changes
