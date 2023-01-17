@@ -1,5 +1,16 @@
 # @quarkcss/core
 
+## 0.5.0
+
+### Minor Changes
+
+- Multiline support and proxy style instantiation with intrinsic react elements.
+  ```tsx
+  const Button = styled.button(`
+    baseClass
+  `);
+  ```
+
 ## 0.4.4
 
 ### Patch Changes

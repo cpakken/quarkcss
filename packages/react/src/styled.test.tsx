@@ -65,6 +65,22 @@ describe('styled', () => {
     `)
   })
 
+  test('template strings', () => {
+    const Conatiner2 = styled('div', {
+      base: `
+        baseClass
+        bg-red-500
+    `,
+    })
+
+    const { container } = render(<Conatiner2 />)
+    expect(container.firstChild).toMatchInlineSnapshot(`
+      <div
+        class="baseClass bg-red-500"
+      />
+    `)
+  })
+
   test('HOC', () => {
     const CustomButton = ({ children, append, ...rest }: ComponentProps<'button'> & { append: string }) => (
       <button {...rest}>{`${children} ${append}`}</button>
@@ -268,5 +284,30 @@ test('className string', () => {
         </div>
       </div>
     </div>
+  `)
+})
+
+test('proxy intrinsic elements', () => {
+  const Button = styled.button({
+    base: 'baseClass',
+    variants: {
+      color: { red: 'red', blue: 'blue' },
+      size: { small: 'small', large: 'large' },
+    },
+  })
+
+  type QuarkVariants = QuarkComponentVariants<typeof Button>
+
+  const { container } = render(
+    <Button color="blue" size="small" className="test">
+      hello
+    </Button>
+  )
+  expect(container.firstChild).toMatchInlineSnapshot(`
+    <button
+      class="test baseClass blue small"
+    >
+      hello
+    </button>
   `)
 })

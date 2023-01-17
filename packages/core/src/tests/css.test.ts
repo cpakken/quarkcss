@@ -17,6 +17,21 @@ describe('core', () => {
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red' })).toEqual('baseClass red')
   })
+  test('handle multiline', () => {
+    const className = css({
+      base: `
+        baseClass
+        baseClass2
+        baseClass3
+      `,
+      variants: {
+        color: { red: 'red', blue: 'blue' },
+        size: { small: 'small', large: 'large' },
+      },
+    })
+
+    expect(className({ color: 'red', size: 'large' })).toEqual('baseClass baseClass2 baseClass3 red large')
+  })
 
   test('defaultVariant', () => {
     const className = css({

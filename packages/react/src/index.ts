@@ -16,9 +16,7 @@ export type QuarkComponentPolymorphicProps<
   VariantsMap extends QuarkVariantsMap,
   DefaultProps extends PartialComponentProps<Element>
 > = { as?: As } & Assign<
-  // ComponentProps<IsNever<As, Element>>,
   Assign<ComponentProps<IsNever<As, Element>>, Partial<DefaultProps>>,
-  // Assign<IsNever<ComponentProps<As>, ComponentProps<Element>>, Partial<DefaultProps>>,
   PropsOfVariantsMap<VariantsMap>
 >
 
@@ -55,7 +53,26 @@ type MaybeQuarkConfig<VariantsMap extends QuarkVariantsMap> =
   //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
   | (string & { quark?: VariantsMap })
 
-export function styled<
+export type StyledFn = <
+  Element extends ElementType,
+  VariantsMap extends QuarkVariantsMap = {},
+  DefaultProps extends PartialComponentProps<Element> = {}
+>(
+  element: Element,
+  configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap>,
+  defaultComponentProps?: DefaultProps
+) => QuarkComponent<Element, VariantsMap, DefaultProps>
+
+export type Styled = StyledFn & {
+  [K in keyof JSX.IntrinsicElements]: {
+    <VariantsMap extends QuarkVariantsMap = {}, DefaultProps extends PartialComponentProps<K> = {}>(
+      configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap>,
+      defaultComponentProps?: DefaultProps
+    ): QuarkComponent<K, VariantsMap, DefaultProps>
+  }
+}
+
+function _styled<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap = {},
   DefaultProps extends PartialComponentProps<Element> = {}
@@ -103,5 +120,15 @@ const isStrings = (value: any): value is string | string[] => {
 }
 
 //Re-export @quark/core
+
+export const styled: Styled = new Proxy(_styled, {
+  get(target, prop) {
+    if (typeof prop !== 'string') throw new Error(`styled: invalid prop \`${prop.toString()}\` `)
+
+    return (configOrCssOrClassStrings: any, defaultComponentProps?: any) =>
+      target(prop as any, configOrCssOrClassStrings, defaultComponentProps)
+  },
+}) as any
+
 export { css, isQuarkCss }
 export type { QuarkConfig, QuarkCss, QuarkVariantsMap }
