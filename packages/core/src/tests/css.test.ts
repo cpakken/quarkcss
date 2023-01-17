@@ -1,8 +1,9 @@
-import { css, getQuarkConfig, GetQuarkVariants, isQuarkCss, QuarkCss } from '..'
+import { css, getQuarkConfig, GetQuarkProps, isQuarkCss } from '..'
 
 describe('core', () => {
   test('classname', () => {
     const className = css({ base: 'baseClass' })
+    type PROPS = GetQuarkProps<typeof className>
     expect(className()).toEqual('baseClass')
   })
   test('variants', () => {
@@ -10,9 +11,11 @@ describe('core', () => {
       base: 'baseClass',
       variants: {
         color: { red: 'red', blue: 'blue' },
-        size: { small: 'small', large: 'large' },
+        size: { small: 'small', large: 'large', null: '' },
       },
     })
+
+    type PROPS = GetQuarkProps<typeof className>
 
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red' })).toEqual('baseClass red')
@@ -38,7 +41,7 @@ describe('core', () => {
       base: 'baseClass',
       variants: {
         color: { red: 'red', blue: 'blueValue' },
-        size: { small: 'small', large: 'large' },
+        size: { small: 'small', large: 'large', null: '' },
       },
       defaults: {
         color: 'blue',
@@ -99,8 +102,7 @@ describe('core', () => {
       },
     })
 
-    type Variants = GetQuarkVariants<typeof className>
-    interface VariantInterface extends GetQuarkVariants<typeof className> {}
+    type Props = GetQuarkProps<typeof className>
 
     expect(className({ color: 'blue' })).toEqual('baseClass blue large blueLarge blueNotDrag')
     expect(className({ color: 'red' })).toEqual('baseClass red large')

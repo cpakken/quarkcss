@@ -3,7 +3,7 @@
 - [Introduction](#introduction)
 - [Install](#install)
 - [Usage](#usage)
-- [Wrap Components](#wrap-components)
+- [Custom Components](#custom-components)
 - [Polymorphic Components](#polymorphic-components)
 - [Compose with @quark/core `css` function](#compose-with-quarkcore-css-function)
 - [Typescript](#typescript)
@@ -106,8 +106,9 @@ const StyledButton = styled('button', {
 // If you don't need variants, you can also declare your base class names as a `string` or `string[]`
 const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
 
-//Intrinsic React Elements (div, span, button, etc) are also proxied and can be instantiated like:
+//You can use the element tag directly
 const Bold = styled.span('font-bold')
+// const Bold = styled.span({ base: 'font-bold' }) //same as above
 
 // Declare Variants as Props
 const App = () => {
@@ -120,7 +121,7 @@ const App = () => {
   )
 }
 ```
-## Wrap Components
+## Custom Components
 
 For components like framer-motion (motion.div) and Radix Primatives
 
@@ -186,7 +187,7 @@ const App = () => {
 import { styled, css } from '@quarkcss/react'
 
 // `css` re-exported from @quarkcss/core
-const container = css({
+const containercss = css({
   base: /* ... */
   variants: { /* ... */ }
   compound: [ /* ... */ ]
@@ -194,10 +195,10 @@ const container = css({
 })
 
 // Directly pass quark css function to styled
-const StyledContainer = styled('div', container)
+const StyledContainer = styled('div', containercss)
 
 // Retrieve quark css from Styled Component
-expect(StyledContainer.CSS).toBe(container)
+expect(StyledContainer.CSS).toBe(containercss)
 ```
 Now we can re-use quark config without using `as`, and pass different default component props
 
@@ -221,12 +222,9 @@ const MotionContainer = styled(motion.div, StyledContainer.CSS, {
 //Extract QuarkVariants from styled component
 const StyledContainer = styled({ /* ... */ }})
 
-type QuarkVariants = QuarkComponentVariants<typeof StyledContainer>
-type QuarkVariantsMap = QuarkComponentVariantsMap<typeof StyledContainer>
-
+type QuarkVariants = QuarkComponentVariantProps<typeof StyledContainer>
 //Or Interface Version
 interface QuarkVariants extends QuarkComponentVariants<typeof StyledContainer> {}
-interface QuarkVariantsMap extends QuarkComponentVariantsMap<typeof StyledContainer> {}
 
 //To Extract Props from Styled Component use ✔️
 import { PropsOf } from '@quarkcss/react'

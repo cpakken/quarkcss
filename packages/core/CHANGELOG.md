@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.5.2
+
+### Patch Changes
+
+- Variant Props are now required unless default or null value is set
+
 ## 0.5.1
 
 ### Patch Changes

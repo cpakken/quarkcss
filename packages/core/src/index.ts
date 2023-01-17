@@ -1,5 +1,6 @@
 //null variant is applied when no variant value is passed
-export type QuarkVariants = { [key: string]: string | string[] } & { null?: string | string[] }
+// export type QuarkVariants = { [key: string]: string | string[] } & { null?: string | string[] }
+export type QuarkVariants = { [key: string]: string | string[] }
 
 export type QuarkVariantsMap = { [variantKey: string]: QuarkVariants }
 
@@ -7,44 +8,73 @@ type TrueStringToBoolean<StringUnion> = StringUnion extends 'true' | 'null'
   ? Exclude<StringUnion, 'true' | 'null'> | boolean | null | undefined
   : StringUnion
 
-export type PropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
+type BooleanPropKeys<VariantValues, VariantPropKey> = VariantValues extends 'null' | 'true'
+  ? VariantPropKey
+  : never
+export type GetBooleanPropKeys<VariantsMap> = {
+  [K in keyof VariantsMap]: BooleanPropKeys<keyof VariantsMap[K], K>
+}[keyof VariantsMap]
+
+export type PartialPropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
   [Key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[Key] & string>
 }
+type Flatten<T> = T extends Record<any, any> ? { [P in keyof T]: T[P] } : T
+type PartialSubset<T, K extends keyof T> = Flatten<Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>>>
+
+//Props are required unless they are in the defaults or are a boolean variant
+//(has variant prop 'null' | 'true')
+export type PropsOfVariantsMap<
+  VariantsMap extends QuarkVariantsMap,
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+> = PartialSubset<
+  {
+    [Key in keyof VariantsMap]: TrueStringToBoolean<keyof VariantsMap[Key] & string>
+  },
+  (keyof Defaults | GetBooleanPropKeys<VariantsMap>) & string
+>
 
 export type CompoundVariants<VariantsMap extends QuarkVariantsMap> =
-  | PropsOfVariantsMap<VariantsMap> & { value: string | string[] }
+  | PartialPropsOfVariantsMap<VariantsMap> & { value: string | string[] }
 
-export type QuarkConfig<VariantsMap extends QuarkVariantsMap = {}> = {
+export type QuarkConfig<
+  VariantsMap extends QuarkVariantsMap = {},
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+> = {
   base?: string | string[]
   variants?: VariantsMap
 
   compound?: CompoundVariants<VariantsMap>[]
-  defaults?: PropsOfVariantsMap<VariantsMap>
+  defaults?: Defaults
 }
 
 const $quark = Symbol('quark')
 
-export interface QuarkCss<VariantsMap extends QuarkVariantsMap> {
-  (variantValues?: PropsOfVariantsMap<VariantsMap>): string
-  [$quark]: QuarkConfig<VariantsMap>
+export interface QuarkCss<
+  VariantsMap extends QuarkVariantsMap,
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+> {
+  (variantValues?: PropsOfVariantsMap<VariantsMap, Defaults>): string
+  [$quark]: QuarkConfig<VariantsMap, Defaults>
 }
 
-export type GetQuarkVariantsMap<Quark extends QuarkCss<{}>> = Quark extends QuarkCss<infer V> ? V : never
+export type GetQuarkProps<Quark> = Quark extends QuarkCss<infer VariantsMap, infer Defaults>
+  ? PropsOfVariantsMap<VariantsMap, Defaults>
+  : never
 
-export type GetQuarkVariants<Quark extends QuarkCss<{}>> = PropsOfVariantsMap<GetQuarkVariantsMap<Quark>>
-
-export function css<VariantsMap extends QuarkVariantsMap>(
-  config: QuarkConfig<VariantsMap>
-): QuarkCss<VariantsMap> {
-  const { base, variants, defaults, compound } = config
+// export function css<Config extends QuarkConfig>(config: Config): QuarkCss<Config> {
+export function css<
+  VariantsMap extends QuarkVariantsMap = {},
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+>(config: QuarkConfig<VariantsMap, Defaults>): QuarkCss<VariantsMap, Defaults> {
+  const { base, variants, defaults, compound } = config as any
   const baseClass = Array.isArray(base) ? base.join(' ') : base
-  const variantsEntries = Object.entries(variants || {})
+  const variantsEntries = Object.entries(variants || {}) as any
 
-  const getNormalizedProp = <T extends PropsOfVariantsMap<VariantsMap>>(props: T, key: keyof T) => {
+  const getNormalizedProp = (props: any, key: string) => {
     return normalize(Object.hasOwn(props, key) ? props[key] : defaults?.[key])
   }
 
-  const css = (props: PropsOfVariantsMap<VariantsMap> = {}) => {
+  const _css = (props: any = {}) => {
     const classNames: string[] = baseClass ? [baseClass] : []
 
     //Process Variants
@@ -78,18 +108,19 @@ export function css<VariantsMap extends QuarkVariantsMap>(
     return cleanMultiLine(classNames.join(' '))
   }
 
-  return Object.assign(css, {
+  return Object.assign(_css, {
     [$quark]: config,
   })
 }
 
-export function isQuarkCss<VariantsMap extends QuarkVariantsMap>(value: any): value is QuarkCss<VariantsMap> {
+export function isQuarkCss(value: any): boolean {
   return !!value?.[$quark]
 }
 
-export function getQuarkConfig<VariantsMap extends QuarkVariantsMap>(
-  quark: QuarkCss<VariantsMap>
-): QuarkConfig<VariantsMap> {
+export function getQuarkConfig<
+  VariantsMap extends QuarkVariantsMap,
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+>(quark: QuarkCss<VariantsMap, Defaults>): QuarkConfig<VariantsMap, Defaults> {
   return quark[$quark]
 }
 
