@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/core",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -21,6 +21,7 @@
   "module": "dist/index.js",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }

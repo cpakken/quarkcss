@@ -1,5 +1,13 @@
 # @quarkcss/react
 
+## 0.5.3
+
+### Patch Changes
+
+- Fixed package.json exports types
+- Updated dependencies
+  - @quarkcss/core@0.5.3
+
 ## 0.5.2
 
 ### Patch Changes

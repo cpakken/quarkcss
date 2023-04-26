@@ -138,6 +138,9 @@ function _styled<
     }
   }
 
+  // @ts-ignore
+  Component.displayName = `Quark(${element.displayName || element.name})`
+  //TODO remove memo
   return Object.assign(memo(forwardRef(Component)), { CSS: quark || css({}) }) as any
 }
 
