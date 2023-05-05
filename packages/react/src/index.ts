@@ -1,12 +1,14 @@
 import {
   arrayify,
   cleanMultiLine,
+  createCss,
   css,
   isQuarkCss,
   PartialPropsOfVariantsMap,
   PropsOfVariantsMap,
   QuarkConfig,
   QuarkCss,
+  QuarkPlugin,
   QuarkVariantsMap,
 } from '@quarkcss/core'
 import {
@@ -105,6 +107,7 @@ function _styled<
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
   DefaultProps extends PartialComponentProps<Element> = {}
 >(
+  this: typeof css,
   element: Element,
   configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
   defaultComponentProps?: DefaultProps
@@ -112,7 +115,7 @@ function _styled<
   const quark = isQuarkCss(configOrCssOrClassStrings)
     ? (configOrCssOrClassStrings as AnyQuarkCss)
     : !isStrings(configOrCssOrClassStrings)
-    ? css(configOrCssOrClassStrings as QuarkConfig)
+    ? this(configOrCssOrClassStrings as QuarkConfig)
     : null
 
   let Component: ForwardRefRenderFunction<any, any>
@@ -121,6 +124,8 @@ function _styled<
     const separateQuarkProps = createSeparateQuarkPropsFn(quark)
     Component = ({ children, className: _className, as, ...props }, ref) => {
       const [quarkProps, rest] = separateQuarkProps(props)
+
+      //TODO useMemo on quarkProps
       const cssClassString = quark(quarkProps as any)
       const className = _className ? `${_className} ${cssClassString}` : cssClassString
 
@@ -148,14 +153,20 @@ const isStrings = (value: any): value is string | string[] => {
   return typeof value === 'string' || Array.isArray(value)
 }
 
-export const styled: Styled = new Proxy(_styled, {
-  get(target, prop) {
-    if (typeof prop !== 'string') throw new Error(`styled: invalid prop \`${prop.toString()}\` `)
+export function createStyled(...plugins: QuarkPlugin[]): Styled {
+  const css = createCss(...plugins)
 
-    return (configOrCssOrClassStrings: any, defaultComponentProps?: any) =>
-      target(prop as any, configOrCssOrClassStrings, defaultComponentProps)
-  },
-}) as any
+  return new Proxy(_styled.bind(css), {
+    get(target, prop) {
+      if (typeof prop !== 'string') throw new Error(`styled: invalid prop \`${prop.toString()}\` `)
+
+      return (configOrCssOrClassStrings: any, defaultComponentProps?: any) =>
+        target(prop as any, configOrCssOrClassStrings, defaultComponentProps)
+    },
+  }) as any
+}
+
+export const styled: Styled = createStyled()
 
 //Re-export @quark/core
 export { css, isQuarkCss }

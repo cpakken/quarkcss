@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.5.4
+
+### Patch Changes
+
+- Typescript fix
+
 ## 0.5.3
 
 ### Patch Changes

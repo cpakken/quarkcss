@@ -1,3 +1,6 @@
+- just useMemo instead of memo()
+  - for quark variant props
+
 - [ ] make variants required props (unless null prop or default :{} is passed)
 
 compound variants OR []

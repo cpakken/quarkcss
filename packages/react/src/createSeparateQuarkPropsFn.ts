@@ -1,12 +1,7 @@
-import { getQuarkConfig, GetQuarkVariantsMap, QuarkCss } from '@quarkcss/core'
+import { getQuarkConfig, QuarkCss } from '@quarkcss/core'
 
-export function createSeparateQuarkPropsFn<Quark extends QuarkCss<{}>>(quark: Quark) {
-  return <Props extends Record<string, any>>(
-    props: Props
-  ): [
-    Pick<Props, keyof GetQuarkVariantsMap<Quark> & string>,
-    Omit<Props, keyof GetQuarkVariantsMap<Quark> & string>
-  ] => {
+export function createSeparateQuarkPropsFn(quark: QuarkCss<any, any>) {
+  return (props: Record<any, any>): [any, any] => {
     const quarkProps = {} as any
     const rest = {} as any
 
@@ -22,6 +17,6 @@ export function createSeparateQuarkPropsFn<Quark extends QuarkCss<{}>>(quark: Qu
       }
     }
 
-    return [quarkProps, rest] as any
+    return [quarkProps, rest]
   }
 }

@@ -57,11 +57,26 @@ export interface QuarkCss<
   [$quark]: QuarkConfig<VariantsMap, Defaults>
 }
 
-export type GetQuarkProps<Quark> = Quark extends QuarkCss<infer VariantsMap, infer Defaults>
+export type QuarkProps<Quark> = Quark extends QuarkCss<infer VariantsMap, infer Defaults>
   ? PropsOfVariantsMap<VariantsMap, Defaults>
   : never
 
 // export function css<Config extends QuarkConfig>(config: Config): QuarkCss<Config> {
+
+export type QuarkPlugin = (classnames: string) => string
+
+export function createCss(...plugins: QuarkPlugin[]): typeof css {
+  if (plugins.length === 0) return css
+
+  return ((config: any) => {
+    const quark = css(config)
+    return (props: any) => {
+      const classnames = quark(props)
+      return plugins.reduce((acc, plugin) => plugin(acc), classnames)
+    }
+  }) as any
+}
+
 export function css<
   VariantsMap extends QuarkVariantsMap = {},
   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}

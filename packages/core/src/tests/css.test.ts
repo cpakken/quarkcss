@@ -1,9 +1,9 @@
-import { css, getQuarkConfig, GetQuarkProps, isQuarkCss } from '..'
+import { css, getQuarkConfig, QuarkProps, isQuarkCss } from '..'
 
 describe('core', () => {
   test('classname', () => {
     const className = css({ base: 'baseClass' })
-    type PROPS = GetQuarkProps<typeof className>
+    type PROPS = QuarkProps<typeof className>
     expect(className()).toEqual('baseClass')
   })
   test('variants', () => {
@@ -15,7 +15,7 @@ describe('core', () => {
       },
     })
 
-    type PROPS = GetQuarkProps<typeof className>
+    type PROPS = QuarkProps<typeof className>
 
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red' })).toEqual('baseClass red')
@@ -102,7 +102,7 @@ describe('core', () => {
       },
     })
 
-    type Props = GetQuarkProps<typeof className>
+    type Props = QuarkProps<typeof className>
 
     expect(className({ color: 'blue' })).toEqual('baseClass blue large blueLarge blueNotDrag')
     expect(className({ color: 'red' })).toEqual('baseClass red large')
