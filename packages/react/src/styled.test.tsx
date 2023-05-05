@@ -50,14 +50,14 @@ describe('styled', () => {
 
   test('base', () => {
     const { container } = render(
-      <Container color="red" size="large" className="custom">
+      <Container color="red" size="large" cn={{ custom: true }}>
         <div>Child</div>
       </Container>
     )
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="custom baseClass red large"
+          class="baseClass red large custom"
         >
           <div>
             Child
@@ -125,13 +125,13 @@ describe('styled', () => {
     expect(container).toMatchInlineSnapshot(`
     <div>
       <button
-        class="test baseClass blue small"
+        class="baseClass blue small test"
         type="button"
       >
         hello world
       </button>
       <button
-        class="test baseClass red small"
+        class="baseClass red small test"
         type="button"
       >
         hello ??
@@ -244,7 +244,7 @@ describe('styled', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <button
-          class="custom baseClass red large"
+          class="baseClass red large custom"
           style="top: 0px;"
         >
           <div>
@@ -313,7 +313,7 @@ test('proxy intrinsic elements', () => {
         class="flex items-center justify-center"
       >
         <button
-          class="test baseClass blue small"
+          class="baseClass blue small test"
         >
           hello
         </button>

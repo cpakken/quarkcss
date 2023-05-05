@@ -1,6 +1,4 @@
 import {
-  arrayify,
-  cleanMultiLine,
   createCss,
   css,
   isQuarkCss,
@@ -10,6 +8,7 @@ import {
   QuarkCss,
   QuarkPlugin,
   QuarkVariantsMap,
+  MixedCN,
 } from '@quarkcss/core'
 import {
   ComponentProps,
@@ -30,7 +29,7 @@ export type QuarkComponentPolymorphicProps<
   DefaultComponentProps extends PartialComponentProps<Element>
 > = { as?: As } & Assign<
   Assign<ComponentProps<IsNever<As, Element>>, Partial<DefaultComponentProps>>,
-  PropsOfVariantsMap<VariantsMap, Defaults>
+  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cn?: MixedCN }>
 >
 
 export interface QuarkComponent<
@@ -112,41 +111,33 @@ function _styled<
   configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
   defaultComponentProps?: DefaultProps
 ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps> {
+  const CSS = this
+
   const quark = isQuarkCss(configOrCssOrClassStrings)
     ? (configOrCssOrClassStrings as AnyQuarkCss)
     : !isStrings(configOrCssOrClassStrings)
-    ? this(configOrCssOrClassStrings as QuarkConfig)
-    : null
+    ? CSS(configOrCssOrClassStrings as QuarkConfig)
+    : CSS({ base: configOrCssOrClassStrings as string[] })
 
-  let Component: ForwardRefRenderFunction<any, any>
+  const separateQuarkProps = createSeparateQuarkPropsFn(quark)
 
-  if (quark) {
-    const separateQuarkProps = createSeparateQuarkPropsFn(quark)
-    Component = ({ children, className: _className, as, ...props }, ref) => {
-      const [quarkProps, rest] = separateQuarkProps(props)
+  const Component: ForwardRefRenderFunction<any, any> = (
+    { children, className: _className, cn, as, ...props },
+    ref
+  ) => {
+    const [quarkProps, rest] = separateQuarkProps(props)
 
-      //TODO useMemo on quarkProps
-      const cssClassString = quark(quarkProps as any)
-      const className = _className ? `${_className} ${cssClassString}` : cssClassString
-
-      // @ts-ignore
-      return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
-    }
-  } else {
-    Component = ({ children, className: _className, as, ...props }, ref) => {
-      const baseClass = cleanMultiLine(arrayify(configOrCssOrClassStrings as string | string[]).join(' '))
-
-      const className = _className ? `${_className} ${baseClass}` : baseClass
-
-      // @ts-ignore
-      return createElement(as || element, { ...defaultComponentProps, className, ...props, ref }, children)
-    }
+    const className = quark(quarkProps as any, _className, cn)
+    // @ts-ignore
+    return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
   }
 
-  // @ts-ignore
-  Component.displayName = `Quark(${element.displayName || element.name})`
-  //TODO remove memo
-  return Object.assign(memo(forwardRef(Component)), { CSS: quark || css({}) }) as any
+  const Forwarded = memo(forwardRef(Component))
+  Forwarded.displayName = `Quark(${
+    typeof element === 'string' ? element : element.displayName || element.name
+  })`
+
+  return Object.assign(Forwarded, { CSS: quark || CSS({}) }) as any
 }
 
 const isStrings = (value: any): value is string | string[] => {
@@ -154,9 +145,9 @@ const isStrings = (value: any): value is string | string[] => {
 }
 
 export function createStyled(...plugins: QuarkPlugin[]): Styled {
-  const css = createCss(...plugins)
+  const CSS = createCss(...plugins)
 
-  return new Proxy(_styled.bind(css), {
+  return new Proxy(_styled.bind(CSS), {
     get(target, prop) {
       if (typeof prop !== 'string') throw new Error(`styled: invalid prop \`${prop.toString()}\` `)
 

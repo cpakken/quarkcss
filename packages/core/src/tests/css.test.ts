@@ -33,7 +33,9 @@ describe('core', () => {
       },
     })
 
-    expect(className({ color: 'red', size: 'large' })).toEqual('baseClass baseClass2 baseClass3 red large')
+    expect(className({ color: 'red', size: 'large' }, 'additional', null, { foo: true, bar: null })).toEqual(
+      'baseClass baseClass2 baseClass3 red large additional foo'
+    )
   })
 
   test('defaultVariant', () => {

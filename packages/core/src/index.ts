@@ -49,11 +49,14 @@ export type QuarkConfig<
 
 const $quark = Symbol('quark')
 
+type Falsey = false | null | undefined | 0 | ''
+export type MixedCN = string | { [key: string]: any } | Falsey
+
 export interface QuarkCss<
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
 > {
-  (variantValues?: PropsOfVariantsMap<VariantsMap, Defaults>): string
+  (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCN[]): string
   [$quark]: QuarkConfig<VariantsMap, Defaults>
 }
 
@@ -70,10 +73,13 @@ export function createCss(...plugins: QuarkPlugin[]): typeof css {
 
   return ((config: any) => {
     const quark = css(config)
-    return (props: any) => {
-      const classnames = quark(props)
-      return plugins.reduce((acc, plugin) => plugin(acc), classnames)
-    }
+    return Object.assign(
+      (...props: any) => {
+        const classnames = quark(...props)
+        return plugins.reduce((acc, plugin) => plugin(acc), classnames)
+      },
+      { [$quark]: quark[$quark] }
+    )
   }) as any
 }
 
@@ -89,7 +95,7 @@ export function css<
     return normalize(Object.hasOwn(props, key) ? props[key] : defaults?.[key])
   }
 
-  const _css = (props: any = {}) => {
+  const _css = (props: any = {}, ...rest: MixedCN[]) => {
     const classNames: string[] = baseClass ? [baseClass] : []
 
     //Process Variants
@@ -116,6 +122,20 @@ export function css<
         if (match) {
           const className = variant.value ?? ''
           classNames.push(...arrayify(className))
+        }
+      }
+    }
+
+    //Add Rest
+    for (const className of rest) {
+      if (className) {
+        if (typeof className === 'string') classNames.push(className)
+        else {
+          for (const key in className) {
+            if (className[key]) {
+              classNames.push(key)
+            }
+          }
         }
       }
     }
