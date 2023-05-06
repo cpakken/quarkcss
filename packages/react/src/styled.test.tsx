@@ -7,6 +7,7 @@ import { PropsOf, QuarkComponentVariantProps, styled } from '.'
 
 describe('styled', () => {
   const Container = styled('div', {
+    name: 'Container',
     base: 'baseClass',
     variants: {
       color: { red: 'red', blue: 'blue' },
@@ -18,6 +19,10 @@ describe('styled', () => {
   })
 
   type QuarkVariants = QuarkComponentVariantProps<typeof Container>
+
+  test('displayName', () => {
+    expect(Container.displayName).toBe('Container')
+  })
 
   test('Without Variants', () => {
     const Center = styled('div', {

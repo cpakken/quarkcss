@@ -9,6 +9,7 @@ import {
   QuarkPlugin,
   QuarkVariantsMap,
   MixedCN,
+  getQuarkConfig,
 } from '@quarkcss/core'
 import {
   ComponentProps,
@@ -42,6 +43,7 @@ export interface QuarkComponent<
     props: QuarkComponentPolymorphicProps<As, Element, VariantsMap, Defaults, DefaultComponentProps>
   ): ReactElement<any, any> | null
   CSS: QuarkCss<VariantsMap, Defaults>
+  displayName: string
 }
 
 type IsNever<T, A> = [T] extends [never] ? A : T
@@ -70,7 +72,7 @@ type MaybeQuarkConfig<
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
 > =
-  | QuarkConfig<VariantsMap, Defaults>
+  | (QuarkConfig<VariantsMap, Defaults> & { name?: string })
   | QuarkCss<VariantsMap, Defaults>
   | string[]
   //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
@@ -113,11 +115,22 @@ function _styled<
 ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps> {
   const CSS = this
 
-  const quark = isQuarkCss(configOrCssOrClassStrings)
-    ? (configOrCssOrClassStrings as AnyQuarkCss)
-    : !isStrings(configOrCssOrClassStrings)
-    ? CSS(configOrCssOrClassStrings as QuarkConfig)
-    : CSS({ base: configOrCssOrClassStrings as string[] })
+  let quark: AnyQuarkCss
+  let name: string | undefined
+
+  if (isQuarkCss(configOrCssOrClassStrings)) {
+    //quarkCSS
+    quark = configOrCssOrClassStrings as AnyQuarkCss
+    // @ts-ignore
+    name = getQuarkConfig(quark).name
+  } else if (isStrings(configOrCssOrClassStrings)) {
+    //string
+    quark = CSS({ base: configOrCssOrClassStrings as string[] })
+  } else {
+    //config
+    quark = CSS(configOrCssOrClassStrings as QuarkConfig)
+    name = configOrCssOrClassStrings.name
+  }
 
   const separateQuarkProps = createSeparateQuarkPropsFn(quark)
 
@@ -133,9 +146,8 @@ function _styled<
   }
 
   const Forwarded = memo(forwardRef(Component))
-  Forwarded.displayName = `Quark(${
-    typeof element === 'string' ? element : element.displayName || element.name
-  })`
+  Forwarded.displayName =
+    name || `Quark_${typeof element === 'string' ? element : element.displayName || element.name}`
 
   return Object.assign(Forwarded, { CSS: quark || CSS({}) }) as any
 }
