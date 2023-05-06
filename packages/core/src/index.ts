@@ -111,7 +111,8 @@ export function css<
         let match = true
 
         for (const key in variant) {
-          if (compoundPropKeywords.has(key)) continue
+          // if (compoundPropKeywords.has(key)) continue
+          if (key === 'value') continue
 
           if (getNormalizedProp(props, key) !== normalize(variant[key])) {
             match = false
@@ -168,4 +169,4 @@ export const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? valu
 
 export const cleanMultiLine = (str: string) => str.replace(/\s+/g, ' ').trim()
 
-const compoundPropKeywords = new Set(['value', 'negate'])
+// const compoundPropKeywords = new Set(['value', 'negate'])
