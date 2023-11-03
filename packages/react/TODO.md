@@ -1,16 +1,34 @@
-- just useMemo instead of memo()
-  - for quark variant props
 
 compound variants OR []
 ```tsx
+
+createCompoundResolver(compoundConfig) => (variantProps) => string | null
+const resolveCompound = createCompoundResolver(compoundConfig)
+
+const compoundResolvers = compoundConfigs.map(createCompoundResolver)
+
+const resolveCompounds = (props) : (string | null)[]=> {
+  return compoundResolvers.map((resolver) => resolver(props))
+}
+
+
+//make add className function that takes in string | null and only pushes if not null
+className.push(...resolveCompounds(props))
+
 {
   compound: [
     {
-      size: ['md', 'lg'],
+      size: ['md', 'lg'], //OR
+      
+      '!type': 'button', //negation (if type is !== 'button')
+
       color:  'primary',
       rounded: null //TODO make sure this works
       outline: true, //TODO make sure this works
-      value: 'md-primary'
+
+    //TODO change 'value' to 'apply
+      apply: 'md-primary'
+      // value: 'md-primary'
     }
   ]
 }
@@ -18,6 +36,7 @@ compound variants OR []
 
 ```
 
+**THEMES**
 
 ```tsx
 type QuarkConfig: {
@@ -27,6 +46,10 @@ type QuarkConfig: {
       size: 'md',
       color: 'primary',
     }
+  }
+
+  defaults: {
+    theme: 'highlight' //Set in DEFAULT
   }
 }
 

@@ -3,7 +3,7 @@
 import { render } from '@testing-library/react'
 import { m } from 'framer-motion'
 import React, { ComponentProps, ReactNode } from 'react'
-import { PropsOf, QuarkComponentVariantProps, styled } from '.'
+import { PropsOf, QuarkVariantProps, styled } from '.'
 
 describe('styled', () => {
   const Container = styled('div', {
@@ -18,7 +18,7 @@ describe('styled', () => {
     },
   })
 
-  type QuarkVariants = QuarkComponentVariantProps<typeof Container>
+  type QuarkVariants = QuarkVariantProps<typeof Container>
 
   test('displayName', () => {
     expect(Container.displayName).toBe('Container')
@@ -29,7 +29,7 @@ describe('styled', () => {
       base: 'flex items-center justify-center',
     })
 
-    type QuarkVariants = QuarkComponentVariantProps<typeof Center>
+    type QuarkVariants = QuarkVariantProps<typeof Center>
 
     type Props = ComponentProps<typeof Center>
     type A = Props['disab']
@@ -93,7 +93,7 @@ describe('styled', () => {
       <button {...rest}>{`${children} ${append}`}</button>
     )
 
-    type QuarkVariants = QuarkComponentVariantProps<typeof StyledCustomButton>
+    type QuarkVariants = QuarkVariantProps<typeof StyledCustomButton>
     type Props = ComponentProps<typeof StyledCustomButton>
     type P = PropsOf<typeof StyledCustomButton>
     // type PB = P['style']
@@ -238,7 +238,7 @@ describe('styled', () => {
       style: { top: 0 },
     })
 
-    type QuarkVariants = QuarkComponentVariantProps<typeof Composed>
+    type QuarkVariants = QuarkVariantProps<typeof Composed>
 
     const { container } = render(
       <Composed color="red" size="large" className="custom">
@@ -265,7 +265,7 @@ test('className string', () => {
   const Center = styled('div', ['flex items-center', 'justify-center'], { 'aria-label': 'center' })
   // const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
 
-  type QuarkVariants = QuarkComponentVariantProps<typeof Center>
+  type QuarkVariants = QuarkVariantProps<typeof Center>
 
   const { container } = render(
     <Center>
@@ -296,7 +296,7 @@ test('proxy intrinsic elements', () => {
     },
   })
 
-  type QuarkVariants = QuarkComponentVariantProps<typeof Button>
+  type QuarkVariants = QuarkVariantProps<typeof Button>
 
   const Center = styled.div(`
     flex 

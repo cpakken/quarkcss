@@ -16,8 +16,15 @@ export type GetBooleanPropKeys<VariantsMap> = {
 }[keyof VariantsMap]
 
 export type PartialPropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
-  [Key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[Key] & string>
+  //if not partial, non-variant keys are rejected as desired
+  //partial allows for partial props to be passed in and no DX variant key recommendation
+  //TODO how to make parital while reject other keys?
+
+  [Key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[Key]>
+  // [Key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[Key]>
+  // [Key in keyof VariantsMap]: TrueStringToBoolean<keyof VariantsMap[Key]>
 }
+
 type Flatten<T> = T extends Record<any, any> ? { [P in keyof T]: T[P] } : T
 type PartialSubset<T, K extends keyof T> = Flatten<Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>>>
 
@@ -28,7 +35,7 @@ export type PropsOfVariantsMap<
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
 > = PartialSubset<
   {
-    [Key in keyof VariantsMap]: TrueStringToBoolean<keyof VariantsMap[Key] & string>
+    [Key in keyof VariantsMap]: TrueStringToBoolean<keyof VariantsMap[Key]>
   },
   (keyof Defaults | GetBooleanPropKeys<VariantsMap>) & string
 >
@@ -50,11 +57,11 @@ export type QuarkConfig<
 const $quark = Symbol('quark')
 
 type Falsey = false | null | undefined | 0 | ''
-export type MixedCN = string | { [key: string]: any } | Falsey
+export type MixedCN = string | string[] | { [key: string]: any } | Falsey
 
 export interface QuarkCss<
-  VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+  VariantsMap extends QuarkVariantsMap = {},
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
 > {
   (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCN[]): string
   [$quark]: QuarkConfig<VariantsMap, Defaults>
@@ -83,13 +90,28 @@ export function createCss(...plugins: QuarkPlugin[]): typeof css {
   }) as any
 }
 
+//Overloading css() ruins type inference, so have to do it this way
+type MaybeQuarkConfig<
+  VariantsMap extends QuarkVariantsMap,
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+> =
+  | (QuarkConfig<VariantsMap, Defaults> & { name?: string })
+  | string[]
+  //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
+  | (string & { quark?: VariantsMap })
+
 export function css<
   VariantsMap extends QuarkVariantsMap = {},
   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
->(config: QuarkConfig<VariantsMap, Defaults>): QuarkCss<VariantsMap, Defaults> {
-  const { base, variants, defaults, compound } = config as any
+>(configOrString: MaybeQuarkConfig<VariantsMap, Defaults>): QuarkCss<VariantsMap, Defaults> {
+  const config =
+    typeof configOrString === 'string' || Array.isArray(configOrString)
+      ? { base: configOrString }
+      : configOrString
+
+  const { base, variants, defaults, compound } = config
   const baseClass = Array.isArray(base) ? base.join(' ') : base
-  const variantsEntries = Object.entries(variants || {}) as any
+  const variantsEntries = variants && Object.entries(variants)
 
   const getNormalizedProp = (props: any, key: string) => {
     return normalize(Object.hasOwn(props, key) ? props[key] : defaults?.[key])
@@ -99,9 +121,11 @@ export function css<
     const classNames: string[] = baseClass ? [baseClass] : []
 
     //Process Variants
-    for (const [key, map] of variantsEntries) {
-      const className = map[getNormalizedProp(props, key)]
-      if (className) classNames.push(...arrayify(className))
+    if (variantsEntries) {
+      for (const [key, map] of variantsEntries) {
+        const className = map[getNormalizedProp(props, key)]
+        if (className) classNames.push(...arrayify(className))
+      }
     }
 
     //Process Compound Variants
@@ -114,7 +138,7 @@ export function css<
           // if (compoundPropKeywords.has(key)) continue
           if (key === 'value') continue
 
-          if (getNormalizedProp(props, key) !== normalize(variant[key])) {
+          if (getNormalizedProp(props, key) !== normalize(variant[key] as any)) {
             match = false
             break
           }
@@ -131,6 +155,7 @@ export function css<
     for (const className of rest) {
       if (className) {
         if (typeof className === 'string') classNames.push(className)
+        else if (Array.isArray(className)) classNames.push(...className)
         else {
           for (const key in className) {
             if (className[key]) {
@@ -149,14 +174,16 @@ export function css<
   })
 }
 
-export function isQuarkCss(value: any): boolean {
+export const isQuarkCss = (value: any): boolean => {
   return !!value?.[$quark]
 }
 
-export function getQuarkConfig<
+export const getQuarkConfig = <
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
->(quark: QuarkCss<VariantsMap, Defaults>): QuarkConfig<VariantsMap, Defaults> {
+>(
+  quark: QuarkCss<VariantsMap, Defaults>
+): QuarkConfig<VariantsMap, Defaults> => {
   return quark[$quark]
 }
 

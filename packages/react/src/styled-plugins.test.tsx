@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 
-import React from "react";
-import { twMerge } from 'tailwind-merge';
-import { createStyled } from ".";
+import React from 'react'
+import { twMerge } from 'tailwind-merge'
+import { createStyled } from './styled'
 import { render } from '@testing-library/react'
 
 describe('styled with plugins', () => {
@@ -38,5 +38,4 @@ describe('styled with plugins', () => {
       </div>
     `)
   })
-
-});
+})

@@ -9,7 +9,7 @@ export default defineConfig({
   minifyIdentifiers: true,
   minifySyntax: true,
 
-  sourcemap: true,
+  // sourcemap: true,
   dts: true,
   clean: true,
 })

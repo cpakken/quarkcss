@@ -14,7 +14,7 @@
 
 **What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
 
-- Create fully-typed React styled components using atomic css classes.
+- Create fully-typed React-Styled components using atomic css classes.
 - Organize your atomic css with variants props 
   - Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api to generate atomic css classes
 - Declare default props for your base component
@@ -49,6 +49,7 @@ import { styled } from '@quarkcss/react'
 
 //Basic
 const StyledButton = styled('button', {
+  name: 'DisplayName/Button', //react-dev-tools display name (default Quark_{element.(displayName || name || tag)})
   base: 'bg-red-500',
   variants: {
     size: {

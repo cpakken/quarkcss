@@ -5,6 +5,11 @@ describe('core', () => {
     const className = css({ base: 'baseClass' })
     type PROPS = QuarkProps<typeof className>
     expect(className()).toEqual('baseClass')
+
+    const withoutConfig = css(['baseClass'])
+    expect(withoutConfig({}, 'additional', null, { foo: true, bar: null })).toEqual(
+      'baseClass additional foo'
+    )
   })
   test('variants', () => {
     const className = css({
@@ -47,6 +52,7 @@ describe('core', () => {
       },
       defaults: {
         color: 'blue',
+        // asdf: 'this shoould type error',
       },
     })
 
