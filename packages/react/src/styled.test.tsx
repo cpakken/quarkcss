@@ -2,8 +2,10 @@
 
 import { render } from '@testing-library/react'
 import { m } from 'framer-motion'
-import React, { ComponentProps, ReactNode } from 'react'
-import { PropsOf, QuarkVariantProps, styled } from '.'
+import React, { ComponentProps } from 'react'
+import { QuarkVariantProps, styled } from '.'
+
+type Prettify<T> = { [K in keyof T]: T[K] } & {}
 
 describe('styled', () => {
   const Container = styled('div', {
@@ -27,12 +29,18 @@ describe('styled', () => {
   test('Without Variants', () => {
     const Center = styled.div({
       base: 'flex items-center justify-center',
+      // variants: {
+      //   color: { red: 'red', blue: 'blue' },
+      //   size: { small: 'small', large: 'large' },
+      // }
     })
 
     type QuarkVariants = QuarkVariantProps<typeof Center>
 
-    type Props = ComponentProps<typeof Center>
-    type A = Props['disab']
+    type Props = Prettify<ComponentProps<typeof Center>>
+    // type Props = Prettify<PropsOf<typeof Center>>
+
+    type A = Props['color']
 
     const { container } = render(
       <Center>
@@ -99,7 +107,7 @@ describe('styled', () => {
 
     type QuarkVariants = QuarkVariantProps<typeof StyledCustomButton>
     type Props = ComponentProps<typeof StyledCustomButton>
-    type P = PropsOf<typeof StyledCustomButton>
+    // type P = PropsOf<typeof StyledCustomButton>
     // type PB = P['style']
     // type PB = P['style']
 
@@ -154,23 +162,12 @@ describe('styled', () => {
     // const Styled = styled('div', {})
 
     const StyledMotion = styled(m.div, {}, { animate: {} })
-    const StyledDiv = styled('div', {})
-    const Custom = ({ children, style }: { children: ReactNode; style: string; crazy: number }) => {
-      return (
-        <div>
-          {children} {style}
-        </div>
-      )
-    }
 
     const { container } = render(
       <div>
         <StyledMotion style={{ x: 0 }}>
           <div>Testing</div>
         </StyledMotion>
-        <StyledDiv as={m.div} style={{ x: 0 }}>
-          <div>Testing</div>
-        </StyledDiv>
       </div>
     )
 
@@ -185,54 +182,7 @@ describe('styled', () => {
               Testing
             </div>
           </div>
-          <div
-            class=""
-            style="transform: none;"
-          >
-            <div>
-              Testing
-            </div>
-          </div>
         </div>
-      </div>
-    `)
-  })
-
-  test('polymorphic', () => {
-    const Center = styled('div', {
-      base: 'flex items-center justify-center',
-    })
-
-    const { container } = render(
-      <>
-        <Center as="a" href="/">
-          <div>Testing</div>
-        </Center>
-        <Center as="button" disabled>
-          <div>Testing</div>
-        </Center>
-        {/* <div disabled>d</div> */}
-      </>
-    )
-
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        <a
-          class="flex items-center justify-center"
-          href="/"
-        >
-          <div>
-            Testing
-          </div>
-        </a>
-        <button
-          class="flex items-center justify-center"
-          disabled=""
-        >
-          <div>
-            Testing
-          </div>
-        </button>
       </div>
     `)
   })

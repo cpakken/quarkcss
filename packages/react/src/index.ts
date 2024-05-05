@@ -2,9 +2,9 @@ export { styled, createStyled, css } from './styled'
 
 export type {
   QuarkVariantProps,
-  PropsOf,
+  // PropsOf,
   PropsWithoutRefOf,
   QuarkComponent,
-  QuarkComponentPolymorphicProps,
+  QuarkComponentProps,
   AnyQuarkComponent,
 } from './styled'
