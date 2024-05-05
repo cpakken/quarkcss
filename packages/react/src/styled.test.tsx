@@ -25,7 +25,7 @@ describe('styled', () => {
   })
 
   test('Without Variants', () => {
-    const Center = styled('div', {
+    const Center = styled.div({
       base: 'flex items-center justify-center',
     })
 
@@ -89,7 +89,11 @@ describe('styled', () => {
   })
 
   test('HOC', () => {
-    const CustomButton = ({ children, append, ...rest }: ComponentProps<'button'> & { append: string }) => (
+    const CustomButton = ({
+      children,
+      append,
+      ...rest
+    }: ComponentProps<'button'> & { append: string }) => (
       <button {...rest}>{`${children} ${append}`}</button>
     )
 

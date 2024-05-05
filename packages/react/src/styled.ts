@@ -19,9 +19,11 @@ import {
   ReactElement,
   createElement,
   forwardRef,
-  memo,
+  useMemo,
 } from 'react'
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
+import { useCompare } from './shallow-compare'
+import { shallowEqualAll } from './shallow-compare'
 
 export type QuarkComponentPolymorphicProps<
   As extends ElementType | never,
@@ -89,35 +91,92 @@ export type PartialComponentProps<Element extends ElementType> = Partial<Compone
 
 type AnyQuarkCss = QuarkCss<any, any>
 
-type MaybeQuarkConfig<
-  VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
-> =
-  | (QuarkConfig<VariantsMap, Defaults> & { name?: string })
-  | QuarkCss<VariantsMap, Defaults>
-  | string[]
-  //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
-  | (string & { quark?: VariantsMap })
+export type AnyQuarkComponent = QuarkComponent<any, any, any, any>
 
-export type StyledFn = <
-  Element extends ElementType,
-  VariantsMap extends QuarkVariantsMap = {},
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-  DefaultProps extends PartialComponentProps<Element> = {}
->(
-  element: Element,
-  configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
-  defaultComponentProps?: DefaultProps
-) => QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
+//BEFORE THE NOT OVERLOADED VERSION
 
-export type Styled = StyledFn & {
+// type MaybeQuarkConfig<
+//   VariantsMap extends QuarkVariantsMap,
+//   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+// > =
+//   | (QuarkConfig<VariantsMap, Defaults> & { name?: string })
+//   | QuarkCss<VariantsMap, Defaults>
+//   | string[]
+//   //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
+//   | (string & { quark?: VariantsMap })
+
+// export type StyledFn = <
+//   Element extends ElementType,
+//   VariantsMap extends QuarkVariantsMap = {},
+//   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+//   DefaultProps extends PartialComponentProps<Element> = {}
+// >(
+//   element: Element,
+//   configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
+//   defaultComponentProps?: DefaultProps
+// ) => QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
+
+// export type Styled = StyledFn & {
+//   [K in keyof JSX.IntrinsicElements]: {
+//     <
+//       VariantsMap extends QuarkVariantsMap = {},
+//       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+//       DefaultProps extends PartialComponentProps<K> = {}
+//     >(
+//       configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
+//       defaultComponentProps?: DefaultProps
+//     ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
+//   }
+// }
+
+export type StyledFnOverload = {
+  <Element extends ElementType, DefaultProps extends PartialComponentProps<Element> = {}>(
+    element: Element,
+    baseCSS: string | string[],
+    defaultComponentProps?: DefaultProps
+  ): QuarkComponent<Element, {}, {}, DefaultProps>
+  <
+    Element extends ElementType,
+    VariantsMap extends QuarkVariantsMap = {},
+    Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+    DefaultProps extends PartialComponentProps<Element> = {}
+  >(
+    element: Element,
+    quarkCSS: QuarkCss<VariantsMap, Defaults>,
+    defaultComponentProps?: DefaultProps
+  ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
+  <
+    Element extends ElementType,
+    VariantsMap extends QuarkVariantsMap = {},
+    Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+    DefaultProps extends PartialComponentProps<Element> = {}
+  >(
+    element: Element,
+    config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
+    defaultComponentProps?: DefaultProps
+  ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
+}
+
+export type Styled = StyledFnOverload & {
   [K in keyof JSX.IntrinsicElements]: {
+    <DefaultProps extends PartialComponentProps<K> = {}>(
+      baseCSS: string | string[],
+      defaultComponentProps?: DefaultProps
+    ): QuarkComponent<K, {}, {}, DefaultProps>
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
       DefaultProps extends PartialComponentProps<K> = {}
     >(
-      configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
+      config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
+      defaultComponentProps?: DefaultProps
+    ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
+    <
+      VariantsMap extends QuarkVariantsMap = {},
+      Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+      DefaultProps extends PartialComponentProps<K> = {}
+    >(
+      quarkCSS: QuarkCss<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
     ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
   }
@@ -131,7 +190,8 @@ function _styled<
 >(
   this: typeof css,
   element: Element,
-  configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
+  // configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
+  configOrCssOrClassStrings: QuarkCss<VariantsMap, Defaults>,
   defaultComponentProps?: DefaultProps
 ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps> {
   const CSS = this
@@ -158,13 +218,24 @@ function _styled<
   ) => {
     const [quarkProps, rest] = separateQuarkProps(props)
 
-    const className = quark(quarkProps as any, _className, cn)
+    // const className = quark(quarkProps as any, _className, cn)
+    const className = useMemo(
+      () => quark(quarkProps as any, _className, cn),
+      useCompare([quarkProps, _className, cn], shallowEqualAll)
+    )
+
     // @ts-ignore
-    return createElement(as || element, { ...defaultComponentProps, className, ...rest, ref }, children)
+    return createElement(
+      as || element,
+      { ...defaultComponentProps, className, ...rest, ref },
+      children
+    )
   }
 
-  const Forwarded = memo(forwardRef(Component))
-  Forwarded.displayName = name || `Quark_${isString(element) ? element : element.displayName || element.name}`
+  // const Forwarded = memo(forwardRef(Component))
+  const Forwarded = forwardRef(Component)
+  Forwarded.displayName =
+    name || `Quark_${isString(element) ? element : element.displayName || element.name}`
 
   return Object.assign(Forwarded, { CSS: quark || CSS({}) }) as any
 }

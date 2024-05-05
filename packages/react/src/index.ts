@@ -6,4 +6,5 @@ export type {
   PropsWithoutRefOf,
   QuarkComponent,
   QuarkComponentPolymorphicProps,
+  AnyQuarkComponent,
 } from './styled'
