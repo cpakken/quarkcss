@@ -19,11 +19,12 @@ import {
   ReactElement,
   createElement,
   forwardRef,
-  useMemo,
 } from 'react'
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
-import { useCompare } from './shallow-compare'
-import { shallowEqualAll } from './shallow-compare'
+
+//@ts-expect-error
+import createUseQuarkMemo from './shallow-compare-common'
+// import { createUseQuarkMemo } from './shallow-compare'
 
 export type QuarkComponentProps<
   Element extends ElementType,
@@ -87,7 +88,7 @@ export type PropsWithoutRefOf<COMP extends ElementType> = COMP extends QuarkComp
 
 export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
 
-type AnyQuarkCss = QuarkCss<any, any>
+export type AnyQuarkCss = QuarkCss<any, any>
 
 export type AnyQuarkComponent = QuarkComponent<any, any, any, any>
 
@@ -204,11 +205,19 @@ function _styled<
     name = getQuarkConfig(quark).name
   } else {
     quark = CSS(configOrCssOrClassStrings as QuarkConfig | string | string[])
+
     // @ts-ignore
     name = configOrCssOrClassStrings.name
   }
 
   const separateQuarkProps = createSeparateQuarkPropsFn(quark)
+
+  const _CSS = quark || CSS({})
+
+  if (createUseQuarkMemo) {
+    // Client Side Rendering
+    quark = createUseQuarkMemo(quark)
+  }
 
   const Component: ForwardRefRenderFunction<any, any> = (
     { children, className: _className, cn, ...props },
@@ -216,11 +225,7 @@ function _styled<
   ) => {
     const [quarkProps, rest] = separateQuarkProps(props)
 
-    // const className = quark(quarkProps as any, _className, cn)
-    const className = useMemo(
-      () => quark(quarkProps as any, _className, cn),
-      useCompare([quarkProps, _className, cn], shallowEqualAll)
-    )
+    const className = quark(quarkProps as any, _className, cn)
 
     // @ts-ignore
     return createElement(element, { ...defaultComponentProps, className, ...rest, ref }, children)
@@ -231,7 +236,7 @@ function _styled<
   Forwarded.displayName =
     name || `Quark_${isString(element) ? element : element.displayName || element.name}`
 
-  return Object.assign(Forwarded, { CSS: quark || CSS({}) }) as any
+  return Object.assign(Forwarded, { CSS: _CSS }) as any
 }
 
 export function createStyled(...plugins: QuarkPlugin[]): Styled {
