@@ -212,7 +212,7 @@ function _styled<
 
   const _CSS = quark || CSS({})
 
-  if (typeof window !== 'undefined') {
+  if (isClient) {
     // Client Side Rendering
     quark = createUseQuarkMemo(quark)
   }
@@ -257,3 +257,5 @@ export { css, isQuarkCss }
 export type { QuarkConfig, QuarkCss, QuarkVariantsMap }
 
 const isString = (value: any): value is string => typeof value === 'string'
+
+const isClient = typeof window !== 'undefined'
