@@ -1,6 +1,6 @@
 // https://www.npmjs.com/package/react-addons-shallow-compare?activeTab=code
 
-import { useMemo, useRef } from 'react'
+import React from 'react'
 import { AnyQuarkCss } from './styled'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
@@ -38,8 +38,8 @@ export const shallowEqual = (objA: any, objB: any) => {
 
 //https://github.com/kotarella1110/use-custom-compare/blob/master/src/useCustomCompareMemo.ts
 export const useCompare = <T>(value: T, comparer: (next: T, prev: T | undefined) => boolean) => {
-  const ref = useRef<T | undefined>()
-  const prev = useRef<T | undefined>(ref.current)
+  const ref = React.useRef<T | undefined>()
+  const prev = React.useRef<T | undefined>(ref.current)
 
   if (prev.current === undefined || !comparer(prev.current, value)) {
     ref.current = value
@@ -54,7 +54,7 @@ export const shallowEqualAll = (deps: any[]): boolean => deps.every(shallowEqual
 
 export const createUseQuarkMemo = (quark: AnyQuarkCss): AnyQuarkCss => {
   return ((quarkProps: any, className: string, cn: any) => {
-    return useMemo(
+    return React.useMemo(
       () => quark(quarkProps as any, className, cn),
       useCompare([quarkProps, className, cn], shallowEqualAll)
     )

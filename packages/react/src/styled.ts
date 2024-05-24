@@ -22,9 +22,7 @@ import {
 } from 'react'
 import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
 
-//@ts-expect-error
-import createUseQuarkMemo from './shallow-compare-common'
-// import { createUseQuarkMemo } from './shallow-compare'
+import { createUseQuarkMemo } from './shallow-compare'
 
 export type QuarkComponentProps<
   Element extends ElementType,
@@ -214,7 +212,7 @@ function _styled<
 
   const _CSS = quark || CSS({})
 
-  if (createUseQuarkMemo) {
+  if (typeof window !== 'undefined') {
     // Client Side Rendering
     quark = createUseQuarkMemo(quark)
   }
