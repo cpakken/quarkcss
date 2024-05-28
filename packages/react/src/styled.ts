@@ -10,6 +10,7 @@ import {
   css,
   getQuarkConfig,
   isQuarkCss,
+  AnyQuarkCss,
 } from '@quarkcss/core'
 import {
   ComponentProps,
@@ -86,7 +87,7 @@ export type PropsWithoutRefOf<COMP extends ElementType> = COMP extends QuarkComp
 
 export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
 
-export type AnyQuarkCss = QuarkCss<any, any>
+// export type AnyQuarkCss = QuarkCss<any, any>
 
 export type AnyQuarkComponent = QuarkComponent<any, any, any, any>
 
@@ -187,7 +188,6 @@ function _styled<
 >(
   this: typeof css,
   element: Element,
-  // configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
   configOrCssOrClassStrings: QuarkCss<VariantsMap, Defaults>,
   defaultComponentProps?: DefaultProps
 ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps> {

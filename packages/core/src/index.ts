@@ -26,7 +26,9 @@ export type PartialPropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
 }
 
 type Flatten<T> = T extends Record<any, any> ? { [P in keyof T]: T[P] } : T
-type PartialSubset<T, K extends keyof T> = Flatten<Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>>>
+type PartialSubset<T, K extends keyof T> = Flatten<
+  Pick<T, Exclude<keyof T, K>> & Partial<Pick<T, K>>
+>
 
 //Props are required unless they are in the defaults or are a boolean variant
 //(has variant prop 'null' | 'true')
@@ -66,6 +68,8 @@ export interface QuarkCss<
   (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCN[]): string
   [$quark]: QuarkConfig<VariantsMap, Defaults>
 }
+
+export type AnyQuarkCss = QuarkCss<any, any>
 
 export type QuarkProps<Quark> = Quark extends QuarkCss<infer VariantsMap, infer Defaults>
   ? PropsOfVariantsMap<VariantsMap, Defaults>
