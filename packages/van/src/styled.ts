@@ -13,102 +13,125 @@ import {
   isQuarkCss,
 } from '@quarkcss/core'
 
-import { type ComponentProps, type ValidComponent, mergeProps, splitProps } from 'solid-js'
-import type { JSX } from 'solid-js/jsx-runtime'
+import type { ChildDom, PropsWithKnownKeys, StateView, TagFunc } from 'vanjs-core'
+import van from 'vanjs-core'
+import { val } from './val'
 
-import h from 'solid-js/h'
+// export type VanElement = keyof HTMLElementTagNameMap | TagFunc<Element>
+export type VanElement = keyof HTMLElementTagNameMap
 
-export type PartialComponentProps<Element extends ValidComponent> = Partial<ComponentProps<Element>>
+export type BaseElementOf<T> = T extends keyof HTMLElementTagNameMap
+  ? HTMLElementTagNameMap[T]
+  : never
+
+// export type BaseElementOf<T> = T extends keyof HTMLElementTagNameMap
+//   ? TagFunc<HTMLElementTagNameMap[T]>
+//   : T extends TagFunc<infer E>
+//   ? E
+//   : never
+
+// export type VanProps<T> = PropsWithKnownKeys<BaseElementOf<T>>
+export type VanProps<T> = PropsWithKnownKeys<BaseElementOf<T>>
 
 type Assign<A, B> = Omit<A, keyof B> & B
 
+type ValueProp<T> = T | StateView<T> | (() => T)
+
+type ValueProps<T> = {
+  [K in keyof T]: ValueProp<T[K]>
+}
+
 export type QuarkComponentProps<
-  Element extends ValidComponent,
+  Element extends VanElement,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
+  DefaultComponentProps extends VanProps<Element>
 > = Assign<
-  Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
-  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cn?: MixedCN }>
+  // Assign<VanProps<Element>, Partial<DefaultComponentProps>>,
+  Assign<VanProps<Element>, DefaultComponentProps>,
+  Assign<ValueProps<PropsOfVariantsMap<VariantsMap, Defaults>>, { cn?: ValueProp<MixedCN> }>
 >
 
-export interface QuarkSolidComponent<
-  Element extends ValidComponent,
+export interface QuarkVanComponent<
+  Element extends VanElement,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
+  DefaultComponentProps extends VanProps<Element>
 > {
-  (props: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps>): JSX.Element
+  (
+    first?: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps> | ChildDom,
+    ...rest: readonly ChildDom[]
+  ): BaseElementOf<Element>
   CSS: QuarkCss<VariantsMap, Defaults>
   displayName: string
 }
 
 export type StyledFnOverload = {
-  <Element extends ValidComponent, DefaultProps extends PartialComponentProps<Element> = {}>(
+  <Element extends VanElement, DefaultProps extends VanProps<Element> = {}>(
     element: Element,
     baseCSS: string | string[],
     defaultComponentProps?: DefaultProps
-  ): QuarkSolidComponent<Element, {}, {}, DefaultProps>
+  ): QuarkVanComponent<Element, {}, {}, DefaultProps>
 
   <
-    Element extends ValidComponent,
+    Element extends VanElement,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {}
+    DefaultProps extends VanProps<Element> = {}
   >(
     element: Element,
     quarkCSS: QuarkCss<VariantsMap, Defaults>,
     defaultComponentProps?: DefaultProps
-  ): QuarkSolidComponent<Element, VariantsMap, Defaults, DefaultProps>
+  ): QuarkVanComponent<Element, VariantsMap, Defaults, DefaultProps>
 
   <
-    Element extends ValidComponent,
+    Element extends VanElement,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {}
+    DefaultProps extends VanProps<Element> = {}
   >(
     element: Element,
     config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
     defaultComponentProps?: DefaultProps
-  ): QuarkSolidComponent<Element, VariantsMap, Defaults, DefaultProps>
+  ): QuarkVanComponent<Element, VariantsMap, Defaults, DefaultProps>
 }
 
 export type Styled = StyledFnOverload & {
-  [K in keyof JSX.IntrinsicElements]: {
-    <DefaultProps extends PartialComponentProps<K> = {}>(
+  [K in keyof HTMLElementTagNameMap]: {
+    <DefaultProps extends VanProps<K> = {}>(
       baseCSS: string | string[],
       defaultComponentProps?: DefaultProps
-    ): QuarkSolidComponent<K, {}, {}, DefaultProps>
+    ): QuarkVanComponent<K, {}, {}, DefaultProps>
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {}
+      DefaultProps extends VanProps<K> = {}
     >(
       config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
       defaultComponentProps?: DefaultProps
-    ): QuarkSolidComponent<K, VariantsMap, Defaults, DefaultProps>
+    ): QuarkVanComponent<K, VariantsMap, Defaults, DefaultProps>
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {}
+      DefaultProps extends VanProps<K> = {}
     >(
       quarkCSS: QuarkCss<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
-    ): QuarkSolidComponent<K, VariantsMap, Defaults, DefaultProps>
+    ): QuarkVanComponent<K, VariantsMap, Defaults, DefaultProps>
   }
 }
 
 function _styled<
-  Element extends ValidComponent,
+  Element extends VanElement,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultProps extends PartialComponentProps<Element> = {}
+  DefaultProps extends VanProps<Element> = {}
 >(
   this: typeof css,
   element: Element,
   configOrCssOrClassStrings: QuarkCss<VariantsMap, Defaults>,
   defaultComponentProps?: DefaultProps
-): QuarkSolidComponent<Element, VariantsMap, Defaults, DefaultProps> {
+): QuarkVanComponent<Element, VariantsMap, Defaults, DefaultProps> {
   const CSS = this
 
   let quark: AnyQuarkCss
@@ -128,28 +151,43 @@ function _styled<
 
   // const separateQuarkProps = createSeparateQuarkPropsFn(quark)
 
-  const variantProps = Object.keys(getQuarkConfig(quark).variants || {}) as any
+  const { variants } = getQuarkConfig(quark)
 
-  const separateQuarkProps = (props: any[]) => {
-    return splitProps(props, ['class', 'cn'] as any, variantProps)
+  const separateQuarkProps = (props: Record<any, any>): [any, any] => {
+    const quarkProps = {} as any
+    const rest = {} as any
+
+    if (!variants) return [quarkProps, props] as any
+
+    for (const propKey in props) {
+      if (Object.hasOwn(variants, propKey)) {
+        quarkProps[propKey] = props[propKey]
+      } else {
+        rest[propKey] = props[propKey]
+      }
+    }
+
+    return [quarkProps, rest] as const
   }
 
   const _CSS = quark || CSS({})
 
-  const Component = (props: any) => {
-    const [cl, quarkProps, rest] = separateQuarkProps(props)
+  const tagFunc = van.tags[element] as unknown as TagFunc<Element>
 
-    const className = () => quark(quarkProps, cl.class, cl.cn)
+  const Component = (first: any, ...children: any[]) => {
+    const [_quarkProps, { cn, class: _className, ...rest }] = separateQuarkProps(first || {})
 
-    const merged = mergeProps(defaultComponentProps, { class: className }, rest)
+    const className = () => {
+      const quarkProps = {} as any
+      for (const key in _quarkProps) {
+        quarkProps[key] = val(_quarkProps[key])
+      }
 
-    return h(element, merged)
+      return quark(quarkProps, val(_className), val(cn))
+    }
+
+    return tagFunc({ ...defaultComponentProps, class: className, ...rest }, ...children)
   }
-
-  // const Forwarded = forwardRef(Component)
-  // Forwarded.displayName =
-  // Forwarded.displayName = name || `Quark_${isString(element) ? element : element.displayName || element.name}`
-  // return Object.assign(Forwarded, { CSS: _CSS }) as any
 
   return Object.assign(Component, { CSS: _CSS }) as any
 }

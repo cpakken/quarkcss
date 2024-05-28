@@ -1,20 +1,64 @@
 // @vitest-environment happy-dom
 import { render } from '@solidjs/testing-library'
 import { styled } from './styled'
+import { createSignal } from 'solid-js'
 
-test('basic', () => {
-  const { container } = render(() => <div>hello</div>)
-  expect(container.innerHTML).toBe('<div>hello</div>')
-})
+const html = String
 
-test.only('styled', () => {
+test('styled', () => {
   const Bold = styled.div('text-bold')
   const { container } = render(() => (
     <Bold>
       <span>hello</span>
-      <span>world</span>
     </Bold>
   ))
 
-  console.log(container.innerHTML)
+  expect(container.innerHTML).toBe(html`<div class="text-bold"><span>hello</span></div>`)
+})
+
+test('styled with variants', () => {
+  const Button = styled.button({
+    variants: {
+      size: {
+        sm: 'text-sm',
+        md: 'text-md',
+        lg: 'text-lg',
+      },
+    },
+  })
+
+  const { container } = render(() => <Button size="lg">Click me</Button>)
+
+  expect(container.innerHTML).toBe(html`<button class="text-lg">Click me</button>`)
+})
+
+test('styled with variants using signal', () => {
+  const Button = styled.button({
+    variants: {
+      size: {
+        null: '',
+        sm: 'text-sm',
+        md: 'text-md',
+        lg: 'text-lg',
+      },
+    },
+  })
+
+  const [size, setSize] = createSignal<'sm' | 'md' | 'lg' | null>('sm')
+
+  const [content, setContent] = createSignal('Click me')
+
+  const { container } = render(() => <Button size={size()}>{content()}</Button>)
+
+  expect(container.innerHTML).toBe(html`<button class="text-sm">Click me</button>`)
+  setSize('md')
+  expect(container.innerHTML).toBe(html`<button class="text-md">Click me</button>`)
+  setSize('lg')
+  expect(container.innerHTML).toBe(html`<button class="text-lg">Click me</button>`)
+
+  setContent('Click me again')
+  expect(container.innerHTML).toBe(html`<button class="text-lg">Click me again</button>`)
+
+  setSize(null)
+  expect(container.innerHTML).toBe(html`<button class="">Click me again</button>`)
 })
