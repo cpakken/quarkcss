@@ -29,7 +29,7 @@ export type QuarkComponentProps<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
+  DefaultComponentProps extends PartialComponentProps<Element>,
 > = Assign<
   Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
   Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cn?: MixedCN }>
@@ -39,7 +39,7 @@ export type QuarkComponentPropsWithoutRef<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
+  DefaultComponentProps extends PartialComponentProps<Element>,
 > = Assign<
   Assign<ComponentPropsWithoutRef<Element>, Partial<DefaultComponentProps>>,
   Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cn?: MixedCN }>
@@ -49,12 +49,11 @@ export interface QuarkComponent<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
+  DefaultComponentProps extends PartialComponentProps<Element>,
 > {
-  (props: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps>): ReactElement<
-    any,
-    any
-  > | null
+  (
+    props: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps>
+  ): ReactElement<any, any> | null
   CSS: QuarkCss<VariantsMap, Defaults>
   displayName: string
 }
@@ -137,7 +136,7 @@ export type StyledFnOverload = {
     Element extends ElementType,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {}
+    DefaultProps extends PartialComponentProps<Element> = {},
   >(
     element: Element,
     quarkCSS: QuarkCss<VariantsMap, Defaults>,
@@ -147,7 +146,7 @@ export type StyledFnOverload = {
     Element extends ElementType,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {}
+    DefaultProps extends PartialComponentProps<Element> = {},
   >(
     element: Element,
     config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
@@ -155,7 +154,7 @@ export type StyledFnOverload = {
   ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
 }
 
-export type Styled = StyledFnOverload & {
+export type StyledProxy = {
   [K in keyof JSX.IntrinsicElements]: {
     <DefaultProps extends PartialComponentProps<K> = {}>(
       baseCSS: string | string[],
@@ -164,7 +163,7 @@ export type Styled = StyledFnOverload & {
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {}
+      DefaultProps extends PartialComponentProps<K> = {},
     >(
       config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
       defaultComponentProps?: DefaultProps
@@ -172,7 +171,7 @@ export type Styled = StyledFnOverload & {
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {}
+      DefaultProps extends PartialComponentProps<K> = {},
     >(
       quarkCSS: QuarkCss<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
@@ -180,11 +179,13 @@ export type Styled = StyledFnOverload & {
   }
 }
 
+export type Styled = StyledFnOverload & StyledProxy
+
 function _styled<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultProps extends PartialComponentProps<Element> = {}
+  DefaultProps extends PartialComponentProps<Element> = {},
 >(
   this: typeof css,
   element: Element,

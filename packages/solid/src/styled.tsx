@@ -14,9 +14,8 @@ import {
 } from '@quarkcss/core'
 
 import { type ComponentProps, type ValidComponent, mergeProps, splitProps } from 'solid-js'
+import { Dynamic } from 'solid-js/web'
 import type { JSX } from 'solid-js/jsx-runtime'
-
-import h from 'solid-js/h'
 
 export type PartialComponentProps<Element extends ValidComponent> = Partial<ComponentProps<Element>>
 
@@ -139,17 +138,11 @@ function _styled<
   const Component = (props: any) => {
     const [cl, quarkProps, rest] = separateQuarkProps(props)
 
+    const merged = mergeProps(defaultComponentProps, rest)
     const className = () => quark(quarkProps, cl.class, cl.cn)
 
-    const merged = mergeProps(defaultComponentProps, { class: className }, rest)
-
-    return h(element, merged)
+    return <Dynamic component={element as any} {...merged} class={className()} />
   }
-
-  // const Forwarded = forwardRef(Component)
-  // Forwarded.displayName =
-  // Forwarded.displayName = name || `Quark_${isString(element) ? element : element.displayName || element.name}`
-  // return Object.assign(Forwarded, { CSS: _CSS }) as any
 
   return Object.assign(Component, { CSS: _CSS }) as any
 }

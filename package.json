@@ -5,6 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "up:i": "bunx npm-check-updates -ws -i",
     "build": "turbo build",
     "publish-packages": "turbo build && changeset publish"
   },
