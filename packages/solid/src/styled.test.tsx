@@ -7,16 +7,21 @@ const html = String
 
 test('styled', () => {
   const Bold = styled.div('text-bold')
+  // const Bold = styled.div('text-bold', {ari})
+  // const Bold = styled('div', 'text-bold', {aria})
   const { container } = render(() => (
-    <Bold>
+    <Bold cn={['custom', { world: true, foo: false }]}>
       <span>hello</span>
     </Bold>
   ))
 
-  expect(container.innerHTML).toBe(html`<div class="text-bold"><span>hello</span></div>`)
+  expect(container.innerHTML).toBe(
+    html`<div class="text-bold custom world"><span>hello</span></div>`
+  )
 })
 
 test('styled with variants', () => {
+  // const Button = styled('button', {
   const Button = styled.button({
     variants: {
       size: {

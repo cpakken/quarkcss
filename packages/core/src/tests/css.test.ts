@@ -6,11 +6,13 @@ describe('core', () => {
     type PROPS = QuarkProps<typeof className>
     expect(className()).toEqual('baseClass')
 
-    const withoutConfig = css(['baseClass'])
-    expect(withoutConfig({}, 'additional', null, { foo: true, bar: null })).toEqual(
-      'baseClass additional foo'
+    const cssWithoutConfig = css(['baseClass'])
+
+    expect(cssWithoutConfig({}, 'additional', null, { foo: true, bar: null, baz: 1 % 3 })).toEqual(
+      'baseClass additional foo baz'
     )
   })
+
   test('variants', () => {
     const className = css({
       base: 'baseClass',
@@ -25,6 +27,7 @@ describe('core', () => {
     expect(className({ color: 'red', size: 'large' })).toEqual('baseClass red large')
     expect(className({ color: 'red' })).toEqual('baseClass red')
   })
+
   test('handle multiline', () => {
     const className = css({
       base: `
@@ -38,9 +41,9 @@ describe('core', () => {
       },
     })
 
-    expect(className({ color: 'red', size: 'large' }, 'additional', null, { foo: true, bar: null })).toEqual(
-      'baseClass baseClass2 baseClass3 red large additional foo'
-    )
+    expect(
+      className({ color: 'red', size: 'large' }, 'additional', null, { foo: true, bar: null })
+    ).toEqual('baseClass baseClass2 baseClass3 red large additional foo')
   })
 
   test('defaultVariant', () => {
@@ -120,7 +123,9 @@ describe('core', () => {
 
     expect(className({ color: 'red', size: 'small' })).toEqual('baseClass red small redSmall')
 
-    expect(className({ color: 'blue', size: 'large' })).toEqual('baseClass blue large blueLarge blueNotDrag')
+    expect(className({ color: 'blue', size: 'large' })).toEqual(
+      'baseClass blue large blueLarge blueNotDrag'
+    )
     expect(className({ color: 'blue', isDragging: true })).toEqual(
       'baseClass blue large dragging blueLarge blueDragging'
     )

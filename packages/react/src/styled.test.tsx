@@ -63,14 +63,14 @@ describe('styled', () => {
 
   test('base', () => {
     const { container } = render(
-      <Container color="red" size="large" cn={{ custom: true }}>
+      <Container color="red" size="large" cn={['amazing', { custom: true }]}>
         <div>Child</div>
       </Container>
     )
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="baseClass red large custom"
+          class="baseClass red large amazing custom"
         >
           <div>
             Child

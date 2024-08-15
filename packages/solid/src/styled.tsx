@@ -7,6 +7,7 @@ import {
   QuarkCss,
   QuarkPlugin,
   QuarkVariantsMap,
+  arrayify,
   createCss,
   css,
   getQuarkConfig,
@@ -14,8 +15,8 @@ import {
 } from '@quarkcss/core'
 
 import { type ComponentProps, type ValidComponent, mergeProps, splitProps } from 'solid-js'
-import { Dynamic } from 'solid-js/web'
 import type { JSX } from 'solid-js/jsx-runtime'
+import { Dynamic } from 'solid-js/web'
 
 export type PartialComponentProps<Element extends ValidComponent> = Partial<ComponentProps<Element>>
 
@@ -41,6 +42,40 @@ export interface QuarkSolidComponent<
   CSS: QuarkCss<VariantsMap, Defaults>
   displayName: string
 }
+
+// type MaybeQuarkConfig<
+//   VariantsMap extends QuarkVariantsMap,
+//   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+// > =
+//   | (QuarkConfig<VariantsMap, Defaults> & { name?: string })
+//   | QuarkCss<VariantsMap, Defaults>
+//   | string[]
+//   //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
+//   | (string & { quark?: VariantsMap })
+
+// export type StyledFn2 = <
+//   Element extends ValidComponent,
+//   VariantsMap extends QuarkVariantsMap = {},
+//   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+//   DefaultProps extends PartialComponentProps<Element> = {}
+// >(
+//   element: Element,
+//   configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
+//   defaultComponentProps?: DefaultProps
+// ) => QuarkSolidComponent<Element, VariantsMap, Defaults, DefaultProps>
+
+// export type Styled2 = StyledFn2 & {
+//   [K in keyof JSX.IntrinsicElements]: {
+//     <
+//       VariantsMap extends QuarkVariantsMap = {},
+//       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+//       DefaultProps extends PartialComponentProps<K> = {}
+//     >(
+//       configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
+//       defaultComponentProps?: DefaultProps
+//     ): QuarkSolidComponent<K, VariantsMap, Defaults, DefaultProps>
+//   }
+// }
 
 export type StyledFnOverload = {
   <Element extends ValidComponent, DefaultProps extends PartialComponentProps<Element> = {}>(
@@ -72,7 +107,7 @@ export type StyledFnOverload = {
   ): QuarkSolidComponent<Element, VariantsMap, Defaults, DefaultProps>
 }
 
-export type Styled = StyledFnOverload & {
+type StyledProxyFns = {
   [K in keyof JSX.IntrinsicElements]: {
     <DefaultProps extends PartialComponentProps<K> = {}>(
       baseCSS: string | string[],
@@ -83,7 +118,9 @@ export type Styled = StyledFnOverload & {
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
       DefaultProps extends PartialComponentProps<K> = {}
     >(
-      config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
+      config: QuarkConfig<VariantsMap, Defaults> & {
+        name?: string
+      },
       defaultComponentProps?: DefaultProps
     ): QuarkSolidComponent<K, VariantsMap, Defaults, DefaultProps>
     <
@@ -96,6 +133,8 @@ export type Styled = StyledFnOverload & {
     ): QuarkSolidComponent<K, VariantsMap, Defaults, DefaultProps>
   }
 }
+
+export type Styled = StyledFnOverload & StyledProxyFns
 
 function _styled<
   Element extends ValidComponent,
@@ -139,7 +178,7 @@ function _styled<
     const [cl, quarkProps, rest] = separateQuarkProps(props)
 
     const merged = mergeProps(defaultComponentProps, rest)
-    const className = () => quark(quarkProps, cl.class, cl.cn)
+    const className = () => quark(quarkProps, cl.class, ...arrayify(cl.cn))
 
     return <Dynamic component={element as any} {...merged} class={className()} />
   }
@@ -163,6 +202,7 @@ export function createStyled(...plugins: QuarkPlugin[]): Styled {
 }
 
 export const styled: Styled = createStyled()
+// export const styled: Styled2 = createStyled() as any
 
 //Re-export @quark/core
 export { css, isQuarkCss }

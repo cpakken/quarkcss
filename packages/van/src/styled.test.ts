@@ -28,9 +28,11 @@ describe('styled', () => {
       },
     })
 
-    document.body.append(Button({ size: 'lg' }, 'Click me'))
+    document.body.append(
+      Button({ size: 'lg', cn: ['custom', { foo: true, bar: false }] }, 'Click me')
+    )
 
-    expect(document.body.innerHTML).toBe(html`<button class="text-lg">Click me</button>`)
+    expect(document.body.innerHTML).toBe(html`<button class="text-lg custom foo">Click me</button>`)
   })
 
   test('styled with variants using state', async () => {

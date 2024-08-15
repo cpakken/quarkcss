@@ -84,6 +84,11 @@ export function createCss(...plugins: QuarkPlugin[]): typeof css {
 
   return ((config: any) => {
     const quark = css(config)
+
+    if (plugins.length === 0) {
+      return quark
+    }
+
     return Object.assign(
       (...props: any) => {
         const classnames = quark(...props)

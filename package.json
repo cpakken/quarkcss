@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "up:i": "bunx npm-check-updates -ws -i",
+    "up:i": "bunx npm-check-updates --root -ws -i",
     "build": "turbo build",
     "publish-packages": "turbo build && changeset publish"
   },
@@ -13,7 +13,7 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@changesets/cli": "^2.26.1",
-    "turbo": "^1.9.3"
+    "@changesets/cli": "^2.27.7",
+    "turbo": "^2.0.13"
   }
 }

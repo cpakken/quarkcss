@@ -1,7 +1,7 @@
 // https://www.npmjs.com/package/react-addons-shallow-compare?activeTab=code
 
+import type { AnyQuarkCss } from '@quarkcss/core'
 import React from 'react'
-import { AnyQuarkCss } from './styled'
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
@@ -53,10 +53,10 @@ export const useCompare = <T>(value: T, comparer: (next: T, prev: T | undefined)
 export const shallowEqualAll = (deps: any[]): boolean => deps.every(shallowEqual)
 
 export const createUseQuarkMemo = (quark: AnyQuarkCss): AnyQuarkCss => {
-  return ((quarkProps: any, className: string, cn: any) => {
+  return ((quarkProps: any, className: string, ...rest: any[]) => {
     return React.useMemo(
-      () => quark(quarkProps as any, className, cn),
-      useCompare([quarkProps, className, cn], shallowEqualAll)
+      () => quark(quarkProps as any, className, ...rest),
+      useCompare([quarkProps, className, ...rest], shallowEqualAll)
     )
   }) as any
 }

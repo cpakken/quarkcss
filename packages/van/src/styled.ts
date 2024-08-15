@@ -7,6 +7,7 @@ import {
   QuarkCss,
   QuarkPlugin,
   QuarkVariantsMap,
+  arrayify,
   createCss,
   css,
   getQuarkConfig,
@@ -183,7 +184,7 @@ function _styled<
         quarkProps[key] = val(_quarkProps[key])
       }
 
-      return quark(quarkProps, val(_className), val(cn))
+      return quark(quarkProps, val(_className), ...arrayify(val(cn)))
     }
 
     return tagFunc({ ...defaultComponentProps, class: className, ...rest }, ...children)
