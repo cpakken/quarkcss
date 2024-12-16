@@ -3,7 +3,11 @@ import { styled } from './styled'
 import van from 'vanjs-core'
 import { waitFor } from '@testing-library/dom'
 
-const html = String
+// const html = String
+const html = (strings: TemplateStringsArray, ...values: any[]) => {
+  let result = strings.reduce((acc, str, i) => acc + str + (values[i] || ''), '')
+  return result.replace(/\n\s+/g, '')
+}
 
 describe('styled', () => {
   beforeEach(() => {
@@ -11,10 +15,17 @@ describe('styled', () => {
   })
 
   test('styled', () => {
-    const Hello = styled.div('font-bold')
-    document.body.append(Hello({}, 'world'))
+    const Bold = styled.div('font-bold')
+    const { div } = van.tags
+    document.body.append(Bold({}, Bold('HELLO'), 'world', Bold(div('foobar'))))
 
-    expect(document.body.innerHTML).toBe(html`<div class="font-bold">world</div>`)
+    expect(document.body.innerHTML).toBe(
+      html`<div class="font-bold">
+        <div class="font-bold">HELLO</div>
+        world
+        <div class="font-bold"><div>foobar</div></div>
+      </div>`
+    )
   })
 
   test('styled with variants', () => {

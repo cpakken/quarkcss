@@ -16,7 +16,7 @@ import {
 
 import type { ChildDom, PropsWithKnownKeys, StateView, TagFunc } from 'vanjs-core'
 import van from 'vanjs-core'
-import { val } from './val'
+import { stateProto, val } from './val'
 
 // export type VanElement = keyof HTMLElementTagNameMap | TagFunc<Element>
 export type VanElement = keyof HTMLElementTagNameMap
@@ -176,6 +176,17 @@ function _styled<
   const tagFunc = van.tags[element] as unknown as TagFunc<Element>
 
   const Component = (first: any, ...children: any[]) => {
+    const firstProto = Object.getPrototypeOf(first)
+    if (
+      typeof first !== 'object' ||
+      firstProto === stateProto ||
+      firstProto === Function.prototype ||
+      firstProto instanceof Node
+    ) {
+      children = [first, ...children]
+      first = null
+    }
+
     const [_quarkProps, { cn, class: _className, ...rest }] = separateQuarkProps(first || {})
 
     const className = () => {

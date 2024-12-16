@@ -26,14 +26,14 @@
     "solid-js": "^1.8.17"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "^14.12.3",
-    "@solidjs/testing-library": "^0.8.9",
-    "@types/bun": "^1.1.6",
-    "happy-dom": "^14.12.3",
-    "jsdom": "^24.1.1",
-    "tsup": "^8.2.4",
-    "vite-plugin-solid": "^2.10.2",
-    "vitest": "^2.0.5"
+    "@happy-dom/global-registrator": "^15.11.7",
+    "@solidjs/testing-library": "^0.8.10",
+    "@types/bun": "^1.1.14",
+    "happy-dom": "^15.11.7",
+    "jsdom": "^25.0.1",
+    "tsup": "^8.3.5",
+    "vite-plugin-solid": "^2.11.0",
+    "vitest": "^2.1.8"
   },
   "dependencies": {
     "@quarkcss/core": "workspace:^0.5.4"
