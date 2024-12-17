@@ -1,5 +1,5 @@
 {
-  "name": "@quarkcss/react",
+  "name": "@quarkcss/react19",
   "version": "0.5.4",
   "author": "Chris Pakken",
   "license": "MIT",
@@ -35,17 +35,18 @@
     "b": "tsup"
   },
   "peerDependencies": {
-    "react": "^18.2.0"
+    "react": "^19.0.0"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^15.11.7",
     "@testing-library/react": "^16.1.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "framer-motion": "^11.15.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
     "happy-dom": "^15.11.7",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "motion": "^11.15.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "tailwind-merge": "^2.5.5",
     "tsup": "^8.3.5",
     "vitest": "^2.1.8"
