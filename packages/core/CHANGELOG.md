@@ -1,5 +1,17 @@
 # @quarkcss/core
 
+## 0.6.1
+
+### Patch Changes
+
+- Update
+
+## 0.6.0
+
+### Minor Changes
+
+- updates
+
 ## 0.5.4
 
 ### Patch Changes

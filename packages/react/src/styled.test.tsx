@@ -27,6 +27,8 @@ describe('styled', () => {
   })
 
   test('Without Variants', () => {
+    const TEST = styled.div('d')
+
     const Center = styled.div({
       base: 'flex items-center justify-center',
       // variants: {

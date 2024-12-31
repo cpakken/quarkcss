@@ -1,12 +1,12 @@
 import {
-  AnyQuarkCss,
-  MixedCN,
-  PartialPropsOfVariantsMap,
-  PropsOfVariantsMap,
-  QuarkConfig,
-  QuarkCss,
-  QuarkPlugin,
-  QuarkVariantsMap,
+  type AnyQuarkCss,
+  type MixedCN,
+  type PartialPropsOfVariantsMap,
+  type PropsOfVariantsMap,
+  type QuarkConfig,
+  type QuarkCss,
+  type QuarkPlugin,
+  type QuarkVariantsMap,
   arrayify,
   createCss,
   css,
@@ -14,11 +14,12 @@ import {
   isQuarkCss,
 } from '@quarkcss/core'
 import {
-  ComponentProps,
-  ComponentPropsWithoutRef,
-  ElementType,
-  ForwardRefRenderFunction,
-  ReactElement,
+  type ComponentProps,
+  type ComponentPropsWithoutRef,
+  type ElementType,
+  type ForwardRefRenderFunction,
+  type JSX,
+  type ReactElement,
   createElement,
   forwardRef,
 } from 'react'
@@ -168,6 +169,7 @@ export type StyledProxy = {
       DefaultProps extends PartialComponentProps<K> = {}
     >(
       config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
+      // config: QuarkConfig<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
     ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
     <

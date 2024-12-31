@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/solid",
-  "version": "0.5.4",
+  "version": "0.6.1",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -20,22 +20,22 @@
   "main": "./src/styled.tsx",
   "scripts": {
     "test": "vitest --globals",
-    "build": "tsup"
+    "b": "tsup"
   },
   "peerDependencies": {
     "solid-js": "^1.8.17"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "^15.11.7",
+    "@happy-dom/global-registrator": "^16.0.1",
     "@solidjs/testing-library": "^0.8.10",
     "@types/bun": "^1.1.14",
-    "happy-dom": "^15.11.7",
+    "happy-dom": "^16.0.1",
     "jsdom": "^25.0.1",
     "tsup": "^8.3.5",
     "vite-plugin-solid": "^2.11.0",
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@quarkcss/core": "workspace:^0.5.4"
+    "@quarkcss/core": "workspace:*"
   }
 }

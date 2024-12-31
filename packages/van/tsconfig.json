@@ -1,22 +1,27 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
 
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+    "moduleDetection": "force",
+    "moduleResolution": "Node",
+    "verbatimModuleSyntax": true,
+    //
+    // "module": "ESNext",
+    "module": "Preserve",
+    "sourceMap": true,
     "noEmit": true,
+
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
+    "noImplicitOverride": true,
     "skipLibCheck": true,
-    "jsx": "react"
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src"]
 }

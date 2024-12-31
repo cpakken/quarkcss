@@ -1,12 +1,12 @@
 import {
-  AnyQuarkCss,
-  MixedCN,
-  PartialPropsOfVariantsMap,
-  PropsOfVariantsMap,
-  QuarkConfig,
-  QuarkCss,
-  QuarkPlugin,
-  QuarkVariantsMap,
+  type AnyQuarkCss,
+  type MixedCN,
+  type PartialPropsOfVariantsMap,
+  type PropsOfVariantsMap,
+  type QuarkConfig,
+  type QuarkCss,
+  type QuarkPlugin,
+  type QuarkVariantsMap,
   arrayify,
   createCss,
   css,
@@ -150,18 +150,18 @@ function _styled<
   const CSS = this
 
   let quark: AnyQuarkCss
-  let name: string | undefined
+  // let name: string | undefined
 
   if (isQuarkCss(configOrCssOrClassStrings)) {
     //quarkCSS
     quark = configOrCssOrClassStrings as AnyQuarkCss
     // @ts-ignore
-    name = getQuarkConfig(quark).name
+    // name = getQuarkConfig(quark).name
   } else {
     quark = CSS(configOrCssOrClassStrings as QuarkConfig | string | string[])
 
     // @ts-ignore
-    name = configOrCssOrClassStrings.name
+    // name = configOrCssOrClassStrings.name
   }
 
   // const separateQuarkProps = createSeparateQuarkPropsFn(quark)

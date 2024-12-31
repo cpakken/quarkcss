@@ -1,4 +1,4 @@
-import { getQuarkConfig, QuarkCss } from '@quarkcss/core'
+import { getQuarkConfig, type QuarkCss } from '@quarkcss/core'
 
 export function createSeparateQuarkPropsFn(quark: QuarkCss<any, any>) {
   const { variants } = getQuarkConfig(quark)
