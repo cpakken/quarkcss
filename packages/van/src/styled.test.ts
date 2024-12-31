@@ -40,7 +40,7 @@ describe('styled', () => {
     })
 
     document.body.append(
-      Button({ size: 'lg', cn: ['custom', { foo: true, bar: false }] }, 'Click me')
+      Button({ size: 'lg', cx: ['custom', { foo: true, bar: false }] }, 'Click me')
     )
 
     expect(document.body.innerHTML).toBe(html`<button class="text-lg custom foo">Click me</button>`)

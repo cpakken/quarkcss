@@ -1,6 +1,6 @@
 import {
   type AnyQuarkCss,
-  type MixedCN,
+  type MixedCX,
   type PartialPropsOfVariantsMap,
   type PropsOfVariantsMap,
   type QuarkConfig,
@@ -50,7 +50,7 @@ export type QuarkComponentProps<
 > = Assign<
   // Assign<VanProps<Element>, Partial<DefaultComponentProps>>,
   Assign<VanProps<Element>, DefaultComponentProps>,
-  Assign<ValueProps<PropsOfVariantsMap<VariantsMap, Defaults>>, { cn?: ValueProp<MixedCN> }>
+  Assign<ValueProps<PropsOfVariantsMap<VariantsMap, Defaults>>, { cx?: ValueProp<MixedCX> }>
 >
 
 export interface QuarkVanComponent<
@@ -187,7 +187,7 @@ function _styled<
       first = null
     }
 
-    const [_quarkProps, { cn, class: _className, ...rest }] = separateQuarkProps(first || {})
+    const [_quarkProps, { cx, class: _className, ...rest }] = separateQuarkProps(first || {})
 
     const className = () => {
       const quarkProps = {} as any
@@ -195,7 +195,7 @@ function _styled<
         quarkProps[key] = val(_quarkProps[key])
       }
 
-      return quark(quarkProps, val(_className), ...arrayify(val(cn)))
+      return quark(quarkProps, val(_className), ...arrayify(val(cx)))
     }
 
     return tagFunc({ ...defaultComponentProps, class: className, ...rest }, ...children)

@@ -9,10 +9,10 @@ describe('plugins', () => {
     const standard = css(config)
     const merged = cssMerge(config)
 
-    const standardCN = standard({ size: 'large' })
-    const mergedCN = merged({ size: 'large' })
+    const standardCX = standard({ size: 'large' })
+    const mergedCX = merged({ size: 'large' })
 
-    expect(standardCN).toEqual('p-4 p-8')
-    expect(mergedCN).toEqual('p-8')
+    expect(standardCX).toEqual('p-4 p-8')
+    expect(mergedCX).toEqual('p-8')
   })
 })

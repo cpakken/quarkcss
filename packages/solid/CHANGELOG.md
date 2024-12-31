@@ -1,5 +1,16 @@
 # @quarkcss/solid
 
+## 0.8.0
+
+### Minor Changes
+
+- cn to cx
+
+### Patch Changes
+
+- Updated dependencies
+  - @quarkcss/core@0.8.0
+
 ## 0.7.7
 
 ### Patch Changes

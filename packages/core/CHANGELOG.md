@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.8.0
+
+### Minor Changes
+
+- cn to cx
+
 ## 0.7.7
 
 ### Patch Changes

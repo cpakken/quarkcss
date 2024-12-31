@@ -1,6 +1,6 @@
 import {
   type AnyQuarkCss,
-  type MixedCN,
+  type MixedCX,
   type PartialPropsOfVariantsMap,
   type PropsOfVariantsMap,
   type QuarkConfig,
@@ -34,7 +34,7 @@ export type QuarkComponentProps<
   DefaultComponentProps extends PartialComponentProps<Element>
 > = Assign<
   Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
-  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cn?: MixedCN }>
+  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
 >
 
 export type QuarkComponentPropsWithoutRef<
@@ -44,7 +44,7 @@ export type QuarkComponentPropsWithoutRef<
   DefaultComponentProps extends PartialComponentProps<Element>
 > = Assign<
   Assign<ComponentPropsWithoutRef<Element>, Partial<DefaultComponentProps>>,
-  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cn?: MixedCN }>
+  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
 >
 
 export interface QuarkComponent<
@@ -223,12 +223,12 @@ function _styled<
   }
 
   const Component: ForwardRefRenderFunction<any, any> = (
-    { children, className: _className, cn, ...props },
+    { children, className: _className, cx, ...props },
     ref
   ) => {
     const [quarkProps, rest] = separateQuarkProps(props)
 
-    const className = quark(quarkProps as any, _className, ...arrayify(cn))
+    const className = quark(quarkProps as any, _className, ...arrayify(cx))
 
     // @ts-ignore
     return createElement(element, { ...defaultComponentProps, className, ...rest, ref }, children)

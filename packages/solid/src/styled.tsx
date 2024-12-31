@@ -1,6 +1,6 @@
 import {
   type AnyQuarkCss,
-  type MixedCN,
+  type MixedCX,
   type PartialPropsOfVariantsMap,
   type PropsOfVariantsMap,
   type QuarkConfig,
@@ -29,7 +29,7 @@ export type QuarkComponentProps<
   DefaultComponentProps extends PartialComponentProps<Element>
 > = Assign<
   Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
-  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cn?: MixedCN }>
+  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
 >
 
 export interface QuarkSolidComponent<
@@ -169,7 +169,7 @@ function _styled<
   const variantProps = Object.keys(getQuarkConfig(quark).variants || {}) as any
 
   const separateQuarkProps = (props: any[]) => {
-    return splitProps(props, ['class', 'cn'] as any, variantProps)
+    return splitProps(props, ['class', 'cx'] as any, variantProps)
   }
 
   const _CSS = quark || CSS({})
@@ -178,7 +178,7 @@ function _styled<
     const [cl, quarkProps, rest] = separateQuarkProps(props)
 
     const merged = mergeProps(defaultComponentProps, rest)
-    const className = () => quark(quarkProps, cl.class, ...arrayify(cl.cn))
+    const className = () => quark(quarkProps, cl.class, ...arrayify(cl.cx))
 
     return <Dynamic component={element as any} {...merged} class={className()} />
   }

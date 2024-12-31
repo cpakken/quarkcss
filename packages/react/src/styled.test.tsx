@@ -65,7 +65,7 @@ describe('styled', () => {
 
   test('base', () => {
     const { container } = render(
-      <Container color="red" size="large" cn={['amazing', { custom: true }]}>
+      <Container color="red" size="large" cx={['amazing', { custom: true }]}>
         <div>Child</div>
       </Container>
     )
@@ -262,7 +262,7 @@ test('proxy intrinsic elements', () => {
 
   const { container } = render(
     <Center>
-      <Button color="blue" size="small" className="test" cn={['amazing', null, { custom: true }]}>
+      <Button color="blue" size="small" className="test" cx={['amazing', null, { custom: true }]}>
         hello
       </Button>
     </Center>

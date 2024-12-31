@@ -10,7 +10,7 @@ test('styled', () => {
   // const Bold = styled.div('text-bold', {ari})
   // const Bold = styled('div', 'text-bold', {aria})
   const { container } = render(() => (
-    <Bold cn={['custom', { world: true, foo: false }]}>
+    <Bold cx={['custom', { world: true, foo: false }]}>
       <span>hello</span>
     </Bold>
   ))

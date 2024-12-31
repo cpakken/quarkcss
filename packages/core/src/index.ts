@@ -59,13 +59,13 @@ export type QuarkConfig<
 const $quark = Symbol('quark')
 
 type Falsey = false | null | undefined | 0 | ''
-export type MixedCN = string | (string | Falsey)[] | { [key: string]: any } | Falsey
+export type MixedCX = string | (string | Falsey)[] | { [key: string]: any } | Falsey
 
 export interface QuarkCss<
   VariantsMap extends QuarkVariantsMap = {},
   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
 > {
-  (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCN[]): string
+  (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCX[]): string
   [$quark]: QuarkConfig<VariantsMap, Defaults>
 }
 
@@ -126,7 +126,7 @@ export function css<
     return normalize(Object.hasOwn(props, key) ? props[key] : defaults?.[key])
   }
 
-  const _css = (props: any = {}, ...rest: MixedCN[]) => {
+  const _css = (props: any = {}, ...rest: MixedCX[]) => {
     const classNames: string[] = baseClass ? [baseClass] : []
 
     //Process Variants
