@@ -1,5 +1,13 @@
 # @quarkcss/solid
 
+## 0.7.7
+
+### Patch Changes
+
+- bump
+- Updated dependencies
+  - @quarkcss/core@0.7.7
+
 ## 0.7.1
 
 ### Patch Changes

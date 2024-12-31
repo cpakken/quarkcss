@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.7.7
+
+### Patch Changes
+
+- bump
+
 ## 0.7.1
 
 ### Patch Changes

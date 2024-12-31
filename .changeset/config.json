@@ -3,7 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [["@quarkcss/react", "@quarkcss/core"]],
+  "linked": [["@quarkcss/core", "@quarkcss/react", "@quarkcss/solid", "@quarkcss/van"]],
   "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",

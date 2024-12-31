@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/core",
-  "version": "0.7.1",
+  "version": "0.7.7",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -24,8 +24,7 @@
   "scripts": {
     "dev": "vite dev",
     "test": "vitest --globals",
-    "b": "tsup",
-    "publish": "bun publish"
+    "b": "tsup"
   },
   "devDependencies": {
     "tailwind-merge": "^2.6.0",
