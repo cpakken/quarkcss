@@ -7,6 +7,7 @@
   "scripts": {
     "up:i": "bunx npm-check-updates --root -ws -i",
     "build": "turbo build",
+    "b": "bun run --filter '*' b",
     "publish-packages": "turbo build && changeset publish"
   },
   "workspaces": [
