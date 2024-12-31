@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/solid",
-  "version": "0.6.1",
+  "version": "0.7.1",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -20,7 +20,8 @@
   "main": "./src/styled.tsx",
   "scripts": {
     "test": "vitest --globals",
-    "b": "tsup"
+    "b": "tsup",
+    "publish": "bun publish"
   },
   "peerDependencies": {
     "solid-js": "^1.8.17"

@@ -1,5 +1,24 @@
 # @quarkcss/solid
 
+## 0.7.1
+
+### Patch Changes
+
+- Fix workspace version when publish
+- Updated dependencies
+  - @quarkcss/core@0.7.1
+
+## 0.7.0
+
+### Minor Changes
+
+- Build without minify
+
+### Patch Changes
+
+- Updated dependencies
+  - @quarkcss/core@0.7.0
+
 ## 0.6.1
 
 ### Patch Changes

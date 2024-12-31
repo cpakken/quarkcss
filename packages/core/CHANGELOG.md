@@ -1,5 +1,17 @@
 # @quarkcss/core
 
+## 0.7.1
+
+### Patch Changes
+
+- Fix workspace version when publish
+
+## 0.7.0
+
+### Minor Changes
+
+- Build without minify
+
 ## 0.6.1
 
 ### Patch Changes
