@@ -18,6 +18,9 @@
   "type": "module",
   "types": "./src/styled.tsx",
   "main": "./src/styled.tsx",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "vitest --globals",
     "b": "tsup"
