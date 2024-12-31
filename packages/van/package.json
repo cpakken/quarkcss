@@ -27,10 +27,10 @@
     "b": "tsup"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "^16.0.1",
+    "@happy-dom/global-registrator": "^16.2.6",
     "@testing-library/dom": "^10.4.0",
     "@types/bun": "^1.1.14",
-    "happy-dom": "^16.0.1",
+    "happy-dom": "^16.2.6",
     "tsup": "^8.3.5",
     "vanjs-core": "^1.5.2"
   },

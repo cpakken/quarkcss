@@ -2,8 +2,8 @@
 
 import { render } from '@testing-library/react'
 import { m } from 'framer-motion'
-import React, { ComponentProps } from 'react'
-import { QuarkVariantProps, styled } from '.'
+import React, { type ComponentProps } from 'react'
+import { type QuarkVariantProps, styled } from '.'
 
 type Prettify<T> = { [K in keyof T]: T[K] } & {}
 
@@ -262,7 +262,7 @@ test('proxy intrinsic elements', () => {
 
   const { container } = render(
     <Center>
-      <Button color="blue" size="small" className="test">
+      <Button color="blue" size="small" className="test" cn={['amazing', null, { custom: true }]}>
         hello
       </Button>
     </Center>
@@ -274,7 +274,7 @@ test('proxy intrinsic elements', () => {
         class="flex items-center justify-center"
       >
         <button
-          class="baseClass blue small test"
+          class="baseClass blue small test amazing custom"
         >
           hello
         </button>

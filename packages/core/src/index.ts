@@ -59,7 +59,7 @@ export type QuarkConfig<
 const $quark = Symbol('quark')
 
 type Falsey = false | null | undefined | 0 | ''
-export type MixedCN = string | string[] | { [key: string]: any } | Falsey
+export type MixedCN = string | (string | Falsey)[] | { [key: string]: any } | Falsey
 
 export interface QuarkCss<
   VariantsMap extends QuarkVariantsMap = {},
@@ -164,7 +164,7 @@ export function css<
     for (const className of rest) {
       if (className) {
         if (typeof className === 'string') classNames.push(className)
-        else if (Array.isArray(className)) classNames.push(...className)
+        else if (Array.isArray(className)) classNames.push(...className.filter(Boolean))
         else {
           for (const key in className) {
             if (className[key]) {

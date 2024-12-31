@@ -24,6 +24,8 @@
   "scripts": {
     "dev": "vite dev",
     "test": "vitest --globals",
+    "t": "bun test",
+    "t:w": "bun test --watch",
     "b": "tsup"
   },
   "devDependencies": {

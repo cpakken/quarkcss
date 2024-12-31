@@ -26,10 +26,10 @@
     "solid-js": "^1.8.17"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "^16.0.1",
+    "@happy-dom/global-registrator": "^16.2.6",
     "@solidjs/testing-library": "^0.8.10",
     "@types/bun": "^1.1.14",
-    "happy-dom": "^16.0.1",
+    "happy-dom": "^16.2.6",
     "jsdom": "^25.0.1",
     "tsup": "^8.3.5",
     "vite-plugin-solid": "^2.11.0",

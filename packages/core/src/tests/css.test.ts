@@ -1,4 +1,4 @@
-import { css, getQuarkConfig, QuarkProps, isQuarkCss } from '..'
+import { css, getQuarkConfig, isQuarkCss, type QuarkProps } from '..'
 
 describe('core', () => {
   test('classname', () => {
@@ -126,9 +126,18 @@ describe('core', () => {
     expect(className({ color: 'blue', size: 'large' })).toEqual(
       'baseClass blue large blueLarge blueNotDrag'
     )
+
+    expect(className({ color: 'blue', size: 'large' })).toEqual(
+      'baseClass blue large blueLarge blueNotDrag'
+    )
+
     expect(className({ color: 'blue', isDragging: true })).toEqual(
       'baseClass blue large dragging blueLarge blueDragging'
     )
+
+    expect(
+      className({ color: 'blue', isDragging: true }, ['additional', false, null, 'foo'])
+    ).toEqual('baseClass blue large dragging blueLarge blueDragging additional foo')
   })
 
   test('utils', () => {
