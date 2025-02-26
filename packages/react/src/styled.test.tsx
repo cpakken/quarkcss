@@ -163,11 +163,11 @@ describe('styled', () => {
     // const StyledMotion = styled(motion.div, {
     // const Styled = styled('div', {})
 
-    const StyledMotion = styled(m.div, {}, { animate: {} })
+    const StyledMotion = styled(m.div, {}, { layout: true })
 
     const { container } = render(
       <div>
-        <StyledMotion style={{ x: 0 }}>
+        <StyledMotion style={{ x: 0 }} layout="position">
           <div>Testing</div>
         </StyledMotion>
       </div>

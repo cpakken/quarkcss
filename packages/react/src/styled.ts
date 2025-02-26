@@ -33,7 +33,11 @@ export type QuarkComponentProps<
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
   DefaultComponentProps extends PartialComponentProps<Element>
 > = Assign<
-  Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
+  // Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
+  Assign<
+    ComponentProps<Element>,
+    { [K in keyof DefaultComponentProps]?: ComponentProps<Element>[K] }
+  >,
   Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
 >
 
