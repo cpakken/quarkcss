@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.8.2
+
+### Patch Changes
+
+- Update dependencies and types
+
 ## 0.8.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @quarkcss/van
 
+## 0.8.2
+
+### Patch Changes
+
+- Update dependencies and types
+- Updated dependencies
+  - @quarkcss/core@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes
