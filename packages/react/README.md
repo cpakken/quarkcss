@@ -4,10 +4,10 @@
 - [Install](#install)
 - [Usage](#usage)
 - [Custom Components](#custom-components)
-- [Polymorphic Components](#polymorphic-components)
 - [Compose with @quark/core `css` function](#compose-with-quarkcore-css-function)
 - [Typescript](#typescript)
 - [Caveats](#caveats)
+- [Vscode Tailwind Regex](#vscode-tailwind-regex)
 
 ## Introduction
 **I ❤️ stitches && ❤️ tailwind**
@@ -159,27 +159,6 @@ const StyledSlider = styled(Slider.Root, {
 })
 ```
 
-
-## Polymorphic Components
-Use the `as` prop to change the underlying component. Typescript will automatically infer the correct props for the new component.
-```tsx
-const StyledComponet = styled('span', {
-  /* ... */
-})
-
-const App = () => {
-  return (
-    <div>
-      <StyledComponent as="button">
-        Click Me
-      </StyledComponent>
-      <StyledComponent as={motion.div}>
-        Click Me
-      </StyledComponent>
-    </div>
-  )
-}
-```
 ⚠️ **Warning**: If you declared default props, make sure they are compatible with the new component. Otherwise compose with its core css. 
 
 ## Compose with @quark/core `css` function
@@ -250,4 +229,16 @@ type StyledComponentProps = ComponentProps<typeof StyledContainer>
   "tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"],
   //TODO: Need to find more surgical regex to match atomic class names in QuarkConfig
   ```
+
+
+## Vscode Tailwind Regex
+- in VSCode settings.json:
+```json
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "styled(?:(?:\\.\\w+\\()|(?:\\(\\s*[\\w.'\"]+,))\\s*([\\s\\S]*?)\\)(?:\\n|$)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ]
+  ],
+```
 

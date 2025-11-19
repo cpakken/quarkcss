@@ -4,11 +4,11 @@ export type QuarkVariants = { [key: string]: string | string[] }
 
 export type QuarkVariantsMap = { [variantKey: string]: QuarkVariants }
 
-type TrueStringToBoolean<StringUnion> = StringUnion extends 'true' | 'null'
-  ? Exclude<StringUnion, 'true' | 'null'> | boolean | null | undefined
+type TrueStringToBoolean<StringUnion> = StringUnion extends 'true' | 'null' | 'false'
+  ? Exclude<StringUnion, 'true' | 'null' | 'false'> | boolean | null | undefined
   : StringUnion
 
-type BooleanPropKeys<VariantValues, VariantPropKey> = VariantValues extends 'null' | 'true'
+type BooleanPropKeys<VariantValues, VariantPropKey> = VariantValues extends 'null' | 'true' | 'false'
   ? VariantPropKey
   : never
 export type GetBooleanPropKeys<VariantsMap> = {
@@ -123,7 +123,8 @@ export function css<
   const variantsEntries = variants && Object.entries(variants)
 
   const getNormalizedProp = (props: any, key: string) => {
-    return normalize(Object.hasOwn(props, key) ? props[key] : defaults?.[key])
+    const value = props[key]
+    return normalize(value ? value : defaults?.[key])
   }
 
   const _css = (props: any = {}, ...rest: MixedCX[]) => {
@@ -132,7 +133,8 @@ export function css<
     //Process Variants
     if (variantsEntries) {
       for (const [key, map] of variantsEntries) {
-        const className = map[getNormalizedProp(props, key)]
+        // const className = map[getNormalizedProp(props, key)]
+        const className = map[getNormalizedProp(props, key)] || map['false']
         if (className) classNames.push(...arrayify(className))
       }
     }

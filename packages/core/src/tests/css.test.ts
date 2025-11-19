@@ -51,7 +51,8 @@ describe('core', () => {
       base: 'baseClass',
       variants: {
         color: { red: 'red', blue: 'blueValue' },
-        size: { small: 'small', large: 'large', null: '' },
+        size: { small: 'small', large: 'large', null: 'medium' },
+        isDragging: { true: 'dragging', false: 'notDragging' },
       },
       defaults: {
         color: 'blue',
@@ -59,9 +60,12 @@ describe('core', () => {
       },
     })
 
-    expect(className()).toEqual('baseClass blueValue')
-    expect(className({ color: 'red' })).toEqual('baseClass red')
-    expect(className({ size: 'large' })).toEqual('baseClass blueValue large')
+    expect(className()).toEqual('baseClass blueValue medium notDragging')
+    expect(className({ color: undefined, size: undefined, isDragging: undefined })).toEqual(
+      'baseClass blueValue medium notDragging'
+    )
+    expect(className({ color: 'red', isDragging: true })).toEqual('baseClass red medium dragging')
+    expect(className({ size: 'large' })).toEqual('baseClass blueValue large notDragging')
   })
 
   test('true boolean', () => {

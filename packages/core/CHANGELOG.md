@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.8.3
+
+### Patch Changes
+
+- Fix workspace resolve
+
 ## 0.8.2
 
 ### Patch Changes
