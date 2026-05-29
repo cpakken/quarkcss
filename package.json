@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "up:i": "bunx npm-check-updates --root -ws -i",
+    "up": "bunx npm-check-updates --root -ws -i",
     "build": "turbo build",
     "b": "bun run --filter '*' b",
     "publish-packages": "turbo build && changeset publish"
@@ -15,7 +15,7 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.3.6",
-    "@changesets/cli": "^2.29.7",
+    "@changesets/cli": "^2.31.0",
     "turbo": "^2.6.1"
   },
   "trustedDependencies": [

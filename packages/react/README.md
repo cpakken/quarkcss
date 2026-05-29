@@ -1,20 +1,7 @@
-<!-- omit from toc -->
-## Table of Contents
-- [Introduction](#introduction)
-- [Install](#install)
-- [Usage](#usage)
-- [Custom Components](#custom-components)
-- [Compose with @quark/core `css` function](#compose-with-quarkcore-css-function)
-- [Typescript](#typescript)
-- [Caveats](#caveats)
-- [Vscode Tailwind Regex](#vscode-tailwind-regex)
-
 ## Introduction
-**I ❤️ stitches && ❤️ tailwind**
-
 **What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
 
-- Create fully-typed React-Styled components using atomic css classes.
+- Create fully-typed React styled components using atomic css classes.
 - Organize your atomic css with variants props 
   - Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api to generate atomic css classes
 - Declare default props for your base component
@@ -22,11 +9,9 @@
 
 Use with your favorite atomic css library:
   - [Tailwindcss](https://tailwindcss.com/)
-  - [unocss](https://github.com/unocss/unocss)
-  - [windicss](https://github.com/windicss/windicss)
-  - (+ many more...)
+  - [cva](https://cva.style/docs)
 
-For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
+For framework-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
 ## Install
 
@@ -35,12 +20,8 @@ npm install @quarkcss/react
 
 pnpm install @quarkcss/react
 
-yarn add @quarkcss/react
+bun add @quarkcss/react
 ```
-| Package           | Minified | Gzipped |
-| ----------------- | -------- | ------- |
-| `@quarkcss/core`  | 1.02KB   | 0.54KB  |
-| `@quarkcss/react` | 1.09KB   | 0.55KB  |
 
 ## Usage
 
@@ -68,14 +49,15 @@ const StyledButton = styled('button', {
       red: 'bg-red-500',
       blue: 'bg-blue-500'
     },
-    //boolean variants (when `true` or `null` keys are declared, variant prop will have `true | falsey` type)
+    //boolean variants (when `true`, `false`, or legacy `null` keys are declared, variant prop will have `boolean | null | undefined | 0` type)
     rounded: { 
       true: 'rounded-full', //`rounded === true`
-      null: 'rounded-none'  //`rounded === falsey` (undefined | false | null | 0) or undeclared
+      false: 'rounded-none', //`rounded` is falsey (undefined | false | null | 0) or undeclared
       
-      //❌ false: 'rounded-none' (Don't use 'false', Since `null` encompasses `falsey` and undeclared values)
+      // `null` is still supported for compatibility. If both `false` and `null` are declared, `false` is preferred.
+      // null: 'rounded-none',
 
-      //Define additional keys along with boolean keys (true / null)
+      //Define additional keys in addition to boolean keys
       small: 'rounded-sm',
       medium: 'rounded-md',
     }
@@ -85,12 +67,18 @@ const StyledButton = styled('button', {
     {
       size: 'small',
       color: 'red',
-      value: 'border-2 border-red-500'
+      class: 'border-2 border-red-500'
     },
     {
       size: 'medium',
       color: 'blue',
-      value: 'border-2 border-blue-500'
+      className: 'border-2 border-blue-500'
+    },
+    {
+      // Match multiple variant conditions, like cva's compoundVariants.
+      size: ['small', 'medium'],
+      color: 'red',
+      value: 'hover:bg-red-600' // `value` is also supported for compatibility
     }
   ],
   //default variants
@@ -101,7 +89,7 @@ const StyledButton = styled('button', {
 }, {
   //default component props - initialize default props for your base component <button />
   disabled: true,
-  onclick: () => console.log('button is clicked')
+  onClick: () => console.log('button is clicked')
 })
 
 // If you don't need variants, you can also declare your base class names as a `string` or `string[]`
@@ -199,16 +187,17 @@ const MotionContainer = styled(motion.div, StyledContainer.CSS, {
 
 ## Typescript
 ```ts
-//Extract QuarkVariants from styled component
+//Extract variant props from styled component
 const StyledContainer = styled({ /* ... */ }})
 
-type QuarkVariants = QuarkComponentVariantProps<typeof StyledContainer>
-//Or Interface Version
-interface QuarkVariants extends QuarkComponentVariants<typeof StyledContainer> {}
+type Variants = QuarkVariantProps<typeof StyledContainer>
 
-//To Extract Props from Styled Component use ✔️
-import { PropsOf } from '@quarkcss/react'
-type StyledComponentProps = PropsOf<typeof StyledContainer>
+//Or Interface Version
+interface Variants extends QuarkVariantProps<typeof StyledContainer> {}
+
+//To extract props from a styled component use ✔️
+import { PropsWithoutRefOf } from '@quarkcss/react'
+type StyledComponentProps = PropsWithoutRefOf<typeof StyledContainer>
 
 //instead of reacts ComponentProps ❌
 import { ComponentProps } from 'react'
@@ -241,4 +230,3 @@ type StyledComponentProps = ComponentProps<typeof StyledContainer>
     ]
   ],
 ```
-

@@ -1,15 +1,4 @@
-<!-- omit from toc -->
-## Table of Contents
-- [Introduction](#introduction)
-- [Install](#install)
-- [Introduction](#introduction-1)
-- [Usage](#usage)
-- [Typescript](#typescript)
-- [Caveats](#caveats)
-
 ## Introduction
-**I ❤️ stitches && ❤️ tailwind**
-
 **What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
 
 - Create fully-typed React styled components using atomic css classes.
@@ -18,12 +7,9 @@
 - Declare default props for your base component
 - Polymorphic and composable. Reuse quark styles from one component to another.
 
-
 Use with your favorite atomic css library:
   - [Tailwindcss](https://tailwindcss.com/)
-  - [unocss](https://github.com/unocss/unocss)
-  - [windicss](https://github.com/windicss/windicss)
-  - (+ many more...)
+  - [cva](https://cva.style/docs)
 
 For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
@@ -34,12 +20,8 @@ npm install @quarkcss/core
 
 pnpm install @quarkcss/core
 
-yarn add @quarkcss/core
+bun add @quarkcss/core
 ```
-| Package           | Minified | Gzipped |
-| ----------------- | -------- | ------- |
-| `@quarkcss/core`  | 1.02KB   | 0.54KB  |
-| `@quarkcss/react` | 1.09KB   | 0.55KB  |
 
 ## Introduction
 Fully typed framework-agnostic generator for atomic css classes.
@@ -55,7 +37,7 @@ For React styling, use [`@quarkcss/react`](https://github.com/cpakken/quarkcss/t
 
 ## Usage
 ```tsx
-import { css } from '@quarkcss/core'
+import { css, type QuarkProps } from '@quarkcss/core'
 
 //Basic
 const button = css({
@@ -70,12 +52,13 @@ const button = css({
       red: 'bg-red-500',
       blue: 'bg-blue-500'
     },
-    //boolean variants (when `true` or `null` keys are declared, variant prop will have `true | falsey` type)
+    //boolean variants (when `true`, `false`, or legacy `null` keys are declared, variant prop will have `boolean | null | undefined | 0` type)
     rounded: { 
       true: 'rounded-full', //`rounded === true`
-      null: 'rounded-none'  //`rounded === falsey` (undefined | false | null | 0) or undeclared
+      false: 'rounded-none', //`rounded` is falsey (undefined | false | null | 0) or undeclared
       
-      //❌ false: 'rounded-none' (Since `null` encompasses `falsey` and undeclared values)
+      // `null` is still supported for compatibility. If both `false` and `null` are declared, `false` is preferred.
+      // null: 'rounded-none',
 
       //Define additional keys in addition to boolean keys
       small: 'rounded-sm',
@@ -87,12 +70,18 @@ const button = css({
     {
       size: 'small',
       color: 'red',
-      value: 'border-2 border-red-500'
+      class: 'border-2 border-red-500'
     },
     {
       size: 'medium',
       color: 'blue',
-      value: 'border-2 border-blue-500'
+      className: 'border-2 border-blue-500'
+    },
+    {
+      // Match multiple variant conditions, like cva's compoundVariants.
+      size: ['small', 'medium'],
+      color: 'red',
+      value: 'hover:bg-red-600' // `value` is also supported for compatibility
     }
   ],
   //default variants
@@ -122,13 +111,13 @@ const App = () => {
 ```
 ## Typescript
 ```ts
-//Extract QuarkVariants from css generator
+//Extract variant props from css generator
 const button = css({ /* ... */ }})
 
-type Variants = GetQuarkVariants<typeof button>
+type Variants = QuarkProps<typeof button>
 
 //Or interface version
-interface Variants extends GetQuarkVariants<typeof button> {}
+interface Variants extends QuarkProps<typeof button> {}
 
 ``` 
 ## Caveats
@@ -142,4 +131,3 @@ interface Variants extends GetQuarkVariants<typeof button> {}
   "tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"],
   //TODO: Need to find more surgical regex to match atomic class names in QuarkConfig
   ```
-

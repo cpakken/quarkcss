@@ -1,16 +1,17 @@
-//null variant is applied when no variant value is passed
-// export type QuarkVariants = { [key: string]: string | string[] } & { null?: string | string[] }
+//false variant is applied when no variant value is passed
 export type QuarkVariants = { [key: string]: string | string[] }
 
 export type QuarkVariantsMap = { [variantKey: string]: QuarkVariants }
 
-type TrueStringToBoolean<StringUnion> = StringUnion extends 'true' | 'null' | 'false'
-  ? Exclude<StringUnion, 'true' | 'null' | 'false'> | boolean | null | undefined
-  : StringUnion
+type BooleanishVariantValue = boolean | null | undefined | 0
+type BooleanConfigKey = 'true' | 'false' | 'null'
 
-type BooleanPropKeys<VariantValues, VariantPropKey> = VariantValues extends 'null' | 'true' | 'false'
-  ? VariantPropKey
-  : never
+type VariantPropValue<VariantValues> = Extract<VariantValues, BooleanConfigKey> extends never
+  ? VariantValues
+  : Exclude<VariantValues, BooleanConfigKey> | BooleanishVariantValue
+
+type BooleanPropKeys<VariantValues, VariantPropKey> =
+  Extract<VariantValues, BooleanConfigKey> extends never ? never : VariantPropKey
 export type GetBooleanPropKeys<VariantsMap> = {
   [K in keyof VariantsMap]: BooleanPropKeys<keyof VariantsMap[K], K>
 }[keyof VariantsMap]
@@ -20,9 +21,9 @@ export type PartialPropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
   //partial allows for partial props to be passed in and no DX variant key recommendation
   //TODO how to make parital while reject other keys?
 
-  [Key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[Key]>
-  // [Key in keyof VariantsMap]?: TrueStringToBoolean<keyof VariantsMap[Key]>
-  // [Key in keyof VariantsMap]: TrueStringToBoolean<keyof VariantsMap[Key]>
+  [Key in keyof VariantsMap]?: VariantPropValue<keyof VariantsMap[Key]>
+  // [Key in keyof VariantsMap]?: VariantPropValue<keyof VariantsMap[Key]>
+  // [Key in keyof VariantsMap]: VariantPropValue<keyof VariantsMap[Key]>
 }
 
 type Flatten<T> = T extends Record<any, any> ? { [P in keyof T]: T[P] } : T
@@ -31,19 +32,34 @@ type PartialSubset<T, K extends keyof T> = Flatten<
 >
 
 //Props are required unless they are in the defaults or are a boolean variant
-//(has variant prop 'null' | 'true')
+//(has variant prop 'false' | 'null' | 'true')
 export type PropsOfVariantsMap<
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
 > = PartialSubset<
   {
-    [Key in keyof VariantsMap]: TrueStringToBoolean<keyof VariantsMap[Key]>
+    [Key in keyof VariantsMap]: VariantPropValue<keyof VariantsMap[Key]>
   },
   (keyof Defaults | GetBooleanPropKeys<VariantsMap>) & string
 >
 
+type QuarkClassValue = string | string[]
+
+type CompoundVariantValue<VariantValues> =
+  | VariantPropValue<VariantValues>
+  | VariantPropValue<VariantValues>[]
+
+type PartialCompoundPropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
+  [Key in keyof VariantsMap]?: CompoundVariantValue<keyof VariantsMap[Key]>
+}
+
+type CompoundClassValue =
+  | { value: QuarkClassValue; class?: QuarkClassValue; className?: QuarkClassValue }
+  | { value?: QuarkClassValue; class: QuarkClassValue; className?: QuarkClassValue }
+  | { value?: QuarkClassValue; class?: QuarkClassValue; className: QuarkClassValue }
+
 export type CompoundVariants<VariantsMap extends QuarkVariantsMap> =
-  | PartialPropsOfVariantsMap<VariantsMap> & { value: string | string[] }
+  PartialCompoundPropsOfVariantsMap<VariantsMap> & CompoundClassValue
 
 export type QuarkConfig<
   VariantsMap extends QuarkVariantsMap = {},
@@ -121,10 +137,51 @@ export function css<
   const { base, variants, defaults, compound } = config
   const baseClass = Array.isArray(base) ? base.join(' ') : base
   const variantsEntries = variants && Object.entries(variants)
+  const compoundEntries = compound?.map((variant) => {
+    const conditions: [string, string | string[]][] = []
+
+    for (const key in variant) {
+      if (compoundPropKeywords.has(key)) continue
+
+      const value = variant[key]
+      conditions.push([
+        key,
+        Array.isArray(value)
+          ? value.map((condition) => normalize(condition as any))
+          : normalize(value as any),
+      ])
+    }
+
+    const className = variant.value ?? variant.class ?? variant.className
+
+    return {
+      conditions,
+      classNames: className ? arrayify(className) : [],
+    }
+  })
 
   const getNormalizedProp = (props: any, key: string) => {
     const value = props[key]
-    return normalize(value ? value : defaults?.[key])
+    return normalize(value === undefined ? defaults?.[key] : value)
+  }
+
+  const getVariantClass = (map: QuarkVariants, key: string) => {
+    if (key === 'false') return map.false !== undefined ? map.false : map.null
+    return map[key]
+  }
+
+  const isCompoundMatch = (props: any, key: string, value: string | string[]) => {
+    const propValue = getNormalizedProp(props, key)
+
+    if (Array.isArray(value)) {
+      for (const variantValue of value) {
+        if (propValue === variantValue) return true
+      }
+
+      return false
+    }
+
+    return propValue === value
   }
 
   const _css = (props: any = {}, ...rest: MixedCX[]) => {
@@ -133,31 +190,27 @@ export function css<
     //Process Variants
     if (variantsEntries) {
       for (const [key, map] of variantsEntries) {
-        // const className = map[getNormalizedProp(props, key)]
-        const className = map[getNormalizedProp(props, key)] || map['false']
+        const propKey = getNormalizedProp(props, key)
+        const className = getVariantClass(map, propKey)
         if (className) classNames.push(...arrayify(className))
       }
     }
 
     //Process Compound Variants
-    if (compound) {
+    if (compoundEntries) {
       //Value
-      for (const variant of compound) {
+      for (const variant of compoundEntries) {
         let match = true
 
-        for (const key in variant) {
-          // if (compoundPropKeywords.has(key)) continue
-          if (key === 'value') continue
-
-          if (getNormalizedProp(props, key) !== normalize(variant[key] as any)) {
+        for (const [key, value] of variant.conditions) {
+          if (!isCompoundMatch(props, key, value)) {
             match = false
             break
           }
         }
 
         if (match) {
-          const className = variant.value ?? ''
-          classNames.push(...arrayify(className))
+          classNames.push(...variant.classNames)
         }
       }
     }
@@ -198,13 +251,13 @@ export const getQuarkConfig = <
   return quark[$quark]
 }
 
-const normalize = (key: string | boolean | null | undefined): string => {
-  //If falsey, return 'null' as the prop key, if true, return 'true'
-  return !key ? 'null' : key.toString()
+const normalize = (key: string | boolean | null | undefined | 0): string => {
+  // If falsey, return 'false' as the prop key. The legacy 'null' key is supported at lookup.
+  return !key ? 'false' : key.toString()
 }
 
 export const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value])
 
 export const cleanMultiLine = (str: string) => str.replace(/\s+/g, ' ').trim()
 
-// const compoundPropKeywords = new Set(['value', 'negate'])
+const compoundPropKeywords = new Set(['value', 'class', 'className'])

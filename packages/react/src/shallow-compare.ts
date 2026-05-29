@@ -37,8 +37,8 @@ export const shallowEqual = (objA: any, objB: any) => {
 }
 
 //https://github.com/kotarella1110/use-custom-compare/blob/master/src/useCustomCompareMemo.ts
-export const useCompare = <T>(value: T, comparer: (next: T, prev: T | undefined) => boolean) => {
-  const ref = React.useRef<T | undefined>()
+export const useCompare = <T>(value: T, comparer: (prev: T, next: T) => boolean) => {
+  const ref = React.useRef<T | undefined>(undefined)
   const prev = React.useRef<T | undefined>(ref.current)
 
   if (prev.current === undefined || !comparer(prev.current, value)) {
@@ -50,13 +50,17 @@ export const useCompare = <T>(value: T, comparer: (next: T, prev: T | undefined)
   return ref.current as T
 }
 
-export const shallowEqualAll = (deps: any[]): boolean => deps.every(shallowEqual)
+export const shallowEqualAll = (nextDeps: any[], prevDeps: any[]): boolean => {
+  if (nextDeps.length !== prevDeps.length) return false
+
+  return nextDeps.every((dep, index) => shallowEqual(dep, prevDeps[index]))
+}
 
 export const createUseQuarkMemo = (quark: AnyQuarkCss): AnyQuarkCss => {
   return ((quarkProps: any, className: string, ...rest: any[]) => {
     return React.useMemo(
       () => quark(quarkProps as any, className, ...rest),
-      useCompare([quarkProps, className, ...rest], shallowEqualAll)
+      useCompare([quarkProps, className, ...rest], (prev, next) => shallowEqualAll(next, prev))
     )
   }) as any
 }

@@ -21,6 +21,10 @@ import { Dynamic } from 'solid-js/web'
 export type PartialComponentProps<Element extends ValidComponent> = Partial<ComponentProps<Element>>
 
 type Assign<A, B> = Omit<A, keyof B> & B
+type NamedQuarkConfig<
+  VariantsMap extends QuarkVariantsMap,
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+> = QuarkConfig<VariantsMap, Defaults> & { name?: string }
 
 export type QuarkComponentProps<
   Element extends ValidComponent,
@@ -28,7 +32,13 @@ export type QuarkComponentProps<
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
   DefaultComponentProps extends PartialComponentProps<Element>
 > = Assign<
-  Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
+  Assign<
+    ComponentProps<Element>,
+    {
+      [K in keyof DefaultComponentProps &
+        keyof ComponentProps<Element>]?: ComponentProps<Element>[K]
+    }
+  >,
   Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
 >
 
@@ -42,6 +52,10 @@ export interface QuarkSolidComponent<
   CSS: QuarkCss<VariantsMap, Defaults>
   displayName: string
 }
+
+export type QuarkVariantProps<C> = C extends QuarkSolidComponent<any, infer V, infer D, any>
+  ? PropsOfVariantsMap<V, D>
+  : never
 
 // type MaybeQuarkConfig<
 //   VariantsMap extends QuarkVariantsMap,
@@ -102,7 +116,7 @@ export type StyledFnOverload = {
     DefaultProps extends PartialComponentProps<Element> = {}
   >(
     element: Element,
-    config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
+    config: NamedQuarkConfig<VariantsMap, Defaults>,
     defaultComponentProps?: DefaultProps
   ): QuarkSolidComponent<Element, VariantsMap, Defaults, DefaultProps>
 }
@@ -118,9 +132,7 @@ type StyledProxyFns = {
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
       DefaultProps extends PartialComponentProps<K> = {}
     >(
-      config: QuarkConfig<VariantsMap, Defaults> & {
-        name?: string
-      },
+      config: NamedQuarkConfig<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
     ): QuarkSolidComponent<K, VariantsMap, Defaults, DefaultProps>
     <
@@ -150,18 +162,16 @@ function _styled<
   const CSS = this
 
   let quark: AnyQuarkCss
-  // let name: string | undefined
+  let name: string | undefined
 
   if (isQuarkCss(configOrCssOrClassStrings)) {
     //quarkCSS
     quark = configOrCssOrClassStrings as AnyQuarkCss
-    // @ts-ignore
-    // name = getQuarkConfig(quark).name
+    name = (getQuarkConfig(quark) as NamedQuarkConfig<VariantsMap, Defaults>).name
   } else {
     quark = CSS(configOrCssOrClassStrings as QuarkConfig | string | string[])
 
-    // @ts-ignore
-    // name = configOrCssOrClassStrings.name
+    name = (configOrCssOrClassStrings as NamedQuarkConfig<VariantsMap, Defaults>).name
   }
 
   // const separateQuarkProps = createSeparateQuarkPropsFn(quark)
@@ -183,7 +193,10 @@ function _styled<
     return <Dynamic component={element as any} {...merged} class={className()} />
   }
 
-  return Object.assign(Component, { CSS: _CSS }) as any
+  return Object.assign(Component, {
+    CSS: _CSS,
+    displayName: name || `Quark_${isString(element) ? element : element.name}`,
+  }) as any
 }
 
 const isString = (value: any): value is string => typeof value === 'string'

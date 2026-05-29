@@ -1,7 +1,9 @@
 // @vitest-environment happy-dom
 import { render } from '@solidjs/testing-library'
-import { styled } from './styled'
-import { createSignal } from 'solid-js'
+import type { MixedCX } from '@quarkcss/core'
+import { createSignal, type ComponentProps } from 'solid-js'
+import { expectTypeOf } from 'vitest'
+import { type QuarkVariantProps, styled } from './styled'
 
 const html = String
 
@@ -9,6 +11,12 @@ test('styled', () => {
   const Bold = styled.div('text-bold')
   // const Bold = styled.div('text-bold', {ari})
   // const Bold = styled('div', 'text-bold', {aria})
+
+  expectTypeOf<QuarkVariantProps<typeof Bold>>().toEqualTypeOf<{}>()
+  expectTypeOf<ComponentProps<typeof Bold>['class']>().toEqualTypeOf<
+    ComponentProps<'div'>['class']
+  >()
+
   const { container } = render(() => (
     <Bold cx={['custom', { world: true, foo: false }]}>
       <span>hello</span>
@@ -22,19 +30,35 @@ test('styled', () => {
 
 test('styled with variants', () => {
   // const Button = styled('button', {
-  const Button = styled.button({
-    variants: {
-      size: {
-        sm: 'text-sm',
-        md: 'text-md',
-        lg: 'text-lg',
+  const Button = styled.button(
+    {
+      name: 'Button',
+      variants: {
+        size: {
+          sm: 'text-sm',
+          md: 'text-md',
+          lg: 'text-lg',
+        },
       },
     },
-  })
+    {
+      type: 'button',
+    }
+  )
+
+  type Variants = QuarkVariantProps<typeof Button>
+  type Props = ComponentProps<typeof Button>
+
+  expect(Button.displayName).toBe('Button')
+  expectTypeOf<Variants>().toEqualTypeOf<{
+    size: 'sm' | 'md' | 'lg'
+  }>()
+  expectTypeOf<Props['cx']>().toEqualTypeOf<MixedCX | undefined>()
+  expectTypeOf<Props['type']>().toEqualTypeOf<ComponentProps<'button'>['type']>()
 
   const { container } = render(() => <Button size="lg">Click me</Button>)
 
-  expect(container.innerHTML).toBe(html`<button class="text-lg">Click me</button>`)
+  expect(container.innerHTML).toBe(html`<button type="button" class="text-lg">Click me</button>`)
 })
 
 test('styled with variants using signal', () => {

@@ -35,8 +35,12 @@ export type BaseElementOf<T> = T extends keyof HTMLElementTagNameMap
 export type VanProps<T> = PropsWithKnownKeys<BaseElementOf<T>>
 
 type Assign<A, B> = Omit<A, keyof B> & B
+type NamedQuarkConfig<
+  VariantsMap extends QuarkVariantsMap,
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+> = QuarkConfig<VariantsMap, Defaults> & { name?: string }
 
-type ValueProp<T> = T | StateView<T> | (() => T)
+export type ValueProp<T> = T | StateView<T> | (() => T)
 
 type ValueProps<T> = {
   [K in keyof T]: ValueProp<T[K]>
@@ -49,7 +53,10 @@ export type QuarkComponentProps<
   DefaultComponentProps extends VanProps<Element>
 > = Assign<
   // Assign<VanProps<Element>, Partial<DefaultComponentProps>>,
-  Assign<VanProps<Element>, DefaultComponentProps>,
+  Assign<
+    VanProps<Element>,
+    { [K in keyof DefaultComponentProps & keyof VanProps<Element>]?: VanProps<Element>[K] }
+  >,
   Assign<ValueProps<PropsOfVariantsMap<VariantsMap, Defaults>>, { cx?: ValueProp<MixedCX> }>
 >
 
@@ -64,8 +71,11 @@ export interface QuarkVanComponent<
     ...rest: readonly ChildDom[]
   ): BaseElementOf<Element>
   CSS: QuarkCss<VariantsMap, Defaults>
-  displayName: string
 }
+
+export type QuarkVariantProps<C> = C extends QuarkVanComponent<any, infer V, infer D, any>
+  ? ValueProps<PropsOfVariantsMap<V, D>>
+  : never
 
 export type StyledFnOverload = {
   <Element extends VanElement, DefaultProps extends VanProps<Element> = {}>(
@@ -92,7 +102,7 @@ export type StyledFnOverload = {
     DefaultProps extends VanProps<Element> = {}
   >(
     element: Element,
-    config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
+    config: NamedQuarkConfig<VariantsMap, Defaults>,
     defaultComponentProps?: DefaultProps
   ): QuarkVanComponent<Element, VariantsMap, Defaults, DefaultProps>
 }
@@ -108,7 +118,7 @@ export type Styled = StyledFnOverload & {
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
       DefaultProps extends VanProps<K> = {}
     >(
-      config: QuarkConfig<VariantsMap, Defaults> & { name?: string },
+      config: NamedQuarkConfig<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
     ): QuarkVanComponent<K, VariantsMap, Defaults, DefaultProps>
     <
@@ -136,18 +146,12 @@ function _styled<
   const CSS = this
 
   let quark: AnyQuarkCss
-  // let name: string | undefined
 
   if (isQuarkCss(configOrCssOrClassStrings)) {
     //quarkCSS
     quark = configOrCssOrClassStrings as AnyQuarkCss
-    // @ts-ignore
-    // name = getQuarkConfig(quark).name
   } else {
     quark = CSS(configOrCssOrClassStrings as QuarkConfig | string | string[])
-
-    // @ts-ignore
-    // name = configOrCssOrClassStrings.name
   }
 
   // const separateQuarkProps = createSeparateQuarkPropsFn(quark)
@@ -176,13 +180,21 @@ function _styled<
   const tagFunc = van.tags[element] as unknown as TagFunc<Element>
 
   const Component = (first: any, ...children: any[]) => {
-    const firstProto = Object.getPrototypeOf(first)
-    if (
-      typeof first !== 'object' ||
-      firstProto === stateProto ||
-      firstProto === Function.prototype ||
-      firstProto instanceof Node
-    ) {
+    let firstIsChild = false
+
+    if (first == null) {
+      first = null
+    } else if (typeof first !== 'object') {
+      firstIsChild = true
+    } else {
+      const firstProto = Object.getPrototypeOf(first)
+      firstIsChild =
+        firstProto === stateProto ||
+        firstProto === Function.prototype ||
+        (typeof Node !== 'undefined' && first instanceof Node)
+    }
+
+    if (firstIsChild) {
       children = [first, ...children]
       first = null
     }

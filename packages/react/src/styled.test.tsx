@@ -1,9 +1,11 @@
 // @vitest-environment happy-dom
 
 import { render } from '@testing-library/react'
+import type { MixedCX } from '@quarkcss/core'
 import { m } from 'framer-motion'
 import React, { type ComponentProps } from 'react'
-import { type QuarkVariantProps, styled } from '.'
+import { expectTypeOf } from 'vitest'
+import { type PropsWithoutRefOf, type QuarkVariantProps, styled } from '.'
 
 type Prettify<T> = { [K in keyof T]: T[K] } & {}
 
@@ -20,15 +22,22 @@ describe('styled', () => {
     },
   })
 
-  type QuarkVariants = QuarkVariantProps<typeof Container>
-
   test('displayName', () => {
     expect(Container.displayName).toBe('Container')
   })
 
-  test('Without Variants', () => {
-    const TEST = styled.div('d')
+  test('variant types', () => {
+    type Variants = QuarkVariantProps<typeof Container>
+    type Props = ComponentProps<typeof Container>
 
+    expectTypeOf<Variants>().toEqualTypeOf<{
+      color?: 'red' | 'blue'
+      size: 'small' | 'large'
+    }>()
+    expectTypeOf<Props['cx']>().toEqualTypeOf<MixedCX | undefined>()
+  })
+
+  test('Without Variants', () => {
     const Center = styled.div({
       base: 'flex items-center justify-center',
       // variants: {
@@ -37,17 +46,14 @@ describe('styled', () => {
       // }
     })
 
-    type QuarkVariants = QuarkVariantProps<typeof Center>
-
+    expectTypeOf<QuarkVariantProps<typeof Center>>().toEqualTypeOf<{}>()
     type Props = Prettify<ComponentProps<typeof Center>>
-    // type Props = Prettify<PropsOf<typeof Center>>
-
-    type A = Props['color']
+    expectTypeOf<Props['color']>().toEqualTypeOf<string | undefined>()
 
     const { container } = render(
       <Center>
         <div>Testing</div>
-      </Center>
+      </Center>,
     )
 
     expect(container).toMatchInlineSnapshot(`
@@ -67,7 +73,7 @@ describe('styled', () => {
     const { container } = render(
       <Container color="red" size="large" cx={['amazing', { custom: true }]}>
         <div>Child</div>
-      </Container>
+      </Container>,
     )
     expect(container).toMatchInlineSnapshot(`
       <div>
@@ -107,8 +113,6 @@ describe('styled', () => {
       <button {...rest}>{`${children} ${append}`}</button>
     )
 
-    type QuarkVariants = QuarkVariantProps<typeof StyledCustomButton>
-    type Props = ComponentProps<typeof StyledCustomButton>
     // type P = PropsOf<typeof StyledCustomButton>
     // type PB = P['style']
     // type PB = P['style']
@@ -128,8 +132,18 @@ describe('styled', () => {
       {
         type: 'button',
         append: '??',
-      }
+      },
     )
+
+    type Variants = QuarkVariantProps<typeof StyledCustomButton>
+    type Props = ComponentProps<typeof StyledCustomButton>
+
+    expectTypeOf<Variants>().toEqualTypeOf<{
+      color: 'red' | 'blue'
+      size: 'small' | 'large'
+    }>()
+    expectTypeOf<Props['append']>().toEqualTypeOf<string | undefined>()
+    expectTypeOf<Props['type']>().toEqualTypeOf<ComponentProps<'button'>['type']>()
 
     const { container } = render(
       <>
@@ -139,7 +153,7 @@ describe('styled', () => {
         <StyledCustomButton color="red" size="small" className="test">
           hello
         </StyledCustomButton>
-      </>
+      </>,
     )
     expect(container).toMatchInlineSnapshot(`
     <div>
@@ -165,12 +179,15 @@ describe('styled', () => {
 
     const StyledMotion = styled(m.div, {}, { layout: true })
 
+    type Props = ComponentProps<typeof StyledMotion>
+    expectTypeOf<Props['layout']>().toEqualTypeOf<ComponentProps<typeof m.div>['layout']>()
+
     const { container } = render(
       <div>
         <StyledMotion style={{ x: 0 }} layout="position">
           <div>Testing</div>
         </StyledMotion>
-      </div>
+      </div>,
     )
 
     expect(container).toMatchInlineSnapshot(`
@@ -194,12 +211,21 @@ describe('styled', () => {
       style: { top: 0 },
     })
 
-    type QuarkVariants = QuarkVariantProps<typeof Composed>
+    type Variants = QuarkVariantProps<typeof Composed>
+    type Props = ComponentProps<typeof Composed>
+    type PropsWithoutRef = PropsWithoutRefOf<typeof Composed>
+
+    expectTypeOf<Variants>().toEqualTypeOf<{
+      color?: 'red' | 'blue'
+      size: 'small' | 'large'
+    }>()
+    expectTypeOf<Props['style']>().toEqualTypeOf<ComponentProps<'button'>['style']>()
+    expectTypeOf<PropsWithoutRef['style']>().toEqualTypeOf<ComponentProps<'button'>['style']>()
 
     const { container } = render(
       <Composed color="red" size="large" className="custom">
         <div>Child</div>
-      </Composed>
+      </Composed>,
     )
 
     expect(container).toMatchInlineSnapshot(`
@@ -221,12 +247,15 @@ test('className string', () => {
   const Center = styled('div', ['flex items-center', 'justify-center'], { 'aria-label': 'center' })
   // const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
 
-  type QuarkVariants = QuarkVariantProps<typeof Center>
+  expectTypeOf<QuarkVariantProps<typeof Center>>().toEqualTypeOf<{}>()
+  expectTypeOf<ComponentProps<typeof Center>['aria-label']>().toEqualTypeOf<
+    ComponentProps<'div'>['aria-label']
+  >()
 
   const { container } = render(
     <Center>
       <div>Testing</div>
-    </Center>
+    </Center>,
   )
 
   expect(container).toMatchInlineSnapshot(`
@@ -252,7 +281,14 @@ test('proxy intrinsic elements', () => {
     },
   })
 
-  type QuarkVariants = QuarkVariantProps<typeof Button>
+  type Variants = QuarkVariantProps<typeof Button>
+  type Props = ComponentProps<typeof Button>
+
+  expectTypeOf<Variants>().toEqualTypeOf<{
+    color: 'red' | 'blue'
+    size: 'small' | 'large'
+  }>()
+  expectTypeOf<Props['className']>().toEqualTypeOf<ComponentProps<'button'>['className']>()
 
   const Center = styled.div(`
     flex 
@@ -265,7 +301,7 @@ test('proxy intrinsic elements', () => {
       <Button color="blue" size="small" className="test" cx={['amazing', null, { custom: true }]}>
         hello
       </Button>
-    </Center>
+    </Center>,
   )
 
   expect(container).toMatchInlineSnapshot(`
