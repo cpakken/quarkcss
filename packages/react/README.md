@@ -16,10 +16,6 @@ For framework-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakke
 ## Install
 
 ```bash
-npm install @quarkcss/react
-
-pnpm install @quarkcss/react
-
 bun add @quarkcss/react
 ```
 

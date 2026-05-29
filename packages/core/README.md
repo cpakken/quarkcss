@@ -16,24 +16,8 @@ For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakk
 ## Install
 
 ```bash
-npm install @quarkcss/core
-
-pnpm install @quarkcss/core
-
 bun add @quarkcss/core
 ```
-
-## Introduction
-Fully typed framework-agnostic generator for atomic css classes.
-
-Inspired by [`@stitches/core`](https://stitches.dev/docs/variants) variants api to generate atomic css classes
-
-Use with your favorite atomic css library:
-  - [Tailwindcss](https://tailwindcss.com/)
-  - [unocss](https://github.com/unocss/unocss)
-  - [windicss](https://github.com/windicss/windicss)
-
-For React styling, use [`@quarkcss/react`](https://github.com/cpakken/quarkcss/tree/master/packages/react)
 
 ## Usage
 ```tsx

@@ -1,4 +1,4 @@
-- use pnpm -r publish
+- use bun run publish-packages
 
 
 compound variants OR []

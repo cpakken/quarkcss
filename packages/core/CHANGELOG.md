@@ -1,5 +1,23 @@
 # @quarkcss/core
 
+## 0.8.6
+
+### Patch Changes
+
+- Resolve workspace dependencies during package packing.
+
+## 0.8.5
+
+### Patch Changes
+
+- Republish packages using Bun so workspace dependencies resolve in published metadata.
+
+## 0.8.4
+
+### Patch Changes
+
+- Migrate package builds from tsup to tsdown.
+
 ## 0.8.3
 
 ### Patch Changes

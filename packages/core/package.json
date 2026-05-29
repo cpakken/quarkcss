@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/core",
-  "version": "0.8.3",
+  "version": "0.8.6",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -26,15 +26,18 @@
   "//module": "src/index.ts",
   "scripts": {
     "dev": "vite dev",
-    "test": "vitest --globals",
+    "test": "bun test",
     "t": "bun test",
     "t:w": "bun test --watch",
-    "b": "tsup"
+    "build": "tsdown",
+    "prepack": "bun ../../scripts/resolve-workspace-deps-for-pack.ts",
+    "postpack": "bun ../../scripts/restore-workspace-deps-after-pack.ts",
+    "b": "tsdown"
   },
   "devDependencies": {
     "@types/bun": "^1.3.14",
     "tailwind-merge": "^3.6.0",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.22.1",
     "typescript": "^5.9.3"
   }
 }
