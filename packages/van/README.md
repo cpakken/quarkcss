@@ -1,11 +1,11 @@
 ## Introduction
 **What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
 
-- Create fully-typed React styled components using atomic css classes.
+- Create fully-typed VanJS styled elements using atomic css classes.
 - Organize your atomic css with variant props
   - Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api to generate atomic css classes
-- Declare default variants, fallback variant branches, and default component props.
-- Polymorphic and composable. Reuse quark styles from one component to another.
+- Declare default variants, fallback variant branches, and default element props.
+- Compose generated elements with VanJS state, derived values, and children.
 
 Use with your favorite atomic css library:
   - [Tailwindcss](https://tailwindcss.com/)
@@ -16,16 +16,16 @@ For framework-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakke
 ## Install
 
 ```bash
-bun add @quarkcss/react
+bun add @quarkcss/van
 ```
 
 ## Usage
 
-```tsx
-import { styled } from '@quarkcss/react'
+```ts
+import van from 'vanjs-core'
+import { styled } from '@quarkcss/van'
 
 const StyledButton = styled('button', {
-  name: 'DisplayName/Button', // react-dev-tools display name
   base: 'inline-flex items-center justify-center font-medium transition-colors',
   variants: {
     size: {
@@ -86,60 +86,43 @@ const StyledButton = styled('button', {
     color: 'red'
   }
 }, {
-  // Default component props for the base <button />.
-  disabled: true,
-  onClick: () => console.log('button is clicked')
+  // Default element props for the base <button />.
+  type: 'button'
 })
 
 // Base classes can be a string or string[] when variants are not needed.
-const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
+const Center = styled('div', 'flex items-center justify-center', { ariaLabel: 'center' })
 
 // Intrinsic elements also support tag shorthand.
 const Bold = styled.span('font-bold')
 // const Bold = styled.span({ base: 'font-bold' }) // same as above
 
-const App = () => {
-  return (
-    <Center>
-      <StyledButton size="medium" color="blue" rounded>
-        <Bold>Click Me</Bold>
-      </StyledButton>
-    </Center>
+const size = van.state<'small' | 'medium' | 'large' | null>('medium')
+
+document.body.append(
+  Center(
+    StyledButton(
+      { size, color: 'blue', rounded: true, cx: ['shadow-sm', 'focus:outline-none'] },
+      Bold('Click Me')
+    )
   )
-}
+)
 ```
 
-## Custom Components
+Van props can be plain values, Van state/view values, or functions. Variant props are resolved whenever Van updates the element:
 
-Pass custom components first. The second argument is the Quark style input; the third argument is default component props.
+```ts
+const size = van.state<'small' | 'medium' | 'large' | null>('small')
 
-```tsx
-import { styled } from '@quarkcss/react'
-import { motion } from 'framer-motion'
+document.body.append(StyledButton({ size }, 'Click Me'))
 
-const MotionBox = styled(motion.div, {
-  base: 'rounded-lg shadow'
-}, {
-  initial: { opacity: 0, x: -100 },
-  animate: { opacity: 1, x: 0 }
-})
+size.val = 'large'
 ```
-
-```tsx
-import { styled } from '@quarkcss/react'
-import * as Slider from '@radix-ui/react-slider'
-
-const StyledSlider = styled(Slider.Root, {
-  /* ... */
-})
-```
-
-Default component props must be compatible with the wrapped component. Otherwise compose with core CSS.
 
 ## Compose with @quark/core `css` function
 
-```tsx
-import { styled, css } from '@quarkcss/react'
+```ts
+import { styled, css } from '@quarkcss/van'
 
 // `css` is re-exported from @quarkcss/core.
 const containercss = css({
@@ -155,55 +138,48 @@ const StyledContainer = styled('div', containercss)
 expect(StyledContainer.CSS).toBe(containercss)
 ```
 
-Use `.CSS` to reuse the same Quark CSS config with another base component and different default component props.
+Use `.CSS` to reuse the same Quark CSS config with another base element and different default element props.
 
-```tsx
-const MotionContainer = styled(motion.div, StyledContainer.CSS, {
-  initial: { x: -100 },
-  animate: { x: 0 },
-  transition: {
-    type: 'spring',
-    stiffness: 500,
-    damping: 30
-  }
+```ts
+const LinkContainer = styled('a', StyledContainer.CSS, {
+  href: '#'
 })
 ```
 
 ## TypeScript
 
 ```ts
-import type { ComponentProps } from 'react'
-import { type QuarkVariantProps } from '@quarkcss/react'
+import { type QuarkVariantProps, type ValueProp } from '@quarkcss/van'
 
 type Variants = QuarkVariantProps<typeof StyledButton>
 const variants: Variants = { color: 'blue', size: 'large', rounded: true }
 
 interface VariantProps extends QuarkVariantProps<typeof StyledButton> {}
 
-type StyledComponentProps = ComponentProps<typeof StyledButton>
+type MaybeSize = ValueProp<'large' | null>
 ```
 
-`QuarkVariantProps` infers variant keys and values from the config. Props are optional when the variant key is in `defaults` or declares a `true`, `false`, or `null` branch.
+`QuarkVariantProps` infers variant keys and values from the config. Van variant values can be plain values, Van state/view values, or functions. Props are optional when the variant key is in `defaults` or declares a `true`, `false`, or `null` branch.
 
 ## Tips
 
-Use the JSX element shorthand for intrinsic elements:
+Use the element shorthand for intrinsic elements:
 
-```tsx
+```ts
 const Button = styled.button('bg-red-500 w-12')
 ```
 
 Style input can be a `string`, `string[]`, a quark `css(...)` function, or a config object:
 
-```tsx
-const StyledCard = styled(Card, 'p-4 rounded-xl')
-const StyledPanel = styled(Panel, ['flex flex-col gap-4', 'bg-white rounded-xl'])
-const StyledInput = styled(Input, { base: 'block w-full', variants: { invalid: { true: 'border-red-500' } } })
+```ts
+const StyledCard = styled('article', 'p-4 rounded-xl')
+const StyledPanel = styled.div(['flex flex-col gap-4', 'bg-white rounded-xl'])
+const StyledInput = styled.input({ base: 'block w-full', variants: { invalid: { true: 'border-red-500' } } })
 ```
 
 Use arrays for long class lists and group classes by concern. Each array entry can contain multiple classes:
 
-```tsx
+```ts
 const Card = styled.div([
   'flex flex-col gap-4 p-6',     // layout
   'bg-white rounded-xl shadow',  // appearance
@@ -213,18 +189,18 @@ const Card = styled.div([
 
 Use `cx` for per-instance customization. `cx` accepts a string, a string array, or an object map:
 
-```tsx
-<Button cx={['text-white', enabled && 'opacity-100']} />
-<Button cx={{ hidden }} />
+```ts
+Button({ cx: ['text-white', enabled.val && 'opacity-100'] }, 'Save')
+Button({ cx: { hidden: hidden.val } }, 'Save')
 ```
 
-Prefer `cx` for quark-specific class extensions, and use `className` when forwarding ordinary React props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
+Prefer `cx` for quark-specific class extensions, and use `class` when forwarding ordinary Van props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
 
 ## Tailwind Conflicts
 
-Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
+Quark appends class names in this order: `base`, `variants`, `compound`, then `class` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
 
-```tsx
+```ts
 const Button = styled('button', {
   base: 'p-4',
   variants: {
@@ -234,13 +210,13 @@ const Button = styled('button', {
   }
 })
 
-<Button size="large" />
-// className: 'p-4 p-8'
+Button({ size: 'large' })
+// class: 'p-4 p-8'
 ```
 
 Design configs so each style concern has one owner. If size is variant-controlled, put fallback sizing in a `null` or `false` branch instead of `base`:
 
-```tsx
+```ts
 const Button = styled('button', {
   base: 'inline-flex items-center justify-center',
   variants: {
@@ -254,7 +230,7 @@ const Button = styled('button', {
 
 Another strategy is to keep stable utilities in `base` and let variants update CSS variables:
 
-```tsx
+```ts
 const Button = styled('button', {
   base: 'h-[var(--button-height)] px-[var(--button-padding-x)] text-[length:var(--button-font-size)]',
   variants: {
@@ -270,8 +246,8 @@ Tailwind CSS v4 exposes [theme values as CSS variables](https://tailwindcss.com/
 
 For automatic conflict resolution, create a configured `styled` function with `tailwind-merge`:
 
-```tsx
-import { createStyled } from '@quarkcss/react'
+```ts
+import { createStyled } from '@quarkcss/van'
 import { twMerge } from 'tailwind-merge'
 
 const styledMerge = createStyled(twMerge)
@@ -285,22 +261,22 @@ const Button = styledMerge('button', {
   }
 })
 
-<Button size="large" />
-// className: 'p-8'
+Button({ size: 'large' })
+// class: 'p-8'
 ```
 
-If an app uses a configured `styled`, re-export it from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/react`.
+If an app uses a configured `styled`, re-export it from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/van`.
 
 ```ts
 // lib/quarkcss.ts
-import { createStyled } from '@quarkcss/react'
+import { createStyled } from '@quarkcss/van'
 import { twMerge } from 'tailwind-merge'
 
 // Re-export styled with the tailwind-merge plugin applied.
 export const styled = createStyled(twMerge)
 ```
 
-```tsx
+```ts
 // Use your app's path alias/import convention if you have one.
 import { styled } from '@/lib/quarkcss'
 
@@ -313,7 +289,7 @@ If all else fails, Tailwind's important modifier can still force an override: `!
 
 ## Editor Support
 
-Set the Tailwind VSCode plugin to recognize atomic class names outside of `<... className="">`. For a broad match, use:
+Set the Tailwind VSCode plugin to recognize atomic class names outside of `<... class="">`. For a broad match, use:
 
 ```json
 "tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"]

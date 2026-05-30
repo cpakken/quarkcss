@@ -1,5 +1,13 @@
 # @quarkcss/react
 
+## 0.8.7
+
+### Patch Changes
+
+- Publish installable package metadata for workspace dependencies.
+- Updated dependencies
+  - @quarkcss/core@0.8.7
+
 ## 0.8.6
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.8.7
+
+### Patch Changes
+
+- Publish installable package metadata for workspace dependencies.
+
 ## 0.8.6
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/solid",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -24,8 +24,6 @@
   "scripts": {
     "test": "vitest --globals",
     "build": "tsdown",
-    "prepack": "bun ../../scripts/resolve-workspace-deps-for-pack.ts",
-    "postpack": "bun ../../scripts/restore-workspace-deps-after-pack.ts",
     "b": "tsdown"
   },
   "peerDependencies": {

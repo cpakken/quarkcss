@@ -15,7 +15,6 @@ import {
 } from '@quarkcss/core'
 import {
   type ComponentProps,
-  type ComponentPropsWithoutRef,
   type ElementType,
   type ForwardRefRenderFunction,
   type JSX,
@@ -41,22 +40,6 @@ export type QuarkComponentProps<
   Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
 >
 
-export type QuarkComponentPropsWithoutRef<
-  Element extends ElementType,
-  VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
-> = Assign<
-  Assign<
-    ComponentPropsWithoutRef<Element>,
-    {
-      [K in keyof DefaultComponentProps &
-        keyof ComponentPropsWithoutRef<Element>]?: ComponentPropsWithoutRef<Element>[K]
-    }
-  >,
-  Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
->
-
 export interface QuarkComponent<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
@@ -78,24 +61,6 @@ type Assign<A, B> = Omit<A, keyof B> & B
 export type QuarkVariantProps<C> = C extends QuarkComponent<any, infer V, infer D, any>
   ? PropsOfVariantsMap<V, D>
   : never
-
-// export type PropsOf<COMP extends ElementType> = COMP extends QuarkComponent<
-//   infer E,
-//   infer C,
-//   infer D,
-//   infer CD
-// >
-//   ? QuarkComponentProps<E, C, D, CD>
-//   : ComponentProps<COMP>
-
-export type PropsWithoutRefOf<COMP extends ElementType> = COMP extends QuarkComponent<
-  infer E,
-  infer C,
-  infer D,
-  infer CD
->
-  ? QuarkComponentPropsWithoutRef<E, C, D, CD>
-  : ComponentPropsWithoutRef<COMP>
 
 export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
 

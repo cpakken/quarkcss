@@ -252,7 +252,7 @@ export const getQuarkConfig = <
 }
 
 const normalize = (key: string | boolean | null | undefined | 0): string => {
-  // If falsey, return 'false' as the prop key. The legacy 'null' key is supported at lookup.
+  // Falsey values use the `false` branch, or the `null` branch when no `false` branch exists.
   return !key ? 'false' : key.toString()
 }
 

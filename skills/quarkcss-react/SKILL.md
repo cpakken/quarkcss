@@ -1,23 +1,11 @@
-## Introduction
-**What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
+---
+name: quarkcss-react
+description: Guidance for using @quarkcss/react to build typed React styled components with atomic CSS classes, variants, compound variants, defaults, custom components, css composition, Tailwind conflict handling, and TypeScript helpers.
+---
 
-- Create fully-typed React styled components using atomic css classes.
-- Organize your atomic css with variant props
-  - Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api to generate atomic css classes
-- Declare default variants, fallback variant branches, and default component props.
-- Polymorphic and composable. Reuse quark styles from one component to another.
+# QuarkCSS React
 
-Use with your favorite atomic css library:
-  - [Tailwindcss](https://tailwindcss.com/)
-  - [cva](https://cva.style/docs)
-
-For framework-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
-
-## Install
-
-```bash
-bun add @quarkcss/react
-```
+Use `@quarkcss/react` when building or refactoring React components that should use QuarkCSS `styled`, `css`, `cx`, variants, compound variants, defaults, or typed variant props.
 
 ## Usage
 
@@ -136,7 +124,7 @@ const StyledSlider = styled(Slider.Root, {
 
 Default component props must be compatible with the wrapped component. Otherwise compose with core CSS.
 
-## Compose with @quark/core `css` function
+## Compose with @quark/core `css` Function
 
 ```tsx
 import { styled, css } from '@quarkcss/react'
@@ -310,22 +298,3 @@ const Button = styled.button('p-4')
 `tailwind-merge` is optional so projects can choose whether the extra dependency and bundle size are worth it.
 
 If all else fails, Tailwind's important modifier can still force an override: `!bg-red-500`.
-
-## Editor Support
-
-Set the Tailwind VSCode plugin to recognize atomic class names outside of `<... className="">`. For a broad match, use:
-
-```json
-"tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"]
-```
-
-For a more targeted `styled(...)` match, use:
-
-```json
-  "tailwindCSS.experimental.classRegex": [
-    [
-      "styled(?:(?:\\.\\w+\\()|(?:\\(\\s*[\\w.'\"]+,))\\s*([\\s\\S]*?)\\)(?:\\n|$)",
-      "[\"'`]([^\"'`]*).*?[\"'`]"
-    ]
-  ],
-```

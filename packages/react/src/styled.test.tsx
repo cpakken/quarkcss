@@ -3,9 +3,9 @@
 import { render } from '@testing-library/react'
 import type { MixedCX } from '@quarkcss/core'
 import { m } from 'framer-motion'
-import React, { type ComponentProps } from 'react'
+import React, { type ComponentProps, type ComponentPropsWithoutRef } from 'react'
 import { expectTypeOf } from 'vitest'
-import { type PropsWithoutRefOf, type QuarkVariantProps, styled } from '.'
+import { type QuarkVariantProps, styled } from '.'
 
 type Prettify<T> = { [K in keyof T]: T[K] } & {}
 
@@ -213,7 +213,7 @@ describe('styled', () => {
 
     type Variants = QuarkVariantProps<typeof Composed>
     type Props = ComponentProps<typeof Composed>
-    type PropsWithoutRef = PropsWithoutRefOf<typeof Composed>
+    type PropsWithoutRef = ComponentPropsWithoutRef<typeof Composed>
 
     expectTypeOf<Variants>().toEqualTypeOf<{
       color?: 'red' | 'blue'

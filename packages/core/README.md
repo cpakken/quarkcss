@@ -1,17 +1,17 @@
 ## Introduction
 **What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
 
-- Create fully-typed React styled components using atomic css classes.
-- Organize your atomic css with variants props 
+- Create fully-typed class name generators using atomic css classes.
+- Organize your atomic css with variant props
   - Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api to generate atomic css classes
-- Declare default props for your base component
-- Polymorphic and composable. Reuse quark styles from one component to another.
+- Declare default variants and fallback variant branches.
+- Compose generated class names with plain strings, arrays, and conditional class maps.
 
 Use with your favorite atomic css library:
   - [Tailwindcss](https://tailwindcss.com/)
   - [cva](https://cva.style/docs)
 
-For framerwork-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
+For framework-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakken/quarkcss/tree/master/packages/core)
 
 ## Install
 
@@ -20,36 +20,42 @@ bun add @quarkcss/core
 ```
 
 ## Usage
-```tsx
-import { css, type QuarkProps } from '@quarkcss/core'
 
-//Basic
+```tsx
+import { css } from '@quarkcss/core'
+
 const button = css({
-  base: 'bg-red-500',
+  base: 'inline-flex items-center justify-center font-medium transition-colors',
   variants: {
     size: {
-      small: 'w-4 h-4',
-      medium: ['w-8', 'h-8'], //use arrays to organize multiple classes
-      large: 'w-12 h-12'
+      // `null` handles omitted, null, false, or 0 and makes `size` optional.
+      null: 'h-8 px-3 text-sm',
+
+      small: 'h-8 px-3 text-sm',
+      medium: ['h-10 px-4', 'text-base'], // use arrays to organize multiple classes
+      large: 'h-12 px-6 text-lg'
     },
     color: {
-      red: 'bg-red-500',
-      blue: 'bg-blue-500'
+      red: 'bg-red-500 text-white',
+      blue: 'bg-blue-500 text-white'
     },
-    //boolean variants (when `true`, `false`, or legacy `null` keys are declared, variant prop will have `boolean | null | undefined | 0` type)
-    rounded: { 
-      true: 'rounded-full', //`rounded === true`
-      false: 'rounded-none', //`rounded` is falsey (undefined | false | null | 0) or undeclared
-      
-      // `null` is still supported for compatibility. If both `false` and `null` are declared, `false` is preferred.
+
+    // Boolean variants usually use `true` and `false` keys.
+    // Declaring `true`, `false`, or `null` makes the prop optional.
+    rounded: {
+      true: 'rounded-full', // `rounded === true`
+      false: 'rounded-none', // `rounded` is omitted, undefined, false, null, or 0
+
+      // `null` is also supported; `false` wins when both exist.
       // null: 'rounded-none',
 
-      //Define additional keys in addition to boolean keys
+      // Additional keys can coexist with boolean keys.
       small: 'rounded-sm',
-      medium: 'rounded-md',
+      medium: 'rounded-md'
     }
   },
-  //compound variants
+
+  // Compound variants
   compound: [
     {
       size: 'small',
@@ -68,50 +74,168 @@ const button = css({
       value: 'hover:bg-red-600' // `value` is also supported for compatibility
     }
   ],
-  //default variants
+
+  // Defaults apply when a variant prop is omitted or undefined.
+  // Defaulted keys are optional in QuarkProps<typeof button>.
   defaults: {
-    size: 'small',
     color: 'red'
   }
-
 })
 
-//Usage
 const classnames = button({
   size: 'medium',
   color: 'blue',
   rounded: true
 })
-//classnames: 'bg-blue-500 w-8 h-8 rounded-full border-2 border-blue-500'
-
-const App = () => {
-  return (
-    <button className={button({size: 'medium', color: 'blue', rounded: true})}>
-      Click Me
-    </button>
-  )
-}
-
+// classnames: 'inline-flex items-center justify-center font-medium transition-colors h-10 px-4 text-base bg-blue-500 text-white rounded-full border-2 border-blue-500'
 ```
-## Typescript
+
+## TypeScript
+
 ```ts
-//Extract variant props from css generator
-const button = css({ /* ... */ }})
+import { type QuarkProps } from '@quarkcss/core'
 
-type Variants = QuarkProps<typeof button>
+type ButtonVariants = QuarkProps<typeof button>
+const variants: ButtonVariants = { color: 'blue', size: 'large', rounded: true }
 
-//Or interface version
-interface Variants extends QuarkProps<typeof button> {}
+button(variants)
 
-``` 
-## Caveats
-- Specificity
-  - css classes are not applied based on ordering specificity (unlike css-in-js / stitches)
-    - design your variants such that atomic classes do not conflict 
-    - if all else fails, overide with `!important` (i.e. `"!bg-red-500"`)
-- Set Tailwind VSCode plugin to recognize atomic class names outside of `<... className="">`
-  - in VSCode settings.json:
-  ```json
-  "tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"],
-  //TODO: Need to find more surgical regex to match atomic class names in QuarkConfig
-  ```
+interface ButtonVariantProps extends QuarkProps<typeof button> {}
+```
+
+`QuarkProps` is the object type accepted by `button(...)`. It infers variant keys and values from the config. Props are optional when the variant key is in `defaults` or declares a `true`, `false`, or `null` branch.
+
+## Tips
+
+Use strings for short class lists. Use arrays for long class lists and group classes by concern:
+
+```ts
+const card = css([
+  'flex flex-col gap-4 p-6',     // layout
+  'bg-white rounded-xl shadow',  // appearance
+  'transition-all duration-200'  // animation
+])
+```
+
+Pass additional classes after the variant props. Additional classes are appended after `base`, `variants`, and `compound`:
+
+```ts
+const classnames = button(
+  { size: 'medium', color: 'blue' },
+  'text-white',
+  enabled && 'opacity-100',
+  { hidden }
+)
+```
+
+If those additional classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createCss(twMerge)`.
+
+## Tailwind Conflicts
+
+Quark appends class names in this order: `base`, `variants`, `compound`, then additional class names passed to the generated function. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
+
+```ts
+const button = css({
+  base: 'p-4',
+  variants: {
+    size: {
+      large: 'p-8'
+    }
+  }
+})
+
+button({ size: 'large' })
+// 'p-4 p-8'
+```
+
+Design configs so each style concern has one owner. If size is variant-controlled, put fallback sizing in a `null` or `false` branch instead of `base`:
+
+```ts
+const button = css({
+  base: 'inline-flex items-center justify-center',
+  variants: {
+    size: {
+      null: 'h-8 px-3 text-sm',
+      large: 'h-12 px-6 text-lg'
+    }
+  }
+})
+```
+
+Another strategy is to keep stable utilities in `base` and let variants update CSS variables:
+
+```ts
+const button = css({
+  base: 'h-[var(--button-height)] px-[var(--button-padding-x)] text-[length:var(--button-font-size)]',
+  variants: {
+    size: {
+      null: '[--button-height:2rem] [--button-padding-x:0.75rem] [--button-font-size:0.875rem]',
+      large: '[--button-height:3rem] [--button-padding-x:1.5rem] [--button-font-size:1.125rem]'
+    }
+  }
+})
+```
+
+Tailwind CSS v4 exposes [theme values as CSS variables](https://tailwindcss.com/docs/theme), which works well for token-driven components.
+
+For automatic conflict resolution, create a configured `css` function with `tailwind-merge`:
+
+```ts
+import { createCss } from '@quarkcss/core'
+import { twMerge } from 'tailwind-merge'
+
+const cssMerge = createCss(twMerge)
+
+const button = cssMerge({
+  base: 'p-4',
+  variants: {
+    size: {
+      large: 'p-8'
+    }
+  }
+})
+
+button({ size: 'large' })
+// 'p-8'
+```
+
+If an app uses a configured `css`, re-export it from a local module. If no plugins are needed, import `css` directly from `@quarkcss/core`.
+
+```ts
+// lib/quarkcss.ts
+import { createCss } from '@quarkcss/core'
+import { twMerge } from 'tailwind-merge'
+
+// Re-export css with the tailwind-merge plugin applied.
+export const css = createCss(twMerge)
+```
+
+```ts
+// Use your app's path alias/import convention if you have one.
+import { css } from '@/lib/quarkcss'
+
+const button = css('p-4 p-8')
+```
+
+`tailwind-merge` is optional so projects can choose whether the extra dependency and bundle size are worth it.
+
+If all else fails, Tailwind's important modifier can still force an override: `"!bg-red-500"`.
+
+## Editor Support
+
+Set the Tailwind VSCode plugin to recognize atomic class names outside of `<... className="">`. For a broad match, use:
+
+```json
+"tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"]
+```
+
+For a more targeted `css(...)` match, use:
+
+```json
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "css\\(\\s*([\\s\\S]*?)\\)(?:\\n|$)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ]
+  ],
+```

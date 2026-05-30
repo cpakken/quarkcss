@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/core",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -30,8 +30,6 @@
     "t": "bun test",
     "t:w": "bun test --watch",
     "build": "tsdown",
-    "prepack": "bun ../../scripts/resolve-workspace-deps-for-pack.ts",
-    "postpack": "bun ../../scripts/restore-workspace-deps-after-pack.ts",
     "b": "tsdown"
   },
   "devDependencies": {

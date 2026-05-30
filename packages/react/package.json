@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/react",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -29,8 +29,6 @@
     "test": "vitest --globals",
     "t": "vitest --globals",
     "build": "tsdown",
-    "prepack": "bun ../../scripts/resolve-workspace-deps-for-pack.ts",
-    "postpack": "bun ../../scripts/restore-workspace-deps-after-pack.ts",
     "b": "tsdown"
   },
   "peerDependencies": {
@@ -47,6 +45,7 @@
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.6.0",
     "tsdown": "^0.22.1",
+    "vite": "^8.0.14",
     "vitest": "^4.1.7"
   },
   "dependencies": {

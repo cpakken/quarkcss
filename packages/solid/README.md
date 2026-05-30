@@ -1,11 +1,11 @@
 ## Introduction
 **What if [stitches](https://stitches.dev/docs/variants) + [tailwind](https://tailwindcss.com/) = 👶?**
 
-- Create fully-typed React styled components using atomic css classes.
+- Create fully-typed Solid styled components using atomic css classes.
 - Organize your atomic css with variant props
   - Inspired by [`@stitches/react`](https://stitches.dev/docs/variants) api to generate atomic css classes
 - Declare default variants, fallback variant branches, and default component props.
-- Polymorphic and composable. Reuse quark styles from one component to another.
+- Composable. Reuse quark styles from one component to another.
 
 Use with your favorite atomic css library:
   - [Tailwindcss](https://tailwindcss.com/)
@@ -16,16 +16,17 @@ For framework-agnostic styling, use [`@quarkcss/core`](https://github.com/cpakke
 ## Install
 
 ```bash
-bun add @quarkcss/react
+bun add @quarkcss/solid
 ```
 
 ## Usage
 
 ```tsx
-import { styled } from '@quarkcss/react'
+import { createSignal } from 'solid-js'
+import { styled } from '@quarkcss/solid'
 
 const StyledButton = styled('button', {
-  name: 'DisplayName/Button', // react-dev-tools display name
+  name: 'DisplayName/Button',
   base: 'inline-flex items-center justify-center font-medium transition-colors',
   variants: {
     size: {
@@ -87,8 +88,7 @@ const StyledButton = styled('button', {
   }
 }, {
   // Default component props for the base <button />.
-  disabled: true,
-  onClick: () => console.log('button is clicked')
+  type: 'button'
 })
 
 // Base classes can be a string or string[] when variants are not needed.
@@ -99,9 +99,11 @@ const Bold = styled.span('font-bold')
 // const Bold = styled.span({ base: 'font-bold' }) // same as above
 
 const App = () => {
+  const [size] = createSignal<'small' | 'medium' | 'large' | null>('medium')
+
   return (
     <Center>
-      <StyledButton size="medium" color="blue" rounded>
+      <StyledButton size={size()} color="blue" rounded cx={['shadow-sm', 'focus:outline-none']}>
         <Bold>Click Me</Bold>
       </StyledButton>
     </Center>
@@ -114,23 +116,15 @@ const App = () => {
 Pass custom components first. The second argument is the Quark style input; the third argument is default component props.
 
 ```tsx
-import { styled } from '@quarkcss/react'
-import { motion } from 'framer-motion'
+import type { ComponentProps } from 'solid-js'
+import { styled } from '@quarkcss/solid'
 
-const MotionBox = styled(motion.div, {
-  base: 'rounded-lg shadow'
+const LinkButton = (props: ComponentProps<'a'>) => <a {...props} />
+
+const StyledLinkButton = styled(LinkButton, {
+  base: 'inline-flex items-center font-medium text-blue-600'
 }, {
-  initial: { opacity: 0, x: -100 },
-  animate: { opacity: 1, x: 0 }
-})
-```
-
-```tsx
-import { styled } from '@quarkcss/react'
-import * as Slider from '@radix-ui/react-slider'
-
-const StyledSlider = styled(Slider.Root, {
-  /* ... */
+  href: '#'
 })
 ```
 
@@ -139,7 +133,7 @@ Default component props must be compatible with the wrapped component. Otherwise
 ## Compose with @quark/core `css` function
 
 ```tsx
-import { styled, css } from '@quarkcss/react'
+import { styled, css } from '@quarkcss/solid'
 
 // `css` is re-exported from @quarkcss/core.
 const containercss = css({
@@ -158,22 +152,16 @@ expect(StyledContainer.CSS).toBe(containercss)
 Use `.CSS` to reuse the same Quark CSS config with another base component and different default component props.
 
 ```tsx
-const MotionContainer = styled(motion.div, StyledContainer.CSS, {
-  initial: { x: -100 },
-  animate: { x: 0 },
-  transition: {
-    type: 'spring',
-    stiffness: 500,
-    damping: 30
-  }
+const LinkContainer = styled(LinkButton, StyledContainer.CSS, {
+  href: '#'
 })
 ```
 
 ## TypeScript
 
 ```ts
-import type { ComponentProps } from 'react'
-import { type QuarkVariantProps } from '@quarkcss/react'
+import type { ComponentProps } from 'solid-js'
+import { type QuarkVariantProps } from '@quarkcss/solid'
 
 type Variants = QuarkVariantProps<typeof StyledButton>
 const variants: Variants = { color: 'blue', size: 'large', rounded: true }
@@ -214,15 +202,15 @@ const Card = styled.div([
 Use `cx` for per-instance customization. `cx` accepts a string, a string array, or an object map:
 
 ```tsx
-<Button cx={['text-white', enabled && 'opacity-100']} />
-<Button cx={{ hidden }} />
+<Button cx={['text-white', enabled() && 'opacity-100']} />
+<Button cx={{ hidden: hidden() }} />
 ```
 
-Prefer `cx` for quark-specific class extensions, and use `className` when forwarding ordinary React props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
+Prefer `cx` for quark-specific class extensions, and use `class` when forwarding ordinary Solid props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
 
 ## Tailwind Conflicts
 
-Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
+Quark appends class names in this order: `base`, `variants`, `compound`, then `class` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
 
 ```tsx
 const Button = styled('button', {
@@ -235,7 +223,7 @@ const Button = styled('button', {
 })
 
 <Button size="large" />
-// className: 'p-4 p-8'
+// class: 'p-4 p-8'
 ```
 
 Design configs so each style concern has one owner. If size is variant-controlled, put fallback sizing in a `null` or `false` branch instead of `base`:
@@ -271,7 +259,7 @@ Tailwind CSS v4 exposes [theme values as CSS variables](https://tailwindcss.com/
 For automatic conflict resolution, create a configured `styled` function with `tailwind-merge`:
 
 ```tsx
-import { createStyled } from '@quarkcss/react'
+import { createStyled } from '@quarkcss/solid'
 import { twMerge } from 'tailwind-merge'
 
 const styledMerge = createStyled(twMerge)
@@ -286,14 +274,14 @@ const Button = styledMerge('button', {
 })
 
 <Button size="large" />
-// className: 'p-8'
+// class: 'p-8'
 ```
 
-If an app uses a configured `styled`, re-export it from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/react`.
+If an app uses a configured `styled`, re-export it from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/solid`.
 
 ```ts
 // lib/quarkcss.ts
-import { createStyled } from '@quarkcss/react'
+import { createStyled } from '@quarkcss/solid'
 import { twMerge } from 'tailwind-merge'
 
 // Re-export styled with the tailwind-merge plugin applied.
@@ -313,7 +301,7 @@ If all else fails, Tailwind's important modifier can still force an override: `!
 
 ## Editor Support
 
-Set the Tailwind VSCode plugin to recognize atomic class names outside of `<... className="">`. For a broad match, use:
+Set the Tailwind VSCode plugin to recognize atomic class names outside of `<... class="">`. For a broad match, use:
 
 ```json
 "tailwindCSS.experimental.classRegex": ["\"([^\"]*)\"", "'([^']*)'"]

@@ -1,6 +1,6 @@
 {
   "name": "@quarkcss/van",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "author": "Chris Pakken",
   "license": "MIT",
   "repository": {
@@ -28,8 +28,6 @@
     "//test": "vitest --globals",
     "test": "bun test",
     "build": "tsdown",
-    "prepack": "bun ../../scripts/resolve-workspace-deps-for-pack.ts",
-    "postpack": "bun ../../scripts/restore-workspace-deps-after-pack.ts",
     "b": "tsdown"
   },
   "devDependencies": {
