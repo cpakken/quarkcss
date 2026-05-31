@@ -162,21 +162,21 @@ const button = css({
 })
 ```
 
-Another strategy is to keep stable utilities in `base` and let variants update CSS variables:
+Prefer the regular variant shape above. When avoiding Tailwind conflicts without `tailwind-merge` would make variants repetitive, a CSS-variable escape hatch is to keep state utilities in `base` and set values from variants:
 
 ```ts
 const button = css({
-  base: 'h-[var(--button-height)] px-[var(--button-padding-x)] text-[length:var(--button-font-size)]',
+  base: 'bg-(--button-bg) hover:bg-(--button-bg-hover)',
   variants: {
-    size: {
-      null: '[--button-height:2rem] [--button-padding-x:0.75rem] [--button-font-size:0.875rem]',
-      large: '[--button-height:3rem] [--button-padding-x:1.5rem] [--button-font-size:1.125rem]'
+    tone: {
+      null: '[--button-bg:var(--color-surface)] [--button-bg-hover:var(--color-surface-hover)]',
+      danger: '[--button-bg:var(--color-danger)] [--button-bg-hover:var(--color-danger-hover)]'
     }
   }
 })
 ```
 
-Tailwind CSS v4 exposes [theme values as CSS variables](https://tailwindcss.com/docs/theme), which works well for token-driven components.
+Tailwind CSS v4 custom property shorthand like `bg-(--button-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
 For automatic conflict resolution, create a configured `css` function with `tailwind-merge`:
 

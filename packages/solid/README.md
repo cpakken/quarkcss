@@ -25,7 +25,7 @@ bun add @quarkcss/solid
 import { createSignal } from 'solid-js'
 import { styled } from '@quarkcss/solid'
 
-const StyledButton = styled('button', {
+const StyledButton = styled.button({
   name: 'DisplayName/Button',
   base: 'inline-flex items-center justify-center font-medium transition-colors',
   variants: {
@@ -92,7 +92,7 @@ const StyledButton = styled('button', {
 })
 
 // Base classes can be a string or string[] when variants are not needed.
-const Center = styled('div', 'flex items-center justify-center', { 'aria-label': 'center' })
+const Center = styled.div('flex items-center justify-center', { 'aria-label': 'center' })
 
 // Intrinsic elements also support tag shorthand.
 const Bold = styled.span('font-bold')
@@ -143,7 +143,7 @@ const containercss = css({
   defaults: { /* ... */ }
 })
 
-const StyledContainer = styled('div', containercss)
+const StyledContainer = styled.div(containercss)
 
 // Retrieve quark css from a styled component.
 expect(StyledContainer.CSS).toBe(containercss)
@@ -213,7 +213,7 @@ Prefer `cx` for quark-specific class extensions, and use `class` when forwarding
 Quark appends class names in this order: `base`, `variants`, `compound`, then `class` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
 
 ```tsx
-const Button = styled('button', {
+const Button = styled.button({
   base: 'p-4',
   variants: {
     size: {
@@ -229,7 +229,7 @@ const Button = styled('button', {
 Design configs so each style concern has one owner. If size is variant-controlled, put fallback sizing in a `null` or `false` branch instead of `base`:
 
 ```tsx
-const Button = styled('button', {
+const Button = styled.button({
   base: 'inline-flex items-center justify-center',
   variants: {
     size: {
@@ -240,21 +240,21 @@ const Button = styled('button', {
 })
 ```
 
-Another strategy is to keep stable utilities in `base` and let variants update CSS variables:
+Prefer the regular variant shape above. When avoiding Tailwind conflicts without `tailwind-merge` would make variants repetitive, a CSS-variable escape hatch is to keep state utilities in `base` and set values from variants:
 
 ```tsx
-const Button = styled('button', {
-  base: 'h-[var(--button-height)] px-[var(--button-padding-x)] text-[length:var(--button-font-size)]',
+const Button = styled.button({
+  base: 'bg-(--button-bg) hover:bg-(--button-bg-hover)',
   variants: {
-    size: {
-      null: '[--button-height:2rem] [--button-padding-x:0.75rem] [--button-font-size:0.875rem]',
-      large: '[--button-height:3rem] [--button-padding-x:1.5rem] [--button-font-size:1.125rem]'
+    tone: {
+      null: '[--button-bg:var(--color-surface)] [--button-bg-hover:var(--color-surface-hover)]',
+      danger: '[--button-bg:var(--color-danger)] [--button-bg-hover:var(--color-danger-hover)]'
     }
   }
 })
 ```
 
-Tailwind CSS v4 exposes [theme values as CSS variables](https://tailwindcss.com/docs/theme), which works well for token-driven components.
+Tailwind CSS v4 custom property shorthand like `bg-(--button-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
 For automatic conflict resolution, create a configured `styled` function with `tailwind-merge`:
 
@@ -264,7 +264,7 @@ import { twMerge } from 'tailwind-merge'
 
 const styledMerge = createStyled(twMerge)
 
-const Button = styledMerge('button', {
+const Button = styledMerge.button({
   base: 'p-4',
   variants: {
     size: {
