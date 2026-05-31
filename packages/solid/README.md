@@ -277,7 +277,7 @@ const Button = styledMerge('button', {
 // class: 'p-8'
 ```
 
-If an app uses a configured `styled`, re-export it from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/solid`.
+If an app uses plugins with `createStyled`, re-export that configured `styled` from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/solid`.
 
 ```ts
 // lib/quarkcss.ts

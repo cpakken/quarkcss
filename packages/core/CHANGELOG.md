@@ -1,5 +1,17 @@
 # @quarkcss/core
 
+## 0.8.10
+
+### Patch Changes
+
+- Clarify that local styled re-exports are only recommended when using plugins with createStyled.
+
+## 0.8.8
+
+### Patch Changes
+
+- update readme and add skills
+
 ## 0.8.7
 
 ### Patch Changes
