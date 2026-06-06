@@ -5,7 +5,17 @@ description: Guidance for using @quarkcss/react to build typed React styled comp
 
 # QuarkCSS React
 
-Use `@quarkcss/react` when building or refactoring React components that should use QuarkCSS `styled`, `css`, `cx`, variants, compound variants, defaults, or typed variant props.
+`@quarkcss/react` is a React styling layer for QuarkCSS core. It turns atomic class lists into typed React components with component-owned base styles, variants, compound variants, defaults, default props, and per-instance class extensions.
+
+Use it to organize Tailwind-heavy JSX into named app primitives when the styling has a concept worth owning. It works alongside normal React `className`s and headless component libraries such as Radix or Base UI: pass the primitive to `styled(...)` when a named styling API, variants, or compatible default props make the component easier to use.
+
+## When To Use It
+
+- Inline `className`s are fine for simple, local layout and one-off scaffolding.
+- Use QuarkCSS for custom styled components when naming the UI concept improves readability, reuse, or ownership.
+- Reach for QuarkCSS when a class list is repeated, has variants, represents a stable app-specific primitive, or mixes base styles with per-instance extensions.
+- Avoid wrapping every element in QuarkCSS just to avoid inline classes.
+- Use variants and defaults for the component's owned styling API, and `cx` for one-off extensions on Quark component instances.
 
 ## Usage
 
@@ -99,7 +109,7 @@ const App = () => {
 
 ## Custom Components
 
-Pass custom components first. The second argument is the Quark style input; the third argument is default component props.
+Pass custom components first. The next argument is the Quark style input; the final argument is default component props.
 
 ```tsx
 import { motion } from 'framer-motion'
@@ -179,6 +189,8 @@ type StyledComponentProps = ComponentProps<typeof StyledButton>
 
 ## Tips
 
+QuarkCSS should reduce noisy JSX, not hide every class string. In a Tailwind project, convert long repeated class lists, ternary class strings, and reusable component states into `styled` configs with variants when doing so makes the code easier to read, reuse, or change. Keep inline `className`s when the styling is simple, local, and clearer at the call site.
+
 Use the JSX element shorthand for intrinsic elements:
 
 ```tsx
@@ -210,7 +222,11 @@ Use `cx` for per-instance customization. `cx` accepts a string, a string array, 
 <Button cx={{ hidden }} />
 ```
 
-Prefer `cx` for quark-specific class extensions, and use `className` when forwarding ordinary React props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
+Prefer `cx` for per-instance class extensions on Quark components. Keep `className` available for React compatibility, prop forwarding, and external consumers that expect it. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
+
+When styling headless primitives such as Radix or Base UI, pass the primitive directly to `styled(...)`. Use QuarkCSS for the app's styling API around the primitive, without replacing its behavior model.
+
+Use the final `styled(...)` argument for compatible default props when that avoids an unnecessary wrapper component.
 
 ## Tailwind Conflicts
 
