@@ -23,7 +23,6 @@ Use it to organize Tailwind-heavy JSX into named app primitives when the styling
 import { styled } from '@quarkcss/react'
 
 const StyledButton = styled.button({
-  name: 'DisplayName/Button', // react-dev-tools display name
   base: 'inline-flex items-center justify-center font-medium transition-colors',
   variants: {
     size: {
