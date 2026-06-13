@@ -135,7 +135,7 @@ export function css<
       : configOrString
 
   const { base, variants, defaults, compound } = config
-  const baseClass = Array.isArray(base) ? base.join(' ') : base
+  const baseClass = base ? cleanMultiLine(Array.isArray(base) ? base.join(' ') : base) : base
   const variantsEntries = variants && Object.entries(variants)
   const compoundEntries = compound?.map((variant) => {
     const conditions: [string, string | string[]][] = []
