@@ -42,14 +42,13 @@ const StyledButton = styled.button({
       blue: 'bg-blue-500 text-white'
     },
 
-    // Boolean variants usually use `true` and `false` keys.
-    // Declaring `true`, `false`, or `null` makes the prop optional.
+    // Boolean variants can use `true`, `false`, or `null` keys. (Any of these keys makes the prop optional)
+    // A lone `true` branch is fine for an opt-in toggle; unneeded: `false: ''`.
     rounded: {
       true: 'rounded-full', // `rounded === true`
       false: 'rounded-none', // `rounded` is omitted, undefined, false, null, or 0
 
-      // `null` is also supported; `false` wins when both exist.
-      // null: 'rounded-none',
+      // null: 'rounded-none', // (falsey fallback; `false` wins when both exist)
 
       // Additional keys can coexist with boolean keys.
       small: 'rounded-sm',
