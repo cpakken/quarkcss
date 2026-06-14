@@ -1,5 +1,13 @@
 # @quarkcss/van
 
+## 0.9.0
+
+### Minor Changes
+
+- Keep package versions aligned across the QuarkCSS package set.
+- Updated dependencies
+  - @quarkcss/core@0.9.0
+
 ## 0.8.11
 
 ### Patch Changes

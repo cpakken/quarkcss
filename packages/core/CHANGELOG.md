@@ -1,5 +1,11 @@
 # @quarkcss/core
 
+## 0.9.0
+
+### Minor Changes
+
+- Keep package versions aligned across the QuarkCSS package set.
+
 ## 0.8.11
 
 ### Patch Changes

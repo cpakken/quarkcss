@@ -1,5 +1,13 @@
 # @quarkcss/react
 
+## 0.9.0
+
+### Minor Changes
+
+- Add `@quarkcss/react/merge`, a Tailwind-aware entrypoint that exports `styled` with the `tailwind-merge` plugin applied.
+- Updated dependencies
+  - @quarkcss/core@0.9.0
+
 ## 0.8.11
 
 ### Patch Changes

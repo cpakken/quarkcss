@@ -293,6 +293,21 @@ const Button = styledMerge.button({
 // className: 'p-8'
 ```
 
+If your React project already depends on `tailwind-merge`, use the preconfigured entrypoint. It exports the same `styled` API as `createStyled(twMerge)`:
+
+```tsx
+import { styled } from '@quarkcss/react/merge'
+
+const Button = styled.button({
+  base: 'p-4',
+  variants: {
+    size: {
+      large: 'p-8'
+    }
+  }
+})
+```
+
 If an app uses plugins with `createStyled`, re-export that configured `styled` from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/react`.
 
 ```ts

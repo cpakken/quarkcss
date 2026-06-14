@@ -1,13 +1,10 @@
 // @vitest-environment happy-dom
 
 import React from 'react'
-import { twMerge } from 'tailwind-merge'
-import { createStyled } from './styled'
+import { styled as styledMerge } from './merge'
 import { render } from '@testing-library/react'
 
 describe('styled with plugins', () => {
-  const styledMerge = createStyled(twMerge)
-
   const Container = styledMerge('div', {
     base: 'baseClass w-2',
     variants: {
