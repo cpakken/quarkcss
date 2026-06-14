@@ -224,7 +224,7 @@ Prefer `cx` for per-instance class extensions on Quark components. Keep `classNa
 
 When styling headless primitives such as Radix or Base UI, pass the primitive directly to `styled(...)`. Use QuarkCSS for the app's styling API around the primitive, without replacing its behavior model.
 
-Use the final `styled(...)` argument for compatible default props when that avoids an unnecessary wrapper component.
+Use the final `styled(...)` argument for compatible default props when a named component should own stable prop values, reducing repeated call-site props or unnecessary wrapper components.
 
 ## Tailwind Conflicts
 
