@@ -220,7 +220,7 @@ Use `cx` for per-instance customization. `cx` accepts a string, a string array, 
 <Button cx={{ hidden }} />
 ```
 
-Prefer `cx` for per-instance class extensions on Quark components. Keep `className` available for React compatibility, prop forwarding, and external consumers that expect it. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
+Prefer `cx` for per-instance class extensions on Quark components. Keep `className` available for React compatibility, prop forwarding, and external consumers that expect it. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict, use `@quarkcss/react/merge` when the app already depends on `tailwind-merge`, or use `createStyled(twMerge)` for custom plugin setup.
 
 When styling headless primitives such as Radix or Base UI, pass the primitive directly to `styled(...)`. Use QuarkCSS for the app's styling API around the primitive, without replacing its behavior model.
 
@@ -274,15 +274,12 @@ const Button = styled.button({
 
 Tailwind CSS v4 custom property shorthand like `bg-(--button-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
-For automatic conflict resolution, create a configured `styled` function with `tailwind-merge`:
+For automatic conflict resolution in React projects that already depend on `tailwind-merge`, import the preconfigured entrypoint:
 
 ```tsx
-import { createStyled } from '@quarkcss/react'
-import { twMerge } from 'tailwind-merge'
+import { styled } from '@quarkcss/react/merge'
 
-const styledMerge = createStyled(twMerge)
-
-const Button = styledMerge.button({
+const Button = styled.button({
   base: 'p-4',
   variants: {
     size: {
@@ -292,17 +289,18 @@ const Button = styledMerge.button({
 })
 
 <Button size="large" />
-// className: 'p-8'
+// tailwind-merge resolves 'p-4 p-8' to 'p-8'
 ```
 
-If an app uses plugins with `createStyled`, re-export that configured `styled` from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/react`.
+This is equivalent to `createStyled(twMerge)` and keeps the default `@quarkcss/react` entrypoint plugin-free.
+
+Use `createStyled(...)` directly when composing `tailwind-merge` with other plugins or when an app wants its own configured styling module. If no plugins are needed, import `styled` directly from `@quarkcss/react`.
 
 ```ts
 // lib/quarkcss.ts
 import { createStyled } from '@quarkcss/react'
 import { twMerge } from 'tailwind-merge'
 
-// Re-export styled with the tailwind-merge plugin applied.
 export const styled = createStyled(twMerge)
 ```
 
