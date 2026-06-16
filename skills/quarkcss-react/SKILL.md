@@ -82,9 +82,8 @@ const StyledButton = styled.button({
     color: 'red'
   }
 }, {
-  // Default component props for the base <button />.
-  disabled: true,
-  onClick: () => console.log('button is clicked')
+  // Default component props owned by this styled primitive.
+  type: 'button'
 })
 
 // Base classes can be a string or string[] when variants are not needed.
@@ -201,6 +200,11 @@ Style input can be a `string`, `string[]`, a quark `css(...)` function, or a con
 const StyledCard = styled(Card, 'p-4 rounded-xl')
 const StyledPanel = styled(Panel, ['flex flex-col gap-4', 'bg-white rounded-xl'])
 const StyledInput = styled(Input, { base: 'block w-full', variants: { invalid: { true: 'border-red-500' } } })
+// The final argument sets default component props.
+const SearchInput = styled(Input, 'h-8 px-2 text-sm', {
+  autoComplete: 'off',
+  type: 'search',
+})
 ```
 
 Use arrays for long class lists and group classes by concern. Each array entry can contain multiple classes:
@@ -224,7 +228,7 @@ Prefer `cx` for per-instance class extensions on Quark components. Keep `classNa
 
 When styling headless primitives such as Radix or Base UI, pass the primitive directly to `styled(...)`. Use QuarkCSS for the app's styling API around the primitive, without replacing its behavior model.
 
-Use the final `styled(...)` argument for compatible default props when a named component should own stable prop values, reducing repeated call-site props or unnecessary wrapper components.
+When converting JSX or a UI primitive into a Quark component, review static props as well as `className`. Move compatible, component-owned defaults into the final `styled(...)` argument. Keep instance-specific identity, accessibility, controlled values, state, handlers, and children at the call site.
 
 ## Tailwind Conflicts
 
@@ -306,7 +310,7 @@ export const styled = createStyled(twMerge)
 
 ```tsx
 // Use your app's path alias/import convention if you have one.
-import { styled } from '@/lib/quarkcss'
+import { styled } from '@quarkcss/react/merge'
 
 const Button = styled.button('p-4')
 ```
