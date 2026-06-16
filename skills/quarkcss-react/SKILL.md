@@ -1,6 +1,6 @@
 ---
 name: quarkcss-react
-description: Guidance for using @quarkcss/react to build typed React styled components with atomic CSS classes, variants, compound variants, defaults, custom components, css composition, Tailwind conflict handling, and TypeScript helpers.
+description: Use when a task involves @quarkcss/react or QuarkCSS in React, including adding, editing, extracting, reviewing, or choosing whether to create styled components, variants, compound variants, defaults, custom component wrappers, css composition, Tailwind conflict handling.
 ---
 
 # QuarkCSS React
