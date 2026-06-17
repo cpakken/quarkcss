@@ -22,13 +22,13 @@ Use it to organize Tailwind-heavy JSX into named app primitives when the styling
 ```tsx
 import { styled } from '@quarkcss/react'
 
-// Intrinsic elements support tag shorthand.
+// Prefer proxy shorthand for intrinsic elements; styled('span', 'font-bold') is equivalent.
 const Bold = styled.span('font-bold')
-// const Bold = styled.span({ base: 'font-bold' }) // same as above
 
 // Base classes can be a string or string[] when variants are not needed.
 const Center = styled.div('flex items-center justify-center', { 'aria-label': 'center' })
 
+// Arrays are just an organization pattern; each entry can contain one or more classes.
 const Card = styled.div([
   'flex flex-col gap-4 p-6',     // layout
   'bg-white rounded-xl shadow',  // appearance
@@ -50,8 +50,6 @@ const StyledPanel = styled(Panel, ['flex flex-col gap-4', 'bg-white rounded-xl']
 const StyledInput = styled(Input, { base: 'block w-full', variants: { invalid: { true: 'border-red-500' } } })
 ```
 
-Use arrays for long class lists and group classes by concern. Each array entry can contain multiple classes.
-
 ## Variants And Defaults
 
 ```tsx
@@ -60,7 +58,7 @@ const StyledButton = styled.button({
   variants: {
     size: {
       small: 'h-8 px-3 text-sm',
-      medium: ['h-10 px-4', 'text-base'], // use arrays to organize multiple classes
+      medium: ['h-10 px-4', 'text-base'],
       large: `
         h-12
         px-6
@@ -138,7 +136,7 @@ Use `defaults` for normal enum defaults. Use `null` or `false` branches when fal
 Pass custom components first. The next argument is the Quark style input; the final argument is default component props.
 
 ```tsx
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 const MotionBox = styled(motion.div, {
   base: 'rounded-lg shadow'
@@ -149,9 +147,9 @@ const MotionBox = styled(motion.div, {
 ```
 
 ```tsx
-import * as Slider from '@radix-ui/react-slider'
+import { Button } from '@base-ui/react/button'
 
-const StyledSlider = styled(Slider.Root, { /* ... */ })
+const StyledButton = styled(Button, { /* ... */ })
 ```
 
 React Native primitives are custom components, not intrinsic JSX tags:
@@ -159,7 +157,7 @@ React Native primitives are custom components, not intrinsic JSX tags:
 ```tsx
 import { View } from 'react-native'
 
-const Box = styled(View, { /* ... */})
+const StyledView = styled(View, { /* ... */})
 ```
 
 Default component props must be compatible with the wrapped component. Otherwise compose with core CSS.
@@ -181,8 +179,7 @@ const containercss = css({
 
 const StyledContainer = styled.div(containercss)
 
-// Retrieve quark css from a styled component.
-expect(StyledContainer.CSS).toBe(containercss)
+StyledContainer.CSS === containercss // true
 ```
 
 Use `.CSS` to reuse the same Quark CSS config with another base component and different default component props.
@@ -206,24 +203,24 @@ import type { ComponentProps } from 'react'
 import { type QuarkVariantProps } from '@quarkcss/react'
 
 type Variants = QuarkVariantProps<typeof StyledButton>
-const variants: Variants = { color: 'blue', size: 'large', rounded: true }
+const variants = { color: 'blue', size: 'large', rounded: true } satisfies Variants
 
 interface VariantProps extends QuarkVariantProps<typeof StyledButton> {}
 
 type StyledComponentProps = ComponentProps<typeof StyledButton>
 ```
 
-`QuarkVariantProps` infers variant keys and values from the config. Props are optional when the variant key is in `defaults` or declares a `true`, `false`, or `null` branch.
+`QuarkVariantProps` infers variant keys and values from the config. Defaulted variants and boolean-style variants are optional.
 
 ## Styling Patterns
 
 QuarkCSS should reduce noisy JSX, not hide every class string. In a Tailwind project, convert long repeated class lists, ternary class strings, and reusable component states into `styled` configs with variants when doing so makes the code easier to read, reuse, or change. Keep inline `className`s when the styling is simple, local, and clearer at the call site.
 
-Use `cx` for per-instance customization. `cx` accepts a string, a string array, or an object map:
+Use `cx` for per-instance customization. `cx` accepts clsx-style values:
 
 ```tsx
-<Button cx={['text-white', enabled && 'opacity-100']} />
-<Button cx={{ hidden }} />
+<Button cx="bg-foreground text-background" />
+<Button cx={['shadow-sm', enabled && 'opacity-100', { hidden, 'pointer-events-none opacity-60': loading }]} />
 ```
 
 Prefer `cx` for per-instance class extensions on Quark components. Keep `className` available for React compatibility, prop forwarding, and external consumers that expect it.
@@ -236,34 +233,44 @@ Keep each style concern owned in one place. If a variant controls a concept, avo
 
 Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
 
+Prefer configs where each style concern has one owner. The next example intentionally contains conflicting utilities to show merge behavior. This can be useful for composed components, consumer overrides, or resilience against styling mistakes, but avoid relying on conflicts when the config can be organized cleanly.
+
 ```tsx
 const Button = styled.button({
-  base: 'p-4',
+  base: 'rounded-md bg-slate-900 px-3',
   variants: {
     size: {
-      large: 'p-8'
+      large: 'px-5'
+    },
+    tone: {
+      danger: 'bg-red-600'
     }
   }
 })
 
-<Button size="large" />
-// without merge: 'p-4 p-8'
-// with @quarkcss/react/merge: 'p-8'
+<Button size="large" tone="danger" cx="px-6" />
+// without merge: 'rounded-md bg-slate-900 px-3 px-5 bg-red-600 px-6'
+// with @quarkcss/react/merge: 'rounded-md bg-red-600 px-6'
 ```
 
-If size is variant-controlled, keep all sizing utilities inside the size variant and use `defaults` for the normal case:
+If a style concern is variant-controlled, keep that concern's utilities inside its variant and use `defaults` for the normal cases:
 
 ```tsx
 const Button = styled.button({
-  base: 'inline-flex items-center justify-center',
+  base: 'inline-flex items-center justify-center rounded-md',
   variants: {
     size: {
-      small: 'h-8 px-3 text-sm',
+      base: 'h-8 px-3 text-sm',
       large: 'h-12 px-6 text-lg'
+    },
+    tone: {
+      neutral: 'bg-slate-900 text-white',
+      danger: 'bg-red-600 text-white'
     }
   },
   defaults: {
-    size: 'small'
+    size: 'base',
+    tone: 'neutral'
   }
 })
 ```
@@ -281,9 +288,11 @@ const Badge = styled.span({
   variants: {
     tone: {
       danger: [
-        '[--badge-bg:color-mix(in_oklch,var(--destructive)_12%,transparent)]',
+        // Tailwind v4 `--alpha(...)` is a color-mix shorthand.
+        // Equivalent: '[--badge-bg:color-mix(in_oklch,var(--destructive)_12%,transparent)]'
+        '[--badge-bg:--alpha(var(--destructive)/12%)]',
         '[--badge-fg:var(--destructive)]',
-        '[--badge-ring:color-mix(in_oklch,var(--destructive)_30%,transparent)]'
+        '[--badge-ring:--alpha(var(--destructive)/30%)]'
       ]
     }
   }
@@ -297,7 +306,6 @@ Tailwind CSS v4 custom property shorthand like `bg-(--badge-bg)` expands to the 
 For automatic conflict resolution in React projects that already depend on `tailwind-merge`, import the preconfigured entrypoint:
 
 ```tsx
+// Exports the same styled API as createStyled(twMerge).
 import { styled } from '@quarkcss/react/merge'
 ```
-
-Use `createStyled(twMerge)` when the app needs a custom `tailwind-merge` plugin setup.
