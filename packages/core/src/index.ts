@@ -17,14 +17,13 @@ export type GetBooleanPropKeys<VariantsMap> = {
 }[keyof VariantsMap]
 
 export type PartialPropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
-  //if not partial, non-variant keys are rejected as desired
-  //partial allows for partial props to be passed in and no DX variant key recommendation
-  //TODO how to make parital while reject other keys?
-
   [Key in keyof VariantsMap]?: VariantPropValue<keyof VariantsMap[Key]>
-  // [Key in keyof VariantsMap]?: VariantPropValue<keyof VariantsMap[Key]>
-  // [Key in keyof VariantsMap]: VariantPropValue<keyof VariantsMap[Key]>
 }
+
+type ExactPartialPropsOfVariantsMap<
+  VariantsMap extends QuarkVariantsMap,
+  Props extends PartialPropsOfVariantsMap<VariantsMap>
+> = Props & Record<Exclude<keyof Props, keyof VariantsMap>, never>
 
 type Flatten<T> = T extends Record<any, any> ? { [P in keyof T]: T[P] } : T
 type PartialSubset<T, K extends keyof T> = Flatten<
@@ -40,7 +39,7 @@ export type PropsOfVariantsMap<
   {
     [Key in keyof VariantsMap]: VariantPropValue<keyof VariantsMap[Key]>
   },
-  (keyof Defaults | GetBooleanPropKeys<VariantsMap>) & string
+  (Extract<keyof Defaults, keyof VariantsMap> | GetBooleanPropKeys<VariantsMap>) & string
 >
 
 export type QuarkClassValue = string | string[]
@@ -69,7 +68,7 @@ export type QuarkConfig<
   variants?: VariantsMap
 
   compound?: CompoundVariants<VariantsMap>[]
-  defaults?: Defaults
+  defaults?: ExactPartialPropsOfVariantsMap<VariantsMap, Defaults>
 }
 
 export type NamedQuarkConfig<

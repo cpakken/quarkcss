@@ -78,7 +78,6 @@ describe('core', () => {
       },
       defaults: {
         color: 'blue',
-        // asdf: 'this shoould type error',
       },
     })
 
@@ -91,6 +90,24 @@ describe('core', () => {
     }>().toExtend<Props>()
     expectTypeOf<{}>().toExtend<Props>()
     expectTypeOf<{ isDragging: false; size: null }>().toExtend<Props>()
+
+    css({
+      variants: {
+        color: { red: 'red', blue: 'blueValue' },
+      },
+      defaults: {
+        color: 'blue',
+        // @ts-expect-error defaults only accept variant keys
+        tone: 'neutral',
+      },
+    })
+
+    const _badProps: Props = {
+      color: 'red',
+      // @ts-expect-error variant props only accept variant keys
+      tone: 'neutral',
+    }
+    void _badProps
 
     expect(className()).toEqual('baseClass blueValue medium notDragging')
     expect(className({ color: undefined, size: undefined, isDragging: undefined })).toEqual(

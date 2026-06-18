@@ -36,7 +36,6 @@ export type QuarkComponentProps<
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
   DefaultComponentProps extends PartialComponentProps<Element>
 > = Assign<
-  // Assign<ComponentProps<Element>, Partial<DefaultComponentProps>>,
   Assign<
     ComponentProps<Element>,
     { [K in keyof DefaultComponentProps]?: ComponentProps<Element>[K] }
@@ -58,8 +57,6 @@ export interface QuarkComponent<
   displayName: string
 }
 
-// type IsNever<T, A> = [T] extends [never] ? A : T
-// type Assign<A, B> = Omit<A, keyof B | 'as'> & B
 type Assign<A, B> = Omit<A, keyof B> & B
 
 export type QuarkVariantProps<C> = C extends QuarkComponent<any, infer V, infer D, any>
@@ -79,7 +76,6 @@ export type ShouldForwardPropConfig<VariantsMap extends QuarkVariantsMap> =
   | ShouldForwardProp
   | readonly (keyof VariantsMap & string)[]
 
-// export type AnyQuarkCss = QuarkCss<any, any>
 
 export type AnyQuarkComponent = QuarkComponent<any, any, any, any>
 
@@ -111,41 +107,6 @@ type ExtendQuarkComponent<
   Assign<QuarkDefaultPropsOf<Component>, DefaultProps>
 >
 
-//BEFORE THE NOT OVERLOADED VERSION
-
-// type MaybeQuarkConfig<
-//   VariantsMap extends QuarkVariantsMap,
-//   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
-// > =
-//   | (QuarkConfig<VariantsMap, Defaults> & { name?: string })
-//   | QuarkCss<VariantsMap, Defaults>
-//   | string[]
-//   //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
-//   | (string & { quark?: VariantsMap })
-
-// export type StyledFn = <
-//   Element extends ElementType,
-//   VariantsMap extends QuarkVariantsMap = {},
-//   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-//   DefaultProps extends PartialComponentProps<Element> = {}
-// >(
-//   element: Element,
-//   configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
-//   defaultComponentProps?: DefaultProps
-// ) => QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
-
-// export type Styled = StyledFn & {
-//   [K in keyof JSX.IntrinsicElements]: {
-//     <
-//       VariantsMap extends QuarkVariantsMap = {},
-//       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-//       DefaultProps extends PartialComponentProps<K> = {}
-//     >(
-//       configOrCssOrClassStrings: MaybeQuarkConfig<VariantsMap, Defaults>,
-//       defaultComponentProps?: DefaultProps
-//     ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
-//   }
-// }
 
 export type StyledFnOverload = {
   <
