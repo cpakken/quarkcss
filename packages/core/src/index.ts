@@ -43,7 +43,7 @@ export type PropsOfVariantsMap<
   (keyof Defaults | GetBooleanPropKeys<VariantsMap>) & string
 >
 
-type QuarkClassValue = string | string[]
+export type QuarkClassValue = string | string[]
 
 type CompoundVariantValue<VariantValues> =
   | VariantPropValue<VariantValues>
@@ -72,6 +72,49 @@ export type QuarkConfig<
   defaults?: Defaults
 }
 
+export type NamedQuarkConfig<
+  VariantsMap extends QuarkVariantsMap = {},
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+> = QuarkConfig<VariantsMap, Defaults> & { name?: string }
+
+export type MergeQuarkVariantValues<Base, Extension> = Flatten<
+  Omit<Base, keyof Extension> & Extension
+>
+
+export type MergeQuarkVariantsMap<
+  Base extends QuarkVariantsMap,
+  Extension extends QuarkVariantsMap
+> = Flatten<
+  Omit<Base, keyof Extension> & {
+    [Key in keyof Extension]: Key extends keyof Base
+      ? MergeQuarkVariantValues<Base[Key], Extension[Key]>
+      : Extension[Key]
+  }
+> extends infer Merged extends QuarkVariantsMap
+  ? Merged
+  : never
+
+export type MergeQuarkDefaults<
+  VariantsMap extends QuarkVariantsMap,
+  BaseDefaults,
+  ExtensionDefaults
+> = Flatten<Omit<BaseDefaults, keyof ExtensionDefaults> & ExtensionDefaults> &
+  PartialPropsOfVariantsMap<VariantsMap>
+
+export type MergeQuarkConfig<
+  BaseVariants extends QuarkVariantsMap,
+  BaseDefaults extends PartialPropsOfVariantsMap<BaseVariants>,
+  ExtensionVariants extends QuarkVariantsMap,
+  ExtensionDefaults extends PartialPropsOfVariantsMap<ExtensionVariants>,
+  MergedVariants extends QuarkVariantsMap = MergeQuarkVariantsMap<
+    BaseVariants,
+    ExtensionVariants
+  >
+> = NamedQuarkConfig<
+  MergedVariants,
+  MergeQuarkDefaults<MergedVariants, BaseDefaults, ExtensionDefaults>
+>
+
 const $quark = Symbol('quark')
 
 type Falsey = false | null | undefined | 0 | ''
@@ -82,7 +125,7 @@ export interface QuarkCss<
   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
 > {
   (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCX[]): string
-  [$quark]: QuarkConfig<VariantsMap, Defaults>
+  [$quark]: NamedQuarkConfig<VariantsMap, Defaults>
 }
 
 export type AnyQuarkCss = QuarkCss<any, any>
@@ -120,7 +163,7 @@ type MaybeQuarkConfig<
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
 > =
-  | (QuarkConfig<VariantsMap, Defaults> & { name?: string })
+  | NamedQuarkConfig<VariantsMap, Defaults>
   | string[]
   //Hack so that typescript can narrow type errors to QuarkConfig instead of the whole parameter
   | (string & { quark?: VariantsMap })
@@ -247,8 +290,78 @@ export const getQuarkConfig = <
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>
 >(
   quark: QuarkCss<VariantsMap, Defaults>
-): QuarkConfig<VariantsMap, Defaults> => {
+): NamedQuarkConfig<VariantsMap, Defaults> => {
   return quark[$quark]
+}
+
+export const mergeQuarkConfigs = <
+  BaseVariants extends QuarkVariantsMap,
+  BaseDefaults extends PartialPropsOfVariantsMap<BaseVariants>,
+  ExtensionVariants extends QuarkVariantsMap,
+  ExtensionDefaults extends PartialPropsOfVariantsMap<ExtensionVariants>
+>(
+  baseConfig: NamedQuarkConfig<BaseVariants, BaseDefaults>,
+  extensionConfig: NamedQuarkConfig<ExtensionVariants, ExtensionDefaults>
+): MergeQuarkConfig<BaseVariants, BaseDefaults, ExtensionVariants, ExtensionDefaults> => {
+  const base = mergeClassValues(baseConfig.base, extensionConfig.base)
+  const variants = mergeVariants(baseConfig.variants, extensionConfig.variants)
+  const compound =
+    baseConfig.compound || extensionConfig.compound
+      ? [...(baseConfig.compound || []), ...(extensionConfig.compound || [])]
+      : undefined
+  const defaults =
+    baseConfig.defaults || extensionConfig.defaults
+      ? { ...baseConfig.defaults, ...extensionConfig.defaults }
+      : undefined
+  const name = extensionConfig.name ?? baseConfig.name
+
+  return {
+    ...(name ? { name } : {}),
+    ...(base ? { base } : {}),
+    ...(variants ? { variants } : {}),
+    ...(compound ? { compound } : {}),
+    ...(defaults ? { defaults } : {}),
+  } as MergeQuarkConfig<BaseVariants, BaseDefaults, ExtensionVariants, ExtensionDefaults>
+}
+
+const mergeVariants = (
+  baseVariants?: QuarkVariantsMap,
+  extensionVariants?: QuarkVariantsMap
+): QuarkVariantsMap | undefined => {
+  if (!baseVariants) return extensionVariants
+  if (!extensionVariants) return baseVariants
+
+  const merged: QuarkVariantsMap = { ...baseVariants }
+
+  for (const variantKey in extensionVariants) {
+    const baseValues = merged[variantKey]
+    const extensionValues = extensionVariants[variantKey]
+
+    if (!baseValues) {
+      merged[variantKey] = extensionValues
+      continue
+    }
+
+    const mergedValues = { ...baseValues }
+
+    for (const valueKey in extensionValues) {
+      mergedValues[valueKey] = mergeClassValues(baseValues[valueKey], extensionValues[valueKey])
+    }
+
+    merged[variantKey] = mergedValues
+  }
+
+  return merged
+}
+
+const mergeClassValues = (
+  baseValue?: QuarkClassValue,
+  extensionValue?: QuarkClassValue
+): QuarkClassValue | undefined => {
+  if (!baseValue) return extensionValue
+  if (!extensionValue) return baseValue
+
+  return [...arrayify(baseValue), ...arrayify(extensionValue)]
 }
 
 const normalize = (key: string | boolean | null | undefined | 0): string => {

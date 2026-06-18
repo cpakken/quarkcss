@@ -1,4 +1,4 @@
-import { css, getQuarkConfig, isQuarkCss, type QuarkProps } from '..'
+import { css, getQuarkConfig, isQuarkCss, mergeQuarkConfigs, type QuarkProps } from '..'
 import {describe, test, expect, expectTypeOf} from 'bun:test'
 
 describe('core', () => {
@@ -304,6 +304,106 @@ describe('core', () => {
     expect(button({ intent: 'secondary', size: 'small' })).toEqual(
       'font-semibold border rounded bg-white text-gray-800 border-gray-400 text-sm py-1 px-2 hover:bg-gray-100'
     )
+  })
+
+  test('mergeQuarkConfigs appends extension output', () => {
+    const merged = mergeQuarkConfigs(
+      {
+        name: 'Badge',
+        base: 'badge-base',
+        variants: {
+          tone: {
+            neutral: 'tone-neutral',
+            danger: 'tone-danger',
+          },
+          size: {
+            small: 'size-small',
+          },
+        },
+        compound: [
+          {
+            tone: 'danger',
+            size: 'small',
+            class: 'badge-danger-small',
+          },
+        ],
+        defaults: {
+          tone: 'neutral',
+          size: 'small',
+        },
+      },
+      {
+        name: 'InteractiveBadge',
+        base: 'interactive-base',
+        variants: {
+          tone: {
+            danger: 'interactive-danger',
+            dangerHover: 'interactive-danger-hover',
+          },
+          interactive: {
+            true: 'interactive-enabled',
+          },
+        },
+        compound: [
+          {
+            tone: 'danger',
+            interactive: true,
+            class: 'interactive-danger-compound',
+          },
+        ],
+        defaults: {
+          tone: 'dangerHover',
+        },
+      }
+    )
+
+    expect(merged).toEqual({
+      name: 'InteractiveBadge',
+      base: ['badge-base', 'interactive-base'],
+      variants: {
+        tone: {
+          neutral: 'tone-neutral',
+          danger: ['tone-danger', 'interactive-danger'],
+          dangerHover: 'interactive-danger-hover',
+        },
+        size: {
+          small: 'size-small',
+        },
+        interactive: {
+          true: 'interactive-enabled',
+        },
+      },
+      compound: [
+        {
+          tone: 'danger',
+          size: 'small',
+          class: 'badge-danger-small',
+        },
+        {
+          tone: 'danger',
+          interactive: true,
+          class: 'interactive-danger-compound',
+        },
+      ],
+      defaults: {
+        tone: 'dangerHover',
+        size: 'small',
+      },
+    })
+
+    const badge = css(merged)
+    type Props = QuarkProps<typeof badge>
+
+    expectTypeOf<{
+      tone?: 'neutral' | 'danger' | 'dangerHover'
+      size?: 'small'
+      interactive?: boolean | null | undefined | 0
+    }>().toExtend<Props>()
+
+    expect(badge({ tone: 'danger', interactive: true }, 'custom')).toEqual(
+      'badge-base interactive-base tone-danger interactive-danger size-small interactive-enabled badge-danger-small interactive-danger-compound custom'
+    )
+    expect(badge()).toEqual('badge-base interactive-base interactive-danger-hover size-small')
   })
 
   test('utils', () => {

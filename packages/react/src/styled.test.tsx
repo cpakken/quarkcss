@@ -241,6 +241,234 @@ describe('styled', () => {
       </div>
     `)
   })
+
+  test('extends quark components by appending config output', () => {
+    const Badge = styled(
+      'span',
+      {
+        base: 'badge-base',
+        variants: {
+          tone: {
+            neutral: 'tone-neutral',
+            danger: 'tone-danger',
+          },
+          size: {
+            small: 'size-small',
+          },
+        },
+        compound: [
+          {
+            tone: 'danger',
+            size: 'small',
+            class: 'badge-danger-small',
+          },
+        ],
+        defaults: {
+          tone: 'neutral',
+          size: 'small',
+        },
+      },
+      {
+        role: 'status',
+        title: 'Base title',
+      }
+    )
+
+    const InteractiveBadge = styled(
+      Badge,
+      {
+        base: 'interactive-base',
+        variants: {
+          tone: {
+            danger: 'interactive-danger',
+            dangerHover: 'interactive-danger-hover',
+          },
+          interactive: {
+            true: 'interactive-enabled',
+          },
+        },
+        compound: [
+          {
+            tone: 'danger',
+            interactive: true,
+            class: 'interactive-danger-compound',
+          },
+        ],
+        defaults: {
+          tone: 'dangerHover',
+        },
+      },
+      {
+        title: 'Interactive title',
+      }
+    )
+
+    type Variants = QuarkVariantProps<typeof InteractiveBadge>
+    type Props = ComponentProps<typeof InteractiveBadge>
+
+    expectTypeOf<Variants>().toEqualTypeOf<{
+      tone?: 'neutral' | 'danger' | 'dangerHover'
+      size?: 'small'
+      interactive?: boolean | null | undefined | 0
+    }>()
+    expectTypeOf<Props['role']>().toEqualTypeOf<ComponentProps<'span'>['role']>()
+    expectTypeOf<Props['title']>().toEqualTypeOf<ComponentProps<'span'>['title']>()
+
+    const { container } = render(
+      <>
+        <InteractiveBadge tone="danger" interactive className="custom">
+          Danger
+        </InteractiveBadge>
+        <InteractiveBadge>Default</InteractiveBadge>
+      </>
+    )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <span
+          class="badge-base interactive-base tone-danger interactive-danger size-small interactive-enabled badge-danger-small interactive-danger-compound custom"
+          role="status"
+          title="Interactive title"
+        >
+          Danger
+        </span>
+        <span
+          class="badge-base interactive-base interactive-danger-hover size-small"
+          role="status"
+          title="Interactive title"
+        >
+          Default
+        </span>
+      </div>
+    `)
+  })
+
+  test('extends quark components with base classes', () => {
+    const Button = styled(
+      'button',
+      {
+        base: 'button-base',
+        variants: {
+          tone: {
+            neutral: 'tone-neutral',
+            danger: 'tone-danger',
+          },
+        },
+        defaults: {
+          tone: 'neutral',
+        },
+      },
+      {
+        type: 'button',
+      }
+    )
+
+    const ToolbarButton = styled(Button, ['toolbar-button', 'gap-2'])
+
+    type Variants = QuarkVariantProps<typeof ToolbarButton>
+    type Props = ComponentProps<typeof ToolbarButton>
+
+    expectTypeOf<Variants>().toEqualTypeOf<{
+      tone?: 'neutral' | 'danger'
+    }>()
+    expectTypeOf<Props['type']>().toEqualTypeOf<ComponentProps<'button'>['type']>()
+
+    const { container } = render(
+      <>
+        <ToolbarButton>Default</ToolbarButton>
+        <ToolbarButton tone="danger" className="custom">
+          Danger
+        </ToolbarButton>
+      </>
+    )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <button
+          class="button-base toolbar-button gap-2 tone-neutral"
+          type="button"
+        >
+          Default
+        </button>
+        <button
+          class="button-base toolbar-button gap-2 tone-danger custom"
+          type="button"
+        >
+          Danger
+        </button>
+      </div>
+    `)
+  })
+
+  test('extends already-extended quark components', () => {
+    const Badge = styled.span({
+      base: 'badge-base',
+      variants: {
+        tone: {
+          neutral: 'tone-neutral',
+          danger: 'tone-danger',
+        },
+      },
+      defaults: {
+        tone: 'neutral',
+      },
+    })
+
+    const InteractiveBadge = styled(Badge, {
+      variants: {
+        tone: {
+          danger: 'interactive-danger',
+        },
+        interactive: {
+          true: 'interactive-enabled',
+        },
+      },
+    })
+
+    const ActionBadge = styled(InteractiveBadge, {
+      base: 'action-badge',
+      variants: {
+        tone: {
+          danger: 'action-danger',
+          success: 'tone-success',
+        },
+      },
+      defaults: {
+        tone: 'success',
+      },
+    })
+
+    type Variants = QuarkVariantProps<typeof ActionBadge>
+
+    expectTypeOf<Variants>().toEqualTypeOf<{
+      tone?: 'neutral' | 'danger' | 'success'
+      interactive?: boolean | null | undefined | 0
+    }>()
+
+    const { container } = render(
+      <>
+        <ActionBadge>Default</ActionBadge>
+        <ActionBadge tone="danger" interactive>
+          Danger
+        </ActionBadge>
+      </>
+    )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <span
+          class="badge-base action-badge tone-success"
+        >
+          Default
+        </span>
+        <span
+          class="badge-base action-badge tone-danger interactive-danger action-danger interactive-enabled"
+        >
+          Danger
+        </span>
+      </div>
+    `)
+  })
 })
 
 test('className string', () => {

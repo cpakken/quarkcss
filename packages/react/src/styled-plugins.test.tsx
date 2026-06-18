@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 
 import React from 'react'
+import { styled } from '.'
 import { styled as styledMerge } from './merge'
 import { render } from '@testing-library/react'
 
@@ -27,6 +28,28 @@ describe('styled with plugins', () => {
       <div>
         <div
           class="baseClass red custom w-30"
+        >
+          <div>
+            Child
+          </div>
+        </div>
+      </div>
+    `)
+  })
+
+  test('preserves plugins when composing with Quark CSS', () => {
+    const Composed = styled('div', Container.CSS)
+
+    const { container } = render(
+      <Composed size="large" className="custom w-30">
+        <div>Child</div>
+      </Composed>
+    )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <div
+          class="baseClass blue custom w-30"
         >
           <div>
             Child
