@@ -224,6 +224,25 @@ Use `cx` for per-instance customization. `cx` accepts a string, a string array, 
 
 Prefer `cx` for quark-specific class extensions, and use `className` when forwarding ordinary React props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
 
+## Prop Filtering
+
+Add `shouldForwardProp` to a styled config to prevent styling-only props from reaching the rendered component.
+
+```tsx
+const Button = styled.button({
+  base: 'inline-flex items-center',
+  variants: {
+    loading: {
+      true: 'opacity-50 pointer-events-none'
+    }
+  },
+  shouldForwardProp: (prop, defaultValidator) =>
+    defaultValidator(prop) && prop !== 'busy'
+})
+```
+
+Variant props are consumed by default. The `defaultValidator` fallback preserves that behavior for all other props, and a custom predicate can explicitly forward a variant prop when needed.
+
 ## Tailwind Conflicts
 
 Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:

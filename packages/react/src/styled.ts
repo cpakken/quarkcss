@@ -26,7 +26,7 @@ import {
   createElement,
   forwardRef,
 } from 'react'
-import { createSeparateQuarkPropsFn } from './createSeparateQuarkPropsFn'
+import { createSeparateQuarkPropsFn, type ShouldForwardProp } from './createSeparateQuarkPropsFn'
 
 import { createUseQuarkMemo } from './shallow-compare'
 
@@ -67,6 +67,13 @@ export type QuarkVariantProps<C> = C extends QuarkComponent<any, infer V, infer 
   : never
 
 export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
+
+export type StyledQuarkConfig<
+  VariantsMap extends QuarkVariantsMap = {},
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+> = NamedQuarkConfig<VariantsMap, Defaults> & {
+  shouldForwardProp?: ShouldForwardProp
+}
 
 // export type AnyQuarkCss = QuarkCss<any, any>
 
@@ -162,7 +169,7 @@ export type StyledFnOverload = {
     DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {}
   >(
     element: Component,
-    config: NamedQuarkConfig<VariantsMap, Defaults>,
+    config: StyledQuarkConfig<VariantsMap, Defaults>,
     defaultComponentProps?: DefaultProps
   ): ExtendQuarkComponent<Component, VariantsMap, Defaults, DefaultProps>
   <Element extends ElementType, DefaultProps extends PartialComponentProps<Element> = {}>(
@@ -187,7 +194,7 @@ export type StyledFnOverload = {
     DefaultProps extends PartialComponentProps<Element> = {}
   >(
     element: Element,
-    config: NamedQuarkConfig<VariantsMap, Defaults>,
+    config: StyledQuarkConfig<VariantsMap, Defaults>,
     defaultComponentProps?: DefaultProps
   ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
 }
@@ -203,7 +210,7 @@ export type StyledProxy = {
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
       DefaultProps extends PartialComponentProps<K> = {}
     >(
-      config: NamedQuarkConfig<VariantsMap, Defaults>,
+      config: StyledQuarkConfig<VariantsMap, Defaults>,
       // config: QuarkConfig<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
     ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
@@ -223,11 +230,18 @@ export type Styled = StyledFnOverload & StyledProxy
 const quarkComponentMeta = Symbol.for('quarkcss.react.component')
 
 type AnyNamedQuarkConfig = NamedQuarkConfig<any, any>
+type AnyStyledQuarkConfig = StyledQuarkConfig<any, any>
 
 type QuarkComponentMeta = {
   element: ElementType
   defaultComponentProps?: Record<any, any>
+  shouldForwardProp?: ShouldForwardProp
 }
+
+type StyledConfigInput<
+  VariantsMap extends QuarkVariantsMap,
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+> = StyledQuarkConfig<VariantsMap, Defaults> | QuarkCss<VariantsMap, Defaults> | string | string[]
 
 function _styled<
   Element extends ElementType,
@@ -237,18 +251,19 @@ function _styled<
 >(
   this: typeof css,
   element: Element,
-  configOrCssOrClassStrings: QuarkCss<VariantsMap, Defaults>,
+  configOrCssOrClassStrings: StyledConfigInput<VariantsMap, Defaults>,
   defaultComponentProps?: DefaultProps
 ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps> {
   const CSS = this
 
   const baseMeta = getQuarkComponentMeta(element)
   const elementToRender = baseMeta?.element ?? element
+  const styledConfig = toStyledConfig(configOrCssOrClassStrings)
   let quark: AnyQuarkCss
   let name: string | undefined
 
   if (baseMeta) {
-    const extensionConfig = toQuarkConfig(configOrCssOrClassStrings)
+    const extensionConfig = styledConfig.config
     const config = mergeQuarkConfigs(
       getQuarkConfig((element as AnyQuarkComponent).CSS),
       extensionConfig
@@ -260,7 +275,7 @@ function _styled<
     quark = configOrCssOrClassStrings as AnyQuarkCss
     name = getQuarkConfig(quark).name
   } else {
-    const config = toQuarkConfig(configOrCssOrClassStrings)
+    const config = styledConfig.config
     quark = CSS(config)
     name = config.name
   }
@@ -269,7 +284,11 @@ function _styled<
     ? { ...baseMeta.defaultComponentProps, ...defaultComponentProps }
     : defaultComponentProps
 
-  const separateQuarkProps = createSeparateQuarkPropsFn(quark)
+  const shouldForwardProp = composeShouldForwardProp(
+    baseMeta?.shouldForwardProp,
+    styledConfig.shouldForwardProp
+  )
+  const separateQuarkProps = createSeparateQuarkPropsFn(quark, shouldForwardProp)
 
   const _CSS = quark || CSS({})
 
@@ -306,6 +325,7 @@ function _styled<
     [quarkComponentMeta]: {
       element: elementToRender,
       defaultComponentProps: mergedDefaultComponentProps,
+      shouldForwardProp,
     } satisfies QuarkComponentMeta,
   }) as any
 }
@@ -328,6 +348,7 @@ export const styled: Styled = createStyled()
 //Re-export @quark/core
 export { css, isQuarkCss }
 export type { QuarkConfig, QuarkCss, QuarkVariantsMap }
+export type { ShouldForwardProp }
 
 const isString = (value: any): value is string => typeof value === 'string'
 
@@ -337,12 +358,30 @@ const getQuarkComponentMeta = (element: any): QuarkComponentMeta | undefined => 
   return element?.[quarkComponentMeta]
 }
 
-const toQuarkConfig = (configOrString: AnyQuarkCss | QuarkConfig | string | string[]) => {
-  if (isQuarkCss(configOrString)) return getQuarkConfig(configOrString as AnyQuarkCss)
-
-  if (typeof configOrString === 'string' || Array.isArray(configOrString)) {
-    return { base: configOrString }
+const toStyledConfig = (
+  configOrString: AnyQuarkCss | AnyStyledQuarkConfig | string | string[]
+): { config: AnyNamedQuarkConfig; shouldForwardProp?: ShouldForwardProp } => {
+  if (isQuarkCss(configOrString)) {
+    return { config: getQuarkConfig(configOrString as AnyQuarkCss) }
   }
 
-  return configOrString as AnyNamedQuarkConfig
+  if (typeof configOrString === 'string' || Array.isArray(configOrString)) {
+    return { config: { base: configOrString } }
+  }
+
+  const { shouldForwardProp, ...config } = configOrString as AnyStyledQuarkConfig
+
+  return { config, shouldForwardProp }
+}
+
+const composeShouldForwardProp = (
+  baseShouldForwardProp?: ShouldForwardProp,
+  extensionShouldForwardProp?: ShouldForwardProp
+): ShouldForwardProp | undefined => {
+  if (!baseShouldForwardProp) return extensionShouldForwardProp
+  if (!extensionShouldForwardProp) return baseShouldForwardProp
+
+  return (prop, defaultValidator) =>
+    baseShouldForwardProp(prop, defaultValidator) &&
+    extensionShouldForwardProp(prop, defaultValidator)
 }

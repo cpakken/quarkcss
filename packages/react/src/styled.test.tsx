@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { render } from '@testing-library/react'
-import type { MixedCX } from '@quarkcss/core'
+import { getQuarkConfig, type MixedCX } from '@quarkcss/core'
 import { m } from 'framer-motion'
 import React, { type ComponentProps, type ComponentPropsWithoutRef } from 'react'
 import { expectTypeOf } from 'vitest'
@@ -156,21 +156,64 @@ describe('styled', () => {
       </>,
     )
     expect(container).toMatchInlineSnapshot(`
-    <div>
-      <button
-        class="baseClass blue small test"
-        type="button"
-      >
-        hello world
-      </button>
-      <button
-        class="baseClass red small test"
-        type="button"
-      >
-        hello ??
-      </button>
-    </div>
-  `)
+      <div>
+        <button
+          class="baseClass blue small test"
+          type="button"
+        >
+          hello world
+        </button>
+        <button
+          class="baseClass red small test"
+          type="button"
+        >
+          hello ??
+        </button>
+      </div>
+    `)
+  })
+
+  test('shouldForwardProp filters props from config', () => {
+    const Box = styled.div({
+      base: 'box-base',
+      shouldForwardProp: (prop, defaultValidator) =>
+        defaultValidator(prop) && prop !== 'data-private',
+    })
+
+    expect('shouldForwardProp' in getQuarkConfig(Box.CSS)).toBe(false)
+
+    const { container } = render(<Box data-private="secret" data-visible="yes" />)
+    const element = container.firstElementChild as HTMLElement
+
+    expect(element.className).toBe('box-base')
+    expect(element.getAttribute('data-private')).toBeNull()
+    expect(element.getAttribute('data-visible')).toBe('yes')
+  })
+
+  test('shouldForwardProp can forward variant props', () => {
+    const CustomBox = ({
+      tone,
+      ...props
+    }: ComponentProps<'div'> & { tone?: 'info' | 'danger' }) => (
+      <div data-tone={tone} {...props} />
+    )
+
+    const Box = styled(CustomBox, {
+      base: 'box-base',
+      variants: {
+        tone: {
+          info: 'tone-info',
+          danger: 'tone-danger',
+        },
+      },
+      shouldForwardProp: (prop, defaultValidator) => prop === 'tone' || defaultValidator(prop),
+    })
+
+    const { container } = render(<Box tone="info" />)
+    const element = container.firstElementChild as HTMLElement
+
+    expect(element.className).toBe('box-base tone-info')
+    expect(element.getAttribute('data-tone')).toBe('info')
   })
 
   test('HOC / Polymorphic Framer Motion Types', () => {
@@ -341,6 +384,28 @@ describe('styled', () => {
         </span>
       </div>
     `)
+  })
+
+  test('composes shouldForwardProp when extending quark components', () => {
+    const Base = styled.div({
+      base: 'base',
+      shouldForwardProp: (prop) => prop !== 'data-base',
+    })
+
+    const Extended = styled(Base, {
+      base: 'extended',
+      shouldForwardProp: (prop) => prop !== 'data-extended',
+    })
+
+    const { container } = render(
+      <Extended data-base="base" data-extended="extended" data-keep="keep" />
+    )
+    const element = container.firstElementChild as HTMLElement
+
+    expect(element.className).toBe('base extended')
+    expect(element.getAttribute('data-base')).toBeNull()
+    expect(element.getAttribute('data-extended')).toBeNull()
+    expect(element.getAttribute('data-keep')).toBe('keep')
   })
 
   test('extends quark components with base classes', () => {

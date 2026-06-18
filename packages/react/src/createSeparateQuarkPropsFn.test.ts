@@ -24,6 +24,28 @@ describe('createSeparateQuarkPropsFn', () => {
     expect(quarkProps).toEqual({ size: 'large' })
     expect(rest).toEqual({ foo: 'bar', baz: 'qux' })
   })
+
+  test('shouldForwardProp filters non-variant props', () => {
+    const separateProps = createSeparateQuarkPropsFn(
+      css(config),
+      (prop, defaultValidator) => defaultValidator(prop) && prop !== 'foo'
+    )
+    const [quarkProps, rest] = separateProps({ color: 'red', foo: 'bar', baz: 'qux' })
+
+    expect(quarkProps).toEqual({ color: 'red' })
+    expect(rest).toEqual({ baz: 'qux' })
+  })
+
+  test('shouldForwardProp can forward variant props', () => {
+    const separateProps = createSeparateQuarkPropsFn(
+      css(config),
+      (prop, defaultValidator) => prop === 'color' || defaultValidator(prop)
+    )
+    const [quarkProps, rest] = separateProps({ color: 'red', size: 'large', foo: 'bar' })
+
+    expect(quarkProps).toEqual({ color: 'red', size: 'large' })
+    expect(rest).toEqual({ color: 'red', foo: 'bar' })
+  })
 })
 
 // describe('shallowMemoPrev', () => {

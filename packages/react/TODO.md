@@ -1,5 +1,3 @@
-- style components shouldForwardProps api
-
 ## Apparently, many people have the same idea as me
 
 https://windstitch.vercel.app/docs/create-a-component
