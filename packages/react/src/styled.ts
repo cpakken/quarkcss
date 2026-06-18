@@ -27,7 +27,6 @@ import {
   forwardRef,
 } from 'react'
 import { createSeparateQuarkPropsFn, type ShouldForwardProp } from './createSeparateQuarkPropsFn'
-import { createUseQuarkMemo } from './shallow-compare'
 
 export type QuarkComponentProps<
   Element extends ElementType,
@@ -258,11 +257,6 @@ function _styled<
 
   const _CSS = quark || CSS({})
 
-  if (isClient) {
-    // Client Side Rendering
-    quark = createUseQuarkMemo(quark)
-  }
-
   const Component: ForwardRefRenderFunction<any, any> = (
     { children, className: _className, cx, ...props },
     ref
@@ -279,7 +273,6 @@ function _styled<
     )
   }
 
-  // const Forwarded = memo(forwardRef(Component))
   const Forwarded = forwardRef(Component)
   const displayName = isString(elementToRender)
     ? elementToRender
@@ -317,8 +310,6 @@ export type { QuarkConfig, QuarkCss, QuarkVariantsMap }
 export type { ShouldForwardProp }
 
 const isString = (value: any): value is string => typeof value === 'string'
-
-const isClient = typeof window !== 'undefined'
 
 const getQuarkComponentMeta = (element: any): QuarkComponentMeta | undefined => {
   return element?.[quarkComponentMeta]
