@@ -47,8 +47,20 @@ Style input can be a `string`, `string[]`, a quark `css(...)` function, or a con
 ```tsx
 const StyledCard = styled(Card, 'p-4 rounded-xl')
 const StyledPanel = styled(Panel, ['flex flex-col gap-4', 'bg-white rounded-xl'])
-const StyledInput = styled(Input, { base: 'block w-full', variants: { invalid: { true: 'border-red-500' } } })
+const StyledInput = styled(Input, {
+  variants: {
+    invalid: { true: 'border-red-500' }
+  },
+  shouldForwardProp: ['invalid'] // forward a consumed variant prop to Input
+})
+
+const FilteredButton = styled.button({
+  shouldForwardProp: (prop, defaultValidator) =>
+    defaultValidator(prop) && prop !== 'busy'
+})
 ```
+
+Variant props are consumed by default. Array form forwards variant props; predicate form handles custom filtering while `defaultValidator` preserves Quark defaults.
 
 ## Variants And Defaults
 
@@ -190,6 +202,39 @@ const MotionContainer = styled(motion.div, StyledContainer.CSS, {
   }
 })
 ```
+
+## Extending Quark Components
+
+Pass an existing Quark component to `styled(...)` to extend it without changing its underlying element or custom component:
+
+```tsx
+const Badge = styled.span({
+  base: 'inline-flex items-center rounded px-2',
+  variants: {
+    tone: {
+      neutral: 'bg-gray-100 text-gray-900',
+      danger: 'bg-red-100 text-red-900'
+    }
+  },
+  defaults: { tone: 'neutral' }
+})
+
+const ActionBadge = styled(Badge, {
+  base: 'cursor-pointer', // appends after Badge base
+  variants: {
+    tone: {
+      danger: 'ring-1 ring-red-300', // appends to Badge tone="danger"
+      success: 'bg-green-100 text-green-900' // adds a new tone value
+    },
+    interactive: {
+      true: 'hover:brightness-95' // adds a new boolean variant
+    }
+  },
+  defaults: { tone: 'success' } // overrides Badge default
+})
+```
+
+Extensions keep the underlying element/component. Configs merge base-first, extension-after; compound variants append; default props override same keys; `shouldForwardProp` filters compose.
 
 ## TypeScript
 
