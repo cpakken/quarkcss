@@ -10,6 +10,8 @@
     "build": "turbo build",
     "b": "bun run --filter '*' b",
     "test": "bun run --filter '*' test",
+    "typecheck": "turbo typecheck",
+    "tc": "turbo typecheck",
     "publish-packages": "pnpm build && changeset publish"
   },
   "workspaces": [

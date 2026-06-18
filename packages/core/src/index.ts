@@ -78,7 +78,9 @@ export type NamedQuarkConfig<
 > = QuarkConfig<VariantsMap, Defaults> & { name?: string }
 
 export type MergeQuarkVariantValues<Base, Extension> = Flatten<
-  Omit<Base, keyof Extension> & Extension
+  Omit<Base, keyof Extension> & {
+    [Key in keyof Extension]: Key extends keyof Base ? QuarkClassValue : Extension[Key]
+  }
 >
 
 export type MergeQuarkVariantsMap<
@@ -337,6 +339,8 @@ const mergeVariants = (
     const baseValues = merged[variantKey]
     const extensionValues = extensionVariants[variantKey]
 
+    if (!extensionValues) continue
+
     if (!baseValues) {
       merged[variantKey] = extensionValues
       continue
@@ -345,7 +349,8 @@ const mergeVariants = (
     const mergedValues = { ...baseValues }
 
     for (const valueKey in extensionValues) {
-      mergedValues[valueKey] = mergeClassValues(baseValues[valueKey], extensionValues[valueKey])
+      const classValue = mergeClassValues(baseValues[valueKey], extensionValues[valueKey])
+      if (classValue) mergedValues[valueKey] = classValue
     }
 
     merged[variantKey] = mergedValues

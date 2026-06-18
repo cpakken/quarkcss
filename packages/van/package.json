@@ -27,6 +27,8 @@
   "scripts": {
     "//test": "vitest --globals",
     "test": "bun test",
+    "typecheck": "tsc --noEmit --pretty false",
+    "tc": "tsc --noEmit --pretty false",
     "build": "tsdown",
     "b": "tsdown"
   },

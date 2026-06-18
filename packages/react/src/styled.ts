@@ -338,7 +338,7 @@ const getQuarkComponentMeta = (element: any): QuarkComponentMeta | undefined => 
 }
 
 const toQuarkConfig = (configOrString: AnyQuarkCss | QuarkConfig | string | string[]) => {
-  if (isQuarkCss(configOrString)) return getQuarkConfig(configOrString)
+  if (isQuarkCss(configOrString)) return getQuarkConfig(configOrString as AnyQuarkCss)
 
   if (typeof configOrString === 'string' || Array.isArray(configOrString)) {
     return { base: configOrString }
