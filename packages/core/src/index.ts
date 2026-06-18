@@ -181,7 +181,7 @@ export function css<
 
   const { base, variants, defaults, compound } = config
   const baseClass = base ? cleanMultiLine(Array.isArray(base) ? base.join(' ') : base) : base
-  const variantsEntries = variants && Object.entries(variants)
+  const variantsEntries = variants && normalizeVariantEntries(variants)
   const compoundEntries = compound?.map((variant) => {
     const conditions: [string, string | string[]][] = []
 
@@ -201,7 +201,7 @@ export function css<
 
     return {
       conditions,
-      classNames: className ? arrayify(className) : [],
+      classNames: className ? normalizeClassNames(className) : [],
     }
   })
 
@@ -231,6 +231,7 @@ export function css<
 
   const _css = (props: any = {}, ...rest: MixedCX[]) => {
     const classNames: string[] = baseClass ? [baseClass] : []
+    let shouldCleanClassNames = false
 
     //Process Variants
     if (variantsEntries) {
@@ -263,11 +264,20 @@ export function css<
     //Add Rest
     for (const className of rest) {
       if (className) {
-        if (typeof className === 'string') classNames.push(className)
-        else if (Array.isArray(className)) classNames.push(...className.filter(Boolean))
-        else {
+        if (typeof className === 'string') {
+          if (needsCleanMultiLine(className)) shouldCleanClassNames = true
+          classNames.push(className)
+        } else if (Array.isArray(className)) {
+          for (const value of className) {
+            if (value) {
+              if (needsCleanMultiLine(value)) shouldCleanClassNames = true
+              classNames.push(value)
+            }
+          }
+        } else {
           for (const key in className) {
             if (className[key]) {
+              if (needsCleanMultiLine(key)) shouldCleanClassNames = true
               classNames.push(key)
             }
           }
@@ -275,7 +285,8 @@ export function css<
       }
     }
 
-    return cleanMultiLine(classNames.join(' '))
+    const className = classNames.join(' ')
+    return shouldCleanClassNames ? cleanMultiLine(className) : className
   }
 
   return Object.assign(_css, {
@@ -376,6 +387,46 @@ const normalize = (key: string | boolean | null | undefined | 0): string => {
 
 export const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value])
 
-export const cleanMultiLine = (str: string) => str.replace(/\s+/g, ' ').trim()
+const multiWhitespace = /\s+/g
+const needsMultiWhitespaceCleanup = /(^\s|\s$|\s{2,}|[^\S ])/
+
+export const cleanMultiLine = (str: string) => str.replace(multiWhitespace, ' ').trim()
+
+const needsCleanMultiLine = (str: string) => needsMultiWhitespaceCleanup.test(str)
+
+const normalizeClassValue = (value: QuarkClassValue): QuarkClassValue => {
+  if (Array.isArray(value)) return value.map(cleanMultiLine).filter(Boolean)
+
+  return cleanMultiLine(value)
+}
+
+const normalizeClassNames = (value: QuarkClassValue): string[] => {
+  if (Array.isArray(value)) return value.map(cleanMultiLine).filter(Boolean)
+
+  const className = cleanMultiLine(value)
+  return className ? [className] : []
+}
+
+const normalizeVariantClassMap = (map: QuarkVariants): QuarkVariants => {
+  const normalized: QuarkVariants = {}
+
+  for (const key in map) {
+    const className = map[key]
+    if (className !== undefined) normalized[key] = normalizeClassValue(className)
+  }
+
+  return normalized
+}
+
+const normalizeVariantEntries = (variants: QuarkVariantsMap): [string, QuarkVariants][] => {
+  const entries: [string, QuarkVariants][] = []
+
+  for (const key in variants) {
+    const map = variants[key]
+    if (map !== undefined) entries.push([key, normalizeVariantClassMap(map)])
+  }
+
+  return entries
+}
 
 const compoundPropKeywords = new Set(['value', 'class', 'className'])

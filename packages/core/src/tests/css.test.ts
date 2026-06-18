@@ -44,14 +44,28 @@ describe('core', () => {
         baseClass3
       `,
       variants: {
-        color: { red: 'red', blue: 'blue' },
-        size: { small: 'small', large: 'large' },
+        color: { red: 'red\nred2', blue: 'blue' },
+        size: { small: 'small', large: ['large', 'large2\nlarge3'] },
       },
+      compound: [
+        {
+          color: 'red',
+          size: 'large',
+          class: 'redLarge\ncompound',
+        },
+      ],
     })
 
     expect(
-      className({ color: 'red', size: 'large' }, 'additional', null, { foo: true, bar: null })
-    ).toEqual('baseClass baseClass2 baseClass3 red large additional foo')
+      className(
+        { color: 'red', size: 'large' },
+        'additional\nadditional2',
+        ['foo\nfoo2', null],
+        { 'bar\nbar2': true, baz: null }
+      )
+    ).toEqual(
+      'baseClass baseClass2 baseClass3 red red2 large large2 large3 redLarge compound additional additional2 foo foo2 bar bar2'
+    )
   })
 
   test('defaultVariant', () => {
