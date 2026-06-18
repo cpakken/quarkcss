@@ -297,6 +297,18 @@ const Badge = styled.span({
     }
   }
 })
+
+const InteractiveBadge = styled(Badge, {
+  variants: {
+    interactive: {
+      true: [
+        // For interactive alpha, replace the static percentage with a variable.
+        '[--badge-alpha:12%] hover:[--badge-alpha:18%]',
+        '[--badge-bg:--alpha(var(--destructive)/var(--badge-alpha))]'
+      ]
+    }
+  }
+})
 ```
 
 Pass the same variant through child components only when those children have independent styling responsibilities. Otherwise, let children inherit or consume the parent-owned variables.
