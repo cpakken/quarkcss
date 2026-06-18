@@ -236,11 +236,15 @@ const quarkComponentMeta = Symbol.for('quarkcss.react.component')
 type AnyNamedQuarkConfig = NamedQuarkConfig<any, any>
 type AnyStyledQuarkConfig = StyledQuarkConfig<any, any>
 type AnyShouldForwardPropConfig = ShouldForwardPropConfig<any>
+type NormalizedShouldForwardPropConfig = {
+  predicates?: readonly ShouldForwardProp[]
+  forwardedProps?: ReadonlySet<string>
+}
 
 type QuarkComponentMeta = {
   element: ElementType
   defaultComponentProps?: Record<any, any>
-  shouldForwardProp?: ShouldForwardProp
+  shouldForwardProp?: NormalizedShouldForwardPropConfig
 }
 
 type StyledConfigInput<
@@ -289,10 +293,11 @@ function _styled<
     ? { ...baseMeta.defaultComponentProps, ...defaultComponentProps }
     : defaultComponentProps
 
-  const shouldForwardProp = composeShouldForwardProp(
+  const shouldForwardPropConfig = composeShouldForwardProp(
     baseMeta?.shouldForwardProp,
     normalizeShouldForwardProp(styledConfig.shouldForwardProp)
   )
+  const shouldForwardProp = createShouldForwardProp(shouldForwardPropConfig)
   const separateQuarkProps = createSeparateQuarkPropsFn(quark, shouldForwardProp)
 
   const _CSS = quark || CSS({})
@@ -330,7 +335,7 @@ function _styled<
     [quarkComponentMeta]: {
       element: elementToRender,
       defaultComponentProps: mergedDefaultComponentProps,
-      shouldForwardProp,
+      shouldForwardProp: shouldForwardPropConfig,
     } satisfies QuarkComponentMeta,
   }) as any
 }
@@ -380,23 +385,81 @@ const toStyledConfig = (
 }
 
 const composeShouldForwardProp = (
-  baseShouldForwardProp?: ShouldForwardProp,
-  extensionShouldForwardProp?: ShouldForwardProp
-): ShouldForwardProp | undefined => {
+  baseShouldForwardProp?: NormalizedShouldForwardPropConfig,
+  extensionShouldForwardProp?: NormalizedShouldForwardPropConfig
+): NormalizedShouldForwardPropConfig | undefined => {
   if (!baseShouldForwardProp) return extensionShouldForwardProp
   if (!extensionShouldForwardProp) return baseShouldForwardProp
 
-  return (prop, defaultValidator) =>
-    baseShouldForwardProp(prop, defaultValidator) &&
-    extensionShouldForwardProp(prop, defaultValidator)
+  const predicates = mergePredicates(
+    baseShouldForwardProp.predicates,
+    extensionShouldForwardProp.predicates
+  )
+
+  const forwardedProps = mergeForwardedProps(
+    baseShouldForwardProp.forwardedProps,
+    extensionShouldForwardProp.forwardedProps
+  )
+
+  return {
+    ...(predicates ? { predicates } : {}),
+    ...(forwardedProps ? { forwardedProps } : {}),
+  }
 }
 
 const normalizeShouldForwardProp = (
   shouldForwardProp?: AnyShouldForwardPropConfig
+): NormalizedShouldForwardPropConfig | undefined => {
+  if (!shouldForwardProp) return undefined
+  if (typeof shouldForwardProp === 'function') return { predicates: [shouldForwardProp] }
+
+  return { forwardedProps: new Set(shouldForwardProp) }
+}
+
+const mergePredicates = (
+  basePredicates?: readonly ShouldForwardProp[],
+  extensionPredicates?: readonly ShouldForwardProp[]
+): readonly ShouldForwardProp[] | undefined => {
+  if (!basePredicates) return extensionPredicates
+  if (!extensionPredicates) return basePredicates
+
+  return [...basePredicates, ...extensionPredicates]
+}
+
+const mergeForwardedProps = (
+  baseForwardedProps?: ReadonlySet<string>,
+  extensionForwardedProps?: ReadonlySet<string>
+): ReadonlySet<string> | undefined => {
+  if (!baseForwardedProps) return extensionForwardedProps
+  if (!extensionForwardedProps) return baseForwardedProps
+
+  return new Set([...baseForwardedProps, ...extensionForwardedProps])
+}
+
+const createShouldForwardProp = (
+  shouldForwardProp?: NormalizedShouldForwardPropConfig
 ): ShouldForwardProp | undefined => {
-  if (!shouldForwardProp || typeof shouldForwardProp === 'function') return shouldForwardProp
+  if (!shouldForwardProp) return undefined
 
-  const forwardedProps = new Set(shouldForwardProp)
+  const { predicates, forwardedProps } = shouldForwardProp
 
-  return (prop, defaultValidator) => defaultValidator(prop) || forwardedProps.has(prop)
+  if (!predicates?.length && !forwardedProps) return undefined
+
+  if (!predicates?.length) {
+    return (prop, defaultValidator) => defaultValidator(prop) || !!forwardedProps?.has(prop)
+  }
+
+  if (!forwardedProps && predicates.length === 1) return predicates[0]
+
+  return (prop, defaultValidator) => {
+    const defaultOrForwarded = forwardedProps
+      ? (prop: string) => defaultValidator(prop) || forwardedProps.has(prop)
+      : defaultValidator
+
+    for (const predicate of predicates) {
+      if (!predicate(prop, defaultOrForwarded)) return false
+    }
+
+    return true
+  }
 }

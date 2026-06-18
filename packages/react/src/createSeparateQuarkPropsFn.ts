@@ -10,20 +10,23 @@ export function createSeparateQuarkPropsFn(
   shouldForwardProp?: ShouldForwardProp
 ) {
   const { variants } = getQuarkConfig(quark)
-  const defaultValidator = (prop: string) => !variants || !Object.hasOwn(variants, prop)
+  const variantKeys = variants ? new Set(Object.keys(variants)) : undefined
+  const defaultValidator = (prop: string) => !variantKeys?.has(prop)
 
   return (props: Record<any, any>): [any, any] => {
     const quarkProps = {} as any
     const rest = {} as any
 
-    if (!variants && !shouldForwardProp) return [quarkProps, props] as any
+    if (!variantKeys && !shouldForwardProp) return [quarkProps, props] as any
 
     for (const propKey in props) {
-      if (variants && Object.hasOwn(variants, propKey)) {
+      const isVariantProp = variantKeys?.has(propKey)
+
+      if (isVariantProp) {
         quarkProps[propKey] = props[propKey]
       }
 
-      if (!shouldForwardProp ? defaultValidator(propKey) : shouldForwardProp(propKey, defaultValidator)) {
+      if (!shouldForwardProp ? !isVariantProp : shouldForwardProp(propKey, defaultValidator)) {
         rest[propKey] = props[propKey]
       }
     }

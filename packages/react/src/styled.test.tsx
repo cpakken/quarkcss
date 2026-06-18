@@ -452,6 +452,55 @@ describe('styled', () => {
     expect(element.getAttribute('data-keep')).toBe('keep')
   })
 
+  test('unions shouldForwardProp arrays when extending quark components', () => {
+    const CustomBox = ({
+      tone,
+      interactive,
+      ...props
+    }: ComponentProps<'div'> & {
+      tone?: 'info' | 'danger'
+      interactive?: boolean | null | undefined | 0
+    }) => <div data-tone={tone} data-interactive={interactive ? 'true' : undefined} {...props} />
+
+    const Base = styled(CustomBox, {
+      base: 'base',
+      variants: {
+        tone: {
+          info: 'tone-info',
+          danger: 'tone-danger',
+        },
+      },
+      shouldForwardProp: ['tone'],
+    })
+
+    const Extended = styled(Base, {
+      base: 'extended',
+      variants: {
+        interactive: {
+          true: 'interactive',
+        },
+      },
+      shouldForwardProp: ['interactive'],
+    })
+
+    const Filtered = styled(Extended, {
+      base: 'filtered',
+      shouldForwardProp: (prop, defaultValidator) =>
+        defaultValidator(prop) && prop !== 'data-private',
+    })
+
+    const { container } = render(
+      <Filtered tone="danger" interactive data-private="private" data-keep="keep" />
+    )
+    const element = container.firstElementChild as HTMLElement
+
+    expect(element.className).toBe('base extended filtered tone-danger interactive')
+    expect(element.getAttribute('data-tone')).toBe('danger')
+    expect(element.getAttribute('data-interactive')).toBe('true')
+    expect(element.getAttribute('data-private')).toBeNull()
+    expect(element.getAttribute('data-keep')).toBe('keep')
+  })
+
   test('extends quark components with base classes', () => {
     const Button = styled(
       'button',
