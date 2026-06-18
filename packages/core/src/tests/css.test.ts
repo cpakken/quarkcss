@@ -1,5 +1,5 @@
+import { describe, test, expect, expectTypeOf } from 'bun:test'
 import { css, getQuarkConfig, isQuarkCss, mergeQuarkConfigs, type QuarkProps } from '..'
-import {describe, test, expect, expectTypeOf} from 'bun:test'
 
 describe('core', () => {
   test('classname', () => {
@@ -57,12 +57,10 @@ describe('core', () => {
     })
 
     expect(
-      className(
-        { color: 'red', size: 'large' },
-        'additional\nadditional2',
-        ['foo\nfoo2', null],
-        { 'bar\nbar2': true, baz: null }
-      )
+      className({ color: 'red', size: 'large' }, 'additional\nadditional2', ['foo\nfoo2', null], {
+        'bar\nbar2': true,
+        baz: null,
+      })
     ).toEqual(
       'baseClass baseClass2 baseClass3 red red2 large large2 large3 redLarge compound additional additional2 foo foo2 bar bar2'
     )

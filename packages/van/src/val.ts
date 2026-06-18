@@ -1,5 +1,5 @@
-import van from 'vanjs-core'
 import type { State } from 'vanjs-core'
+import van from 'vanjs-core'
 
 export const stateProto = Object.getPrototypeOf(van.state())
 

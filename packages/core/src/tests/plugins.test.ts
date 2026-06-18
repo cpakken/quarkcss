@@ -1,6 +1,6 @@
-import { css, createCss } from '..'
 import { describe, test, expect } from 'bun:test'
 import { twMerge } from 'tailwind-merge'
+import { css, createCss } from '..'
 
 describe('plugins', () => {
   test('tailwind-merge', () => {

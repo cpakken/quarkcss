@@ -1,4 +1,4 @@
 interface:
-  display_name: "QuarkCSS React"
-  short_description: "Use QuarkCSS styled components in React"
-  default_prompt: "Use $quarkcss-react to build typed React components with QuarkCSS."
+  display_name: 'QuarkCSS React'
+  short_description: 'Use QuarkCSS styled components in React'
+  default_prompt: 'Use $quarkcss-react to build typed React components with QuarkCSS.'

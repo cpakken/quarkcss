@@ -6,9 +6,10 @@ export type QuarkVariantsMap = { [variantKey: string]: QuarkVariants }
 type BooleanishVariantValue = boolean | null | undefined | 0
 type BooleanConfigKey = 'true' | 'false' | 'null'
 
-type VariantPropValue<VariantValues> = Extract<VariantValues, BooleanConfigKey> extends never
-  ? VariantValues
-  : Exclude<VariantValues, BooleanConfigKey> | BooleanishVariantValue
+type VariantPropValue<VariantValues> =
+  Extract<VariantValues, BooleanConfigKey> extends never
+    ? VariantValues
+    : Exclude<VariantValues, BooleanConfigKey> | BooleanishVariantValue
 
 type BooleanPropKeys<VariantValues, VariantPropKey> =
   Extract<VariantValues, BooleanConfigKey> extends never ? never : VariantPropKey
@@ -22,7 +23,7 @@ export type PartialPropsOfVariantsMap<VariantsMap extends QuarkVariantsMap> = {
 
 type ExactPartialPropsOfVariantsMap<
   VariantsMap extends QuarkVariantsMap,
-  Props extends PartialPropsOfVariantsMap<VariantsMap>
+  Props extends PartialPropsOfVariantsMap<VariantsMap>,
 > = Props & Record<Exclude<keyof Props, keyof VariantsMap>, never>
 
 type Flatten<T> = T extends Record<any, any> ? { [P in keyof T]: T[P] } : T
@@ -34,7 +35,7 @@ type PartialSubset<T, K extends keyof T> = Flatten<
 //(has variant prop 'false' | 'null' | 'true')
 export type PropsOfVariantsMap<
   VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
 > = PartialSubset<
   {
     [Key in keyof VariantsMap]: VariantPropValue<keyof VariantsMap[Key]>
@@ -62,7 +63,7 @@ export type CompoundVariants<VariantsMap extends QuarkVariantsMap> =
 
 export type QuarkConfig<
   VariantsMap extends QuarkVariantsMap = {},
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
 > = {
   base?: string | string[]
   variants?: VariantsMap
@@ -73,7 +74,7 @@ export type QuarkConfig<
 
 export type NamedQuarkConfig<
   VariantsMap extends QuarkVariantsMap = {},
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
 > = QuarkConfig<VariantsMap, Defaults> & { name?: string }
 
 export type MergeQuarkVariantValues<Base, Extension> = Flatten<
@@ -84,21 +85,22 @@ export type MergeQuarkVariantValues<Base, Extension> = Flatten<
 
 export type MergeQuarkVariantsMap<
   Base extends QuarkVariantsMap,
-  Extension extends QuarkVariantsMap
-> = Flatten<
-  Omit<Base, keyof Extension> & {
-    [Key in keyof Extension]: Key extends keyof Base
-      ? MergeQuarkVariantValues<Base[Key], Extension[Key]>
-      : Extension[Key]
-  }
-> extends infer Merged extends QuarkVariantsMap
-  ? Merged
-  : never
+  Extension extends QuarkVariantsMap,
+> =
+  Flatten<
+    Omit<Base, keyof Extension> & {
+      [Key in keyof Extension]: Key extends keyof Base
+        ? MergeQuarkVariantValues<Base[Key], Extension[Key]>
+        : Extension[Key]
+    }
+  > extends infer Merged extends QuarkVariantsMap
+    ? Merged
+    : never
 
 export type MergeQuarkDefaults<
   VariantsMap extends QuarkVariantsMap,
   BaseDefaults,
-  ExtensionDefaults
+  ExtensionDefaults,
 > = Flatten<Omit<BaseDefaults, keyof ExtensionDefaults> & ExtensionDefaults> &
   PartialPropsOfVariantsMap<VariantsMap>
 
@@ -107,10 +109,7 @@ export type MergeQuarkConfig<
   BaseDefaults extends PartialPropsOfVariantsMap<BaseVariants>,
   ExtensionVariants extends QuarkVariantsMap,
   ExtensionDefaults extends PartialPropsOfVariantsMap<ExtensionVariants>,
-  MergedVariants extends QuarkVariantsMap = MergeQuarkVariantsMap<
-    BaseVariants,
-    ExtensionVariants
-  >
+  MergedVariants extends QuarkVariantsMap = MergeQuarkVariantsMap<BaseVariants, ExtensionVariants>,
 > = NamedQuarkConfig<
   MergedVariants,
   MergeQuarkDefaults<MergedVariants, BaseDefaults, ExtensionDefaults>
@@ -123,7 +122,7 @@ export type MixedCX = string | (string | Falsey)[] | { [key: string]: any } | Fa
 
 export interface QuarkCss<
   VariantsMap extends QuarkVariantsMap = {},
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
 > {
   (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCX[]): string
   [$quark]: NamedQuarkConfig<VariantsMap, Defaults>
@@ -131,9 +130,10 @@ export interface QuarkCss<
 
 export type AnyQuarkCss = QuarkCss<any, any>
 
-export type QuarkProps<Quark> = Quark extends QuarkCss<infer VariantsMap, infer Defaults>
-  ? PropsOfVariantsMap<VariantsMap, Defaults>
-  : never
+export type QuarkProps<Quark> =
+  Quark extends QuarkCss<infer VariantsMap, infer Defaults>
+    ? PropsOfVariantsMap<VariantsMap, Defaults>
+    : never
 
 // export function css<Config extends QuarkConfig>(config: Config): QuarkCss<Config> {
 
@@ -162,7 +162,7 @@ export function createCss(...plugins: QuarkPlugin[]): typeof css {
 //Overloading css() ruins type inference, so have to do it this way
 type MaybeQuarkConfig<
   VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
 > =
   | NamedQuarkConfig<VariantsMap, Defaults>
   | string[]
@@ -171,7 +171,7 @@ type MaybeQuarkConfig<
 
 export function css<
   VariantsMap extends QuarkVariantsMap = {},
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
 >(configOrString: MaybeQuarkConfig<VariantsMap, Defaults>): QuarkCss<VariantsMap, Defaults> {
   const config =
     typeof configOrString === 'string' || Array.isArray(configOrString)
@@ -299,7 +299,7 @@ export const isQuarkCss = (value: any): boolean => {
 
 export const getQuarkConfig = <
   VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
 >(
   quark: QuarkCss<VariantsMap, Defaults>
 ): NamedQuarkConfig<VariantsMap, Defaults> => {
@@ -310,7 +310,7 @@ export const mergeQuarkConfigs = <
   BaseVariants extends QuarkVariantsMap,
   BaseDefaults extends PartialPropsOfVariantsMap<BaseVariants>,
   ExtensionVariants extends QuarkVariantsMap,
-  ExtensionDefaults extends PartialPropsOfVariantsMap<ExtensionVariants>
+  ExtensionDefaults extends PartialPropsOfVariantsMap<ExtensionVariants>,
 >(
   baseConfig: NamedQuarkConfig<BaseVariants, BaseDefaults>,
   extensionConfig: NamedQuarkConfig<ExtensionVariants, ExtensionDefaults>

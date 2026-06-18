@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
-import { render } from '@testing-library/react'
 import { getQuarkConfig, type MixedCX } from '@quarkcss/core'
+import { render } from '@testing-library/react'
 import { m } from 'framer-motion'
 import React, { type ComponentProps, type ComponentPropsWithoutRef } from 'react'
 import { expectTypeOf } from 'vitest'
@@ -53,7 +53,7 @@ describe('styled', () => {
     const { container } = render(
       <Center>
         <div>Testing</div>
-      </Center>,
+      </Center>
     )
 
     expect(container).toMatchInlineSnapshot(`
@@ -73,7 +73,7 @@ describe('styled', () => {
     const { container } = render(
       <Container color="red" size="large" cx={['amazing', { custom: true }]}>
         <div>Child</div>
-      </Container>,
+      </Container>
     )
     expect(container).toMatchInlineSnapshot(`
       <div>
@@ -90,10 +90,8 @@ describe('styled', () => {
 
   test('template strings', () => {
     const Conatiner2 = styled('div', {
-      base: `
-        baseClass
-        bg-red-500
-    `,
+      base: `baseClass
+        bg-red-500`,
     })
 
     const { container } = render(<Conatiner2 />)
@@ -132,7 +130,7 @@ describe('styled', () => {
       {
         type: 'button',
         append: '??',
-      },
+      }
     )
 
     type Variants = QuarkVariantProps<typeof StyledCustomButton>
@@ -153,7 +151,7 @@ describe('styled', () => {
         <StyledCustomButton color="red" size="small" className="test">
           hello
         </StyledCustomButton>
-      </>,
+      </>
     )
     expect(container).toMatchInlineSnapshot(`
       <div>
@@ -194,9 +192,7 @@ describe('styled', () => {
     const CustomBox = ({
       tone,
       ...props
-    }: ComponentProps<'div'> & { tone?: 'info' | 'danger' }) => (
-      <div data-tone={tone} {...props} />
-    )
+    }: ComponentProps<'div'> & { tone?: 'info' | 'danger' }) => <div data-tone={tone} {...props} />
 
     const Box = styled(CustomBox, {
       base: 'box-base',
@@ -220,9 +216,7 @@ describe('styled', () => {
     const CustomBox = ({
       tone,
       ...props
-    }: ComponentProps<'div'> & { tone?: 'info' | 'danger' }) => (
-      <div data-tone={tone} {...props} />
-    )
+    }: ComponentProps<'div'> & { tone?: 'info' | 'danger' }) => <div data-tone={tone} {...props} />
 
     const Box = styled(CustomBox, {
       base: 'box-base',
@@ -274,7 +268,7 @@ describe('styled', () => {
         <StyledMotion style={{ x: 0 }} layout="position">
           <div>Testing</div>
         </StyledMotion>
-      </div>,
+      </div>
     )
 
     expect(container).toMatchInlineSnapshot(`
@@ -312,7 +306,7 @@ describe('styled', () => {
     const { container } = render(
       <Composed color="red" size="large" className="custom">
         <div>Child</div>
-      </Composed>,
+      </Composed>
     )
 
     expect(container).toMatchInlineSnapshot(`
@@ -641,7 +635,7 @@ test('className string', () => {
   const { container } = render(
     <Center>
       <div>Testing</div>
-    </Center>,
+    </Center>
   )
 
   expect(container).toMatchInlineSnapshot(`
@@ -676,18 +670,16 @@ test('proxy intrinsic elements', () => {
   }>()
   expectTypeOf<Props['className']>().toEqualTypeOf<ComponentProps<'button'>['className']>()
 
-  const Center = styled.div(`
-    flex 
+  const Center = styled.div(`flex 
     items-center
-    justify-center
-  `)
+    justify-center`)
 
   const { container } = render(
     <Center>
       <Button color="blue" size="small" className="test" cx={['amazing', null, { custom: true }]}>
         hello
       </Button>
-    </Center>,
+    </Center>
   )
 
   expect(container).toMatchInlineSnapshot(`

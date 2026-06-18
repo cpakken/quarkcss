@@ -7,7 +7,8 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "moduleDetection": "force",
-    "moduleResolution": "Node",
+    "types": ["bun"],
+    "moduleResolution": "Bundler",
     "verbatimModuleSyntax": true,
     //
     // "module": "ESNext",

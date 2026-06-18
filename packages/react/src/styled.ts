@@ -27,14 +27,13 @@ import {
   forwardRef,
 } from 'react'
 import { createSeparateQuarkPropsFn, type ShouldForwardProp } from './createSeparateQuarkPropsFn'
-
 import { createUseQuarkMemo } from './shallow-compare'
 
 export type QuarkComponentProps<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
+  DefaultComponentProps extends PartialComponentProps<Element>,
 > = Assign<
   Assign<
     ComponentProps<Element>,
@@ -47,27 +46,25 @@ export interface QuarkComponent<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends PartialComponentProps<Element>
+  DefaultComponentProps extends PartialComponentProps<Element>,
 > {
-  (props: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps>): ReactElement<
-    any,
-    any
-  > | null
+  (
+    props: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps>
+  ): ReactElement<any, any> | null
   CSS: QuarkCss<VariantsMap, Defaults>
   displayName: string
 }
 
 type Assign<A, B> = Omit<A, keyof B> & B
 
-export type QuarkVariantProps<C> = C extends QuarkComponent<any, infer V, infer D, any>
-  ? PropsOfVariantsMap<V, D>
-  : never
+export type QuarkVariantProps<C> =
+  C extends QuarkComponent<any, infer V, infer D, any> ? PropsOfVariantsMap<V, D> : never
 
 export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
 
 export type StyledQuarkConfig<
   VariantsMap extends QuarkVariantsMap = {},
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
 > = NamedQuarkConfig<VariantsMap, Defaults> & {
   shouldForwardProp?: ShouldForwardPropConfig<VariantsMap>
 }
@@ -75,7 +72,6 @@ export type StyledQuarkConfig<
 export type ShouldForwardPropConfig<VariantsMap extends QuarkVariantsMap> =
   | ShouldForwardProp
   | readonly (keyof VariantsMap & string)[]
-
 
 export type AnyQuarkComponent = QuarkComponent<any, any, any, any>
 
@@ -99,7 +95,7 @@ type ExtendQuarkComponent<
   MergedVariants extends QuarkVariantsMap = MergeQuarkVariantsMap<
     QuarkVariantsOf<Component>,
     VariantsMap
-  >
+  >,
 > = QuarkComponent<
   QuarkElementOf<Component>,
   MergedVariants,
@@ -107,11 +103,10 @@ type ExtendQuarkComponent<
   Assign<QuarkDefaultPropsOf<Component>, DefaultProps>
 >
 
-
 export type StyledFnOverload = {
   <
     Component extends AnyQuarkComponent,
-    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {}
+    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {},
   >(
     element: Component,
     baseCSS: string | string[],
@@ -121,7 +116,7 @@ export type StyledFnOverload = {
     Component extends AnyQuarkComponent,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {}
+    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {},
   >(
     element: Component,
     quarkCSS: QuarkCss<VariantsMap, Defaults>,
@@ -131,7 +126,7 @@ export type StyledFnOverload = {
     Component extends AnyQuarkComponent,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {}
+    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {},
   >(
     element: Component,
     config: StyledQuarkConfig<VariantsMap, Defaults>,
@@ -146,7 +141,7 @@ export type StyledFnOverload = {
     Element extends ElementType,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {}
+    DefaultProps extends PartialComponentProps<Element> = {},
   >(
     element: Element,
     quarkCSS: QuarkCss<VariantsMap, Defaults>,
@@ -156,7 +151,7 @@ export type StyledFnOverload = {
     Element extends ElementType,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {}
+    DefaultProps extends PartialComponentProps<Element> = {},
   >(
     element: Element,
     config: StyledQuarkConfig<VariantsMap, Defaults>,
@@ -173,7 +168,7 @@ export type StyledProxy = {
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {}
+      DefaultProps extends PartialComponentProps<K> = {},
     >(
       config: StyledQuarkConfig<VariantsMap, Defaults>,
       // config: QuarkConfig<VariantsMap, Defaults>,
@@ -182,7 +177,7 @@ export type StyledProxy = {
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {}
+      DefaultProps extends PartialComponentProps<K> = {},
     >(
       quarkCSS: QuarkCss<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
@@ -210,14 +205,14 @@ type QuarkComponentMeta = {
 
 type StyledConfigInput<
   VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
 > = StyledQuarkConfig<VariantsMap, Defaults> | QuarkCss<VariantsMap, Defaults> | string | string[]
 
 function _styled<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultProps extends PartialComponentProps<Element> = {}
+  DefaultProps extends PartialComponentProps<Element> = {},
 >(
   this: typeof css,
   element: Element,

@@ -1,3 +1,4 @@
+import type { ChildDom, PropsWithKnownKeys, StateView, TagFunc } from 'vanjs-core'
 import {
   type AnyQuarkCss,
   type MixedCX,
@@ -13,8 +14,6 @@ import {
   getQuarkConfig,
   isQuarkCss,
 } from '@quarkcss/core'
-
-import type { ChildDom, PropsWithKnownKeys, StateView, TagFunc } from 'vanjs-core'
 import van from 'vanjs-core'
 import { stateProto, val } from './val'
 
@@ -37,7 +36,7 @@ export type VanProps<T> = PropsWithKnownKeys<BaseElementOf<T>>
 type Assign<A, B> = Omit<A, keyof B> & B
 type NamedQuarkConfig<
   VariantsMap extends QuarkVariantsMap,
-  Defaults extends PartialPropsOfVariantsMap<VariantsMap>
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
 > = QuarkConfig<VariantsMap, Defaults> & { name?: string }
 
 export type ValueProp<T> = T | StateView<T> | (() => T)
@@ -50,7 +49,7 @@ export type QuarkComponentProps<
   Element extends VanElement,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends VanProps<Element>
+  DefaultComponentProps extends VanProps<Element>,
 > = Assign<
   // Assign<VanProps<Element>, Partial<DefaultComponentProps>>,
   Assign<
@@ -64,7 +63,7 @@ export interface QuarkVanComponent<
   Element extends VanElement,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends VanProps<Element>
+  DefaultComponentProps extends VanProps<Element>,
 > {
   (
     first?: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps> | ChildDom,
@@ -73,9 +72,10 @@ export interface QuarkVanComponent<
   CSS: QuarkCss<VariantsMap, Defaults>
 }
 
-export type QuarkVariantProps<C> = C extends QuarkVanComponent<any, infer V, infer D, any>
-  ? ValueProps<PropsOfVariantsMap<V, D>>
-  : never
+export type QuarkVariantProps<C> =
+  C extends QuarkVanComponent<any, infer V, infer D, any>
+    ? ValueProps<PropsOfVariantsMap<V, D>>
+    : never
 
 export type StyledFnOverload = {
   <Element extends VanElement, DefaultProps extends VanProps<Element> = {}>(
@@ -88,7 +88,7 @@ export type StyledFnOverload = {
     Element extends VanElement,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends VanProps<Element> = {}
+    DefaultProps extends VanProps<Element> = {},
   >(
     element: Element,
     quarkCSS: QuarkCss<VariantsMap, Defaults>,
@@ -99,7 +99,7 @@ export type StyledFnOverload = {
     Element extends VanElement,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends VanProps<Element> = {}
+    DefaultProps extends VanProps<Element> = {},
   >(
     element: Element,
     config: NamedQuarkConfig<VariantsMap, Defaults>,
@@ -116,7 +116,7 @@ export type Styled = StyledFnOverload & {
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends VanProps<K> = {}
+      DefaultProps extends VanProps<K> = {},
     >(
       config: NamedQuarkConfig<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
@@ -124,7 +124,7 @@ export type Styled = StyledFnOverload & {
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends VanProps<K> = {}
+      DefaultProps extends VanProps<K> = {},
     >(
       quarkCSS: QuarkCss<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultProps
@@ -136,7 +136,7 @@ function _styled<
   Element extends VanElement,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultProps extends VanProps<Element> = {}
+  DefaultProps extends VanProps<Element> = {},
 >(
   this: typeof css,
   element: Element,

@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
 
+import { render } from '@testing-library/react'
 import React from 'react'
 import { styled } from '.'
 import { styled as styledMerge } from './merge'
-import { render } from '@testing-library/react'
 
 describe('styled with plugins', () => {
   const Container = styledMerge('div', {

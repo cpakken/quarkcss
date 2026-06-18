@@ -1,5 +1,7 @@
 import type { MixedCX } from '@quarkcss/core'
+import { waitFor } from '@testing-library/dom'
 import { test, expect, describe, beforeEach, expectTypeOf } from 'bun:test'
+import van from 'vanjs-core'
 import {
   type QuarkComponentProps,
   type QuarkVanComponent,
@@ -8,12 +10,11 @@ import {
   type VanProps,
   styled,
 } from './styled'
-import van from 'vanjs-core'
-import { waitFor } from '@testing-library/dom'
 
-type PropsOf<C> = C extends QuarkVanComponent<infer E, infer V, infer D, infer DP>
-  ? QuarkComponentProps<E, V, D, DP>
-  : never
+type PropsOf<C> =
+  C extends QuarkVanComponent<infer E, infer V, infer D, infer DP>
+    ? QuarkComponentProps<E, V, D, DP>
+    : never
 
 // const html = String
 const html = (strings: TemplateStringsArray, ...values: any[]) => {

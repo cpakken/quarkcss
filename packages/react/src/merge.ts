@@ -1,6 +1,6 @@
 import { twMerge } from 'tailwind-merge'
-import { createStyled } from './styled'
 import type { Styled } from './styled'
+import { createStyled } from './styled'
 
 export * from './styled'
 

@@ -1,6 +1,6 @@
+import type { MixedCX } from '@quarkcss/core'
 // @vitest-environment happy-dom
 import { render } from '@solidjs/testing-library'
-import type { MixedCX } from '@quarkcss/core'
 import { createSignal, type ComponentProps } from 'solid-js'
 import { expectTypeOf } from 'vitest'
 import { type QuarkVariantProps, styled } from './styled'

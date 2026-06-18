@@ -14,7 +14,12 @@ describe('createSeparateQuarkPropsFn', () => {
   })
 
   test('extra', () => {
-    const [quarkProps, rest] = separateProps({ color: 'red', size: 'large', foo: 'bar', baz: 'qux' })
+    const [quarkProps, rest] = separateProps({
+      color: 'red',
+      size: 'large',
+      foo: 'bar',
+      baz: 'qux',
+    })
     expect(quarkProps).toEqual({ color: 'red', size: 'large' })
     expect(rest).toEqual({ foo: 'bar', baz: 'qux' })
   })
