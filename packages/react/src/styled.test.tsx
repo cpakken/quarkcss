@@ -216,6 +216,50 @@ describe('styled', () => {
     expect(element.getAttribute('data-tone')).toBe('info')
   })
 
+  test('shouldForwardProp array forwards variant props', () => {
+    const CustomBox = ({
+      tone,
+      ...props
+    }: ComponentProps<'div'> & { tone?: 'info' | 'danger' }) => (
+      <div data-tone={tone} {...props} />
+    )
+
+    const Box = styled(CustomBox, {
+      base: 'box-base',
+      variants: {
+        tone: {
+          info: 'tone-info',
+          danger: 'tone-danger',
+        },
+      },
+      shouldForwardProp: ['tone'],
+    })
+
+    type Variants = QuarkVariantProps<typeof Box>
+    expectTypeOf<Variants>().toEqualTypeOf<{
+      tone: 'info' | 'danger'
+    }>()
+
+    const { container } = render(<Box tone="danger" data-visible="yes" />)
+    const element = container.firstElementChild as HTMLElement
+
+    expect(element.className).toBe('box-base tone-danger')
+    expect(element.getAttribute('data-tone')).toBe('danger')
+    expect(element.getAttribute('data-visible')).toBe('yes')
+  })
+
+  test('shouldForwardProp array only accepts variant keys', () => {
+    // @ts-expect-error shouldForwardProp array only accepts variant keys
+    styled.div({
+      variants: {
+        tone: {
+          info: 'tone-info',
+        },
+      },
+      shouldForwardProp: ['missing'],
+    })
+  })
+
   test('HOC / Polymorphic Framer Motion Types', () => {
     // const StyledMotion = styled(motion.div, {
     // const Styled = styled('div', {})

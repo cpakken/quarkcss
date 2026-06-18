@@ -72,8 +72,12 @@ export type StyledQuarkConfig<
   VariantsMap extends QuarkVariantsMap = {},
   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {}
 > = NamedQuarkConfig<VariantsMap, Defaults> & {
-  shouldForwardProp?: ShouldForwardProp
+  shouldForwardProp?: ShouldForwardPropConfig<VariantsMap>
 }
+
+export type ShouldForwardPropConfig<VariantsMap extends QuarkVariantsMap> =
+  | ShouldForwardProp
+  | readonly (keyof VariantsMap & string)[]
 
 // export type AnyQuarkCss = QuarkCss<any, any>
 
@@ -231,6 +235,7 @@ const quarkComponentMeta = Symbol.for('quarkcss.react.component')
 
 type AnyNamedQuarkConfig = NamedQuarkConfig<any, any>
 type AnyStyledQuarkConfig = StyledQuarkConfig<any, any>
+type AnyShouldForwardPropConfig = ShouldForwardPropConfig<any>
 
 type QuarkComponentMeta = {
   element: ElementType
@@ -286,7 +291,7 @@ function _styled<
 
   const shouldForwardProp = composeShouldForwardProp(
     baseMeta?.shouldForwardProp,
-    styledConfig.shouldForwardProp
+    normalizeShouldForwardProp(styledConfig.shouldForwardProp)
   )
   const separateQuarkProps = createSeparateQuarkPropsFn(quark, shouldForwardProp)
 
@@ -360,7 +365,7 @@ const getQuarkComponentMeta = (element: any): QuarkComponentMeta | undefined => 
 
 const toStyledConfig = (
   configOrString: AnyQuarkCss | AnyStyledQuarkConfig | string | string[]
-): { config: AnyNamedQuarkConfig; shouldForwardProp?: ShouldForwardProp } => {
+): { config: AnyNamedQuarkConfig; shouldForwardProp?: AnyShouldForwardPropConfig } => {
   if (isQuarkCss(configOrString)) {
     return { config: getQuarkConfig(configOrString as AnyQuarkCss) }
   }
@@ -384,4 +389,14 @@ const composeShouldForwardProp = (
   return (prop, defaultValidator) =>
     baseShouldForwardProp(prop, defaultValidator) &&
     extensionShouldForwardProp(prop, defaultValidator)
+}
+
+const normalizeShouldForwardProp = (
+  shouldForwardProp?: AnyShouldForwardPropConfig
+): ShouldForwardProp | undefined => {
+  if (!shouldForwardProp || typeof shouldForwardProp === 'function') return shouldForwardProp
+
+  const forwardedProps = new Set(shouldForwardProp)
+
+  return (prop, defaultValidator) => defaultValidator(prop) || forwardedProps.has(prop)
 }

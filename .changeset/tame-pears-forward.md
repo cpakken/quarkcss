@@ -2,4 +2,4 @@
 "@quarkcss/react": minor
 ---
 
-Add `shouldForwardProp` support to React styled configs.
+Add `shouldForwardProp` predicate and variant-key array support to React styled configs.

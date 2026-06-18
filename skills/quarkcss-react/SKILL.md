@@ -136,6 +136,7 @@ Use `defaults` for normal enum defaults. Use `null` or `false` branches when fal
 Pass custom components first. The next argument is the Quark style input; the final argument is default component props.
 
 ```tsx
+// Motion components
 import { motion } from 'motion/react'
 
 const MotionBox = styled(motion.div, {
@@ -144,17 +145,13 @@ const MotionBox = styled(motion.div, {
   initial: { opacity: 0, x: -100 },
   animate: { opacity: 1, x: 0 }
 })
-```
 
-```tsx
+// Headless UI primitives
 import { Button } from '@base-ui/react/button'
 
 const StyledButton = styled(Button, { /* ... */ })
-```
 
-React Native primitives are custom components, not intrinsic JSX tags:
-
-```tsx
+// React Native primitives are custom components, not intrinsic JSX tags.
 import { View } from 'react-native'
 
 const StyledView = styled(View, { /* ... */})
@@ -180,11 +177,9 @@ const containercss = css({
 const StyledContainer = styled.div(containercss)
 
 StyledContainer.CSS === containercss // true
-```
 
-Use `.CSS` to reuse the same Quark CSS config with another base component and different default component props.
-
-```tsx
+// Use `.CSS` to reuse the same Quark CSS config with another base component
+// and different default component props.
 const MotionContainer = styled(motion.div, StyledContainer.CSS, {
   initial: { x: -100 },
   animate: { x: 0 },
