@@ -3,9 +3,20 @@
 import { render } from '@testing-library/react'
 import React from 'react'
 import { styled } from '.'
-import { styled as styledMerge } from './merge'
+import { css as cssMerge, styled as styledMerge } from './merge'
 
 describe('styled with plugins', () => {
+  test('exports css with plugins applied', () => {
+    const button = cssMerge({
+      base: 'p-4',
+      variants: {
+        size: { large: 'p-8' },
+      },
+    })
+
+    expect(button({ size: 'large' })).toEqual('p-8')
+  })
+
   const Container = styledMerge('div', {
     base: 'baseClass w-2',
     variants: {

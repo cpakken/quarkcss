@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "@quarkcss/core": "0.9.0",
+    "@quarkcss/react": "0.9.0",
+    "@quarkcss/solid": "0.9.0",
+    "@quarkcss/van": "0.9.0"
+  },
+  "changesets": ["clean-plums-watch", "tame-pears-forward", "tidy-walls-brake"]
+}

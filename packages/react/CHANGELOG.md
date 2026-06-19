@@ -1,5 +1,21 @@
 # @quarkcss/react
 
+## 1.0.0-beta.0
+
+### Major Changes
+
+- Prepare the QuarkCSS package set for the 1.0.0 beta release.
+
+### Minor Changes
+
+- 6f2a50f: Add `shouldForwardProp` predicate and variant-key array support to React styled configs.
+- Export `css` from `@quarkcss/react/merge` with the `tailwind-merge` plugin applied.
+
+### Patch Changes
+
+- Updated dependencies
+  - @quarkcss/core@1.0.0-beta.0
+
 ## 0.9.0
 
 ### Minor Changes
