@@ -160,7 +160,7 @@ Pass custom components first. The second argument is the Quark style input; the 
 
 ```tsx
 // Motion components
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 const MotionBox = styled(motion.div, {
   base: 'rounded-lg shadow'

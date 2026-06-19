@@ -1,5 +1,11 @@
 # @quarkcss/solid
 
+## 1.0.0-beta.2
+
+### Patch Changes
+
+- @quarkcss/core@1.0.0-beta.2
+
 ## 1.0.0-beta.1
 
 ### Patch Changes

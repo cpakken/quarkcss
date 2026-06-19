@@ -1,5 +1,12 @@
 # @quarkcss/react
 
+## 1.0.0-beta.2
+
+### Patch Changes
+
+- Refine React styled default prop typing and preserve default children when rendering styled components.
+  - @quarkcss/core@1.0.0-beta.2
+
 ## 1.0.0-beta.1
 
 ### Patch Changes

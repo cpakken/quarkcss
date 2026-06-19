@@ -2,10 +2,10 @@
 
 import { getQuarkConfig, type MixedCX } from '@quarkcss/core'
 import { render } from '@testing-library/react'
-import { m } from 'framer-motion'
+import { motion } from 'motion/react'
 import React, { type ComponentProps, type ComponentPropsWithoutRef } from 'react'
 import { expectTypeOf } from 'vitest'
-import { type QuarkVariantProps, styled } from '.'
+import { type DataAttributeValue, type QuarkVariantProps, styled } from '.'
 
 type Prettify<T> = { [K in keyof T]: T[K] } & {}
 
@@ -258,10 +258,10 @@ describe('styled', () => {
     // const StyledMotion = styled(motion.div, {
     // const Styled = styled('div', {})
 
-    const StyledMotion = styled(m.div, {}, { layout: true })
+    const StyledMotion = styled(motion.div, {}, { layout: true })
 
     type Props = ComponentProps<typeof StyledMotion>
-    expectTypeOf<Props['layout']>().toEqualTypeOf<ComponentProps<typeof m.div>['layout']>()
+    expectTypeOf<Props['layout']>().toEqualTypeOf<ComponentProps<typeof motion.div>['layout']>()
 
     const { container } = render(
       <div>
@@ -288,28 +288,53 @@ describe('styled', () => {
   })
 
   test('default data attributes', () => {
+    const RequiresLabel = ({ label, ...props }: { label: string; className?: string }) => (
+      <div {...props}>{label}</div>
+    )
+
     const Status = styled.span('inline-flex', {
       'data-family': 'status',
     })
 
-    const MotionCard = styled(m.div, 'rounded', {
+    const CustomData = styled(RequiresLabel, 'inline-flex', {
+      'data-family': 'custom',
+    })
+
+    const MotionData = styled(motion.div, 'rounded', {
+      'data-family': 'motion-data',
+    })
+
+    const MotionCard = styled(motion.div, 'rounded', {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       'data-family': 'motion-card',
     })
 
+    const MotionShowcase = styled(motion.div, 'rounded', {
+      children: <span>Motion</span>,
+      initial: { opacity: 0, y: 12 },
+      animate: { opacity: 1, y: 0, rotate: [0, 4, -4, 0] },
+      transition: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
+      'data-family': 'motion-showcase',
+    })
+
     type StatusProps = ComponentProps<typeof Status>
+    type CustomDataProps = ComponentProps<typeof CustomData>
+    type MotionDataProps = ComponentProps<typeof MotionData>
     type MotionCardProps = ComponentProps<typeof MotionCard>
 
-    expectTypeOf<StatusProps['data-family']>().toEqualTypeOf<
-      string | number | boolean | null | undefined
-    >()
-    expectTypeOf<MotionCardProps['data-family']>().toEqualTypeOf<
-      string | number | boolean | null | undefined
-    >()
+    expectTypeOf<StatusProps['title']>().toEqualTypeOf<ComponentProps<'span'>['title']>()
+    expectTypeOf<StatusProps['data-family']>().toEqualTypeOf<DataAttributeValue>()
+    expectTypeOf<CustomDataProps['label']>().toEqualTypeOf<string>()
+    expectTypeOf<CustomDataProps['data-family']>().toEqualTypeOf<DataAttributeValue>()
+    expectTypeOf<MotionDataProps['data-family']>().toEqualTypeOf<DataAttributeValue>()
     expectTypeOf<MotionCardProps['initial']>().toEqualTypeOf<
-      ComponentProps<typeof m.div>['initial']
+      ComponentProps<typeof motion.div>['initial']
     >()
+
+    React.createElement(Status, { 'data-family': 'status-override' })
+    React.createElement(CustomData, { label: 'Custom', 'data-family': 'custom-override' })
+    React.createElement(MotionData, { 'data-family': 'motion-override' })
 
     // @ts-expect-error known intrinsic props still use React's prop types
     styled.span('inline-flex', { tabIndex: 'wrong' })
@@ -318,15 +343,21 @@ describe('styled', () => {
     styled.button('inline-flex', { type: 'wat' })
 
     // @ts-expect-error wrapped component props are still validated
-    styled(m.div, 'rounded', { layout: 'wrong' })
+    styled(motion.div, 'rounded', { layout: 'wrong' })
 
     // @ts-expect-error unknown non-data props are still rejected
     styled.span('inline-flex', { family: 'status' })
 
+    // @ts-expect-error data-only defaults do not satisfy required custom props
+    ;<CustomData />
+
     const { container } = render(
       <>
         <Status>Status</Status>
+        <CustomData label="Custom" />
+        <MotionData />
         <MotionCard>Motion</MotionCard>
+        <MotionShowcase />
       </>
     )
 
@@ -339,11 +370,30 @@ describe('styled', () => {
           Status
         </span>
         <div
+          class="inline-flex"
+          data-family="custom"
+        >
+          Custom
+        </div>
+        <div
+          class="rounded"
+          data-family="motion-data"
+        />
+        <div
           class="rounded"
           data-family="motion-card"
           style="opacity: 0;"
         >
           Motion
+        </div>
+        <div
+          class="rounded"
+          data-family="motion-showcase"
+          style="opacity: 0; transform: translateY(12px);"
+        >
+          <span>
+            Motion
+          </span>
         </div>
       </div>
     `)

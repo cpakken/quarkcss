@@ -32,17 +32,18 @@ export type QuarkComponentProps<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends ComponentDefaultProps<Element>,
+  DefaultComponentProps extends object,
 > = Assign<
   Assign<ComponentProps<Element>, DefaultedComponentProps<Element, DefaultComponentProps>>,
   Assign<PropsOfVariantsMap<VariantsMap, Defaults>, { cx?: MixedCX }>
->
+> &
+  DataAttributes
 
 export interface QuarkComponent<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultComponentProps extends ComponentDefaultProps<Element>,
+  DefaultComponentProps extends object,
 > {
   (
     props: QuarkComponentProps<Element, VariantsMap, Defaults, DefaultComponentProps>
@@ -59,22 +60,25 @@ export type DataAttributes = {
   [K in `data-${string}`]?: DataAttributeValue
 }
 
-type DefaultedComponentProps<
-  Element extends ElementType,
-  DefaultComponentProps extends ComponentDefaultProps<Element>,
-> = {
+type DefaultedComponentProps<Element extends ElementType, DefaultComponentProps extends object> = {
   [K in keyof DefaultComponentProps & keyof ComponentProps<Element>]?: ComponentProps<Element>[K]
-} & {
-  [K in Extract<keyof DefaultComponentProps, `data-${string}`>]?: DataAttributeValue
+}
+
+type DefaultComponentPropsInput<
+  Element extends ElementType,
+  DefaultComponentProps extends object,
+> = {
+  [K in keyof DefaultComponentProps]: K extends keyof ComponentProps<Element>
+    ? ComponentProps<Element>[K]
+    : K extends `data-${string}`
+      ? DataAttributeValue
+      : never
 }
 
 export type QuarkVariantProps<C> =
   C extends QuarkComponent<any, infer V, infer D, any> ? PropsOfVariantsMap<V, D> : never
 
 export type PartialComponentProps<Element extends ElementType> = Partial<ComponentProps<Element>>
-
-export type ComponentDefaultProps<Element extends ElementType> = PartialComponentProps<Element> &
-  DataAttributes
 
 export type StyledQuarkConfig<
   VariantsMap extends QuarkVariantsMap = {},
@@ -105,7 +109,7 @@ type ExtendQuarkComponent<
   Component extends AnyQuarkComponent,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultProps extends PartialComponentProps<QuarkElementOf<Component>>,
+  DefaultProps extends object,
   MergedVariants extends QuarkVariantsMap = MergeQuarkVariantsMap<
     QuarkVariantsOf<Component>,
     VariantsMap
@@ -114,88 +118,85 @@ type ExtendQuarkComponent<
   QuarkElementOf<Component>,
   MergedVariants,
   MergeQuarkDefaults<MergedVariants, QuarkDefaultsOf<Component>, Defaults>,
-  Assign<QuarkDefaultPropsOf<Component>, DefaultProps & DataAttributes>
+  Assign<QuarkDefaultPropsOf<Component>, DefaultProps>
 >
 
 export type StyledFnOverload = {
-  <
-    Component extends AnyQuarkComponent,
-    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {},
-  >(
+  <Component extends AnyQuarkComponent, DefaultProps extends object = {}>(
     element: Component,
     baseCSS: string | string[],
-    defaultComponentProps?: DefaultProps & DataAttributes
+    defaultComponentProps?: DefaultComponentPropsInput<QuarkElementOf<Component>, DefaultProps>
   ): ExtendQuarkComponent<Component, {}, {}, DefaultProps>
   <
     Component extends AnyQuarkComponent,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {},
+    DefaultProps extends object = {},
   >(
     element: Component,
     quarkCSS: QuarkCss<VariantsMap, Defaults>,
-    defaultComponentProps?: DefaultProps & DataAttributes
+    defaultComponentProps?: DefaultComponentPropsInput<QuarkElementOf<Component>, DefaultProps>
   ): ExtendQuarkComponent<Component, VariantsMap, Defaults, DefaultProps>
   <
     Component extends AnyQuarkComponent,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<QuarkElementOf<Component>> = {},
+    DefaultProps extends object = {},
   >(
     element: Component,
     config: StyledQuarkConfig<VariantsMap, Defaults>,
-    defaultComponentProps?: DefaultProps & DataAttributes
+    defaultComponentProps?: DefaultComponentPropsInput<QuarkElementOf<Component>, DefaultProps>
   ): ExtendQuarkComponent<Component, VariantsMap, Defaults, DefaultProps>
-  <Element extends ElementType, DefaultProps extends PartialComponentProps<Element> = {}>(
+  <Element extends ElementType, DefaultProps extends object = {}>(
     element: Element,
     baseCSS: string | string[],
-    defaultComponentProps?: DefaultProps & DataAttributes
-  ): QuarkComponent<Element, {}, {}, DefaultProps & DataAttributes>
+    defaultComponentProps?: DefaultComponentPropsInput<Element, DefaultProps>
+  ): QuarkComponent<Element, {}, {}, DefaultProps>
   <
     Element extends ElementType,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {},
+    DefaultProps extends object = {},
   >(
     element: Element,
     quarkCSS: QuarkCss<VariantsMap, Defaults>,
-    defaultComponentProps?: DefaultProps & DataAttributes
-  ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps & DataAttributes>
+    defaultComponentProps?: DefaultComponentPropsInput<Element, DefaultProps>
+  ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
   <
     Element extends ElementType,
     VariantsMap extends QuarkVariantsMap = {},
     Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-    DefaultProps extends PartialComponentProps<Element> = {},
+    DefaultProps extends object = {},
   >(
     element: Element,
     config: StyledQuarkConfig<VariantsMap, Defaults>,
-    defaultComponentProps?: DefaultProps & DataAttributes
-  ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps & DataAttributes>
+    defaultComponentProps?: DefaultComponentPropsInput<Element, DefaultProps>
+  ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps>
 }
 
 export type StyledProxy = {
   [K in keyof JSX.IntrinsicElements]: {
-    <DefaultProps extends PartialComponentProps<K> = {}>(
+    <DefaultProps extends object = {}>(
       baseCSS: string | string[],
-      defaultComponentProps?: DefaultProps & DataAttributes
-    ): QuarkComponent<K, {}, {}, DefaultProps & DataAttributes>
+      defaultComponentProps?: DefaultComponentPropsInput<K, DefaultProps>
+    ): QuarkComponent<K, {}, {}, DefaultProps>
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {},
+      DefaultProps extends object = {},
     >(
       config: StyledQuarkConfig<VariantsMap, Defaults>,
       // config: QuarkConfig<VariantsMap, Defaults>,
-      defaultComponentProps?: DefaultProps & DataAttributes
-    ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps & DataAttributes>
+      defaultComponentProps?: DefaultComponentPropsInput<K, DefaultProps>
+    ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
     <
       VariantsMap extends QuarkVariantsMap = {},
       Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
-      DefaultProps extends PartialComponentProps<K> = {},
+      DefaultProps extends object = {},
     >(
       quarkCSS: QuarkCss<VariantsMap, Defaults>,
-      defaultComponentProps?: DefaultProps & DataAttributes
-    ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps & DataAttributes>
+      defaultComponentProps?: DefaultComponentPropsInput<K, DefaultProps>
+    ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
   }
 }
 
@@ -226,13 +227,13 @@ function _styled<
   Element extends ElementType,
   VariantsMap extends QuarkVariantsMap,
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
-  DefaultProps extends PartialComponentProps<Element> = {},
+  DefaultProps extends object = {},
 >(
   this: typeof css,
   element: Element,
   configOrCssOrClassStrings: StyledConfigInput<VariantsMap, Defaults>,
-  defaultComponentProps?: DefaultProps & DataAttributes
-): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps & DataAttributes> {
+  defaultComponentProps?: DefaultComponentPropsInput<Element, DefaultProps>
+): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps> {
   const CSS = this
 
   const baseMeta = getQuarkComponentMeta(element)
@@ -273,7 +274,7 @@ function _styled<
   const _CSS = quark || CSS({})
 
   const Component: ForwardRefRenderFunction<any, any> = (
-    { children, className: _className, cx, ...props },
+    { className: _className, cx, ...props },
     ref
   ) => {
     const [quarkProps, rest] = separateQuarkProps(props)
@@ -281,11 +282,12 @@ function _styled<
     const className = quark(quarkProps as any, _className, ...arrayify(cx))
 
     // @ts-ignore
-    return createElement(
-      elementToRender,
-      { ...mergedDefaultComponentProps, className, ...rest, ref },
-      children
-    )
+    return createElement(elementToRender, {
+      ...mergedDefaultComponentProps,
+      className,
+      ...rest,
+      ref,
+    })
   }
 
   const Forwarded = forwardRef(Component)

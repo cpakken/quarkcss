@@ -10,6 +10,7 @@
   "changesets": [
     "clean-plums-watch",
     "react-data-attributes",
+    "react-default-props",
     "tame-pears-forward",
     "tidy-walls-brake"
   ]
