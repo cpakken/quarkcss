@@ -1,5 +1,12 @@
 # @quarkcss/react
 
+## 1.0.0-beta.1
+
+### Patch Changes
+
+- Allow `data-*` attributes in React styled default props while preserving validation for known component props.
+  - @quarkcss/core@1.0.0-beta.1
+
 ## 1.0.0-beta.0
 
 ### Major Changes

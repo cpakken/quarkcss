@@ -287,6 +287,68 @@ describe('styled', () => {
     `)
   })
 
+  test('default data attributes', () => {
+    const Status = styled.span('inline-flex', {
+      'data-family': 'status',
+    })
+
+    const MotionCard = styled(m.div, 'rounded', {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      'data-family': 'motion-card',
+    })
+
+    type StatusProps = ComponentProps<typeof Status>
+    type MotionCardProps = ComponentProps<typeof MotionCard>
+
+    expectTypeOf<StatusProps['data-family']>().toEqualTypeOf<
+      string | number | boolean | null | undefined
+    >()
+    expectTypeOf<MotionCardProps['data-family']>().toEqualTypeOf<
+      string | number | boolean | null | undefined
+    >()
+    expectTypeOf<MotionCardProps['initial']>().toEqualTypeOf<
+      ComponentProps<typeof m.div>['initial']
+    >()
+
+    // @ts-expect-error known intrinsic props still use React's prop types
+    styled.span('inline-flex', { tabIndex: 'wrong' })
+
+    // @ts-expect-error known intrinsic string unions are still validated
+    styled.button('inline-flex', { type: 'wat' })
+
+    // @ts-expect-error wrapped component props are still validated
+    styled(m.div, 'rounded', { layout: 'wrong' })
+
+    // @ts-expect-error unknown non-data props are still rejected
+    styled.span('inline-flex', { family: 'status' })
+
+    const { container } = render(
+      <>
+        <Status>Status</Status>
+        <MotionCard>Motion</MotionCard>
+      </>
+    )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <span
+          class="inline-flex"
+          data-family="status"
+        >
+          Status
+        </span>
+        <div
+          class="rounded"
+          data-family="motion-card"
+          style="opacity: 0;"
+        >
+          Motion
+        </div>
+      </div>
+    `)
+  })
+
   test('compose', () => {
     const Composed = styled('button', Container.CSS, {
       style: { top: 0 },
