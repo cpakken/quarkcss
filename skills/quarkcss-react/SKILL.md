@@ -139,9 +139,21 @@ const StyledButton = styled.button({
 
 Use variants for named visual concepts owned by the component. A variant should represent a styling decision the component API intentionally exposes, not just a way to toggle arbitrary classes.
 
-Use `defaults` when omission should select a styled variant, such as a normal enum default. Use `null` or `false` branches when absence means no style/state and should pass through cleanly from callers; this often keeps boundary types easier to wrangle.
+Use `defaults` when omission should select a styled variant, such as a normal enum default. Use `null` or `false` branches when absence means no style/state; this keeps the prop optional without adding fake empty values to the public API.
 
-Avoid empty enum variants like `default: ''` or `none: ''` when they only mean “no extra classes.” Prefer a falsey fallback such as `null: ''`.
+```tsx
+const Text = styled.span({
+  variants: {
+    tone: {
+      accent: 'text-blue-600',
+      danger: 'text-red-600',
+      null: ''
+    }
+  }
+})
+
+// Prefer optional `tone` over a fake empty value like `tone="default"`.
+```
 
 ## Composition
 
@@ -275,7 +287,20 @@ Keep each style concern owned in one place. If a variant controls a concept, avo
 
 Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or merge Tailwind conflicts unless you configure a class engine, so conflicting Tailwind utilities can both appear:
 
-Prefer configs where each style concern has one owner. The next example intentionally contains conflicting utilities to show merge behavior. This can be useful for composed components, consumer overrides, or resilience against styling mistakes, but avoid relying on conflicts when the config can be organized cleanly.
+For automatic conflict resolution, choose one preconfigured React class-engine entrypoint. Prefer `cnfast` for the fast compose-and-merge path, or use `merge` when the project specifically wants direct `tailwind-merge` compatibility while keeping Quark's built-in clsx-style composition:
+
+```tsx
+import { css, styled } from '@quarkcss/react/cnfast'
+
+// or
+// import { css, styled } from '@quarkcss/react/merge'
+```
+
+Configured `css` and `styled` exports are a matched pair. Do not pass Quark CSS from one configured module to `styled` from another.
+
+Prefer organizing configs as if no merge engine exists, with each style concern owned in one place.
+
+Conflict merging can be useful for composed components, consumer overrides, resilience against styling mistakes, or cases where `cnfast` or `merge` makes the config shorter and easier to understand. Avoid relying on conflicts when the config can be organized cleanly, but do not add awkward structure or boilerplate just to avoid every conflict. The next example intentionally contains conflicting utilities to show merge behavior.
 
 ```tsx
 const Button = styled.button({
@@ -356,14 +381,3 @@ const InteractiveBadge = styled(Badge, {
 Pass the same variant through child components only when those children have independent styling responsibilities. Otherwise, let children inherit or consume the parent-owned variables.
 
 Tailwind CSS v4 custom property shorthand like `bg-(--badge-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
-
-For automatic conflict resolution, choose one preconfigured React class-engine entrypoint. Prefer `cnfast` for the fast compose-and-merge path, or use `merge` when the project specifically wants direct `tailwind-merge` compatibility while keeping Quark's built-in clsx-style composition:
-
-```tsx
-import { css, styled } from '@quarkcss/react/cnfast'
-
-// or
-// import { css, styled } from '@quarkcss/react/merge'
-```
-
-Configured `css` and `styled` exports are a matched pair. Do not pass Quark CSS from one configured module to `styled` from another.
