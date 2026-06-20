@@ -9,6 +9,7 @@
   },
   "changesets": [
     "clean-plums-watch",
+    "react-core-reexports",
     "react-data-attributes",
     "react-default-props",
     "tame-pears-forward",

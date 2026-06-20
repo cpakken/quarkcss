@@ -6,7 +6,6 @@ import {
   type NamedQuarkConfig,
   type PartialPropsOfVariantsMap,
   type PropsOfVariantsMap,
-  type QuarkConfig,
   type QuarkCss,
   type QuarkPlugin,
   type QuarkVariantsMap,
@@ -321,9 +320,7 @@ export function createStyled(...plugins: QuarkPlugin[]): Styled {
 
 export const styled: Styled = createStyled()
 
-//Re-export @quark/core
-export { css, isQuarkCss }
-export type { QuarkConfig, QuarkCss, QuarkVariantsMap }
+export * from '@quarkcss/core'
 export type { ShouldForwardProp }
 
 const isString = (value: any): value is string => typeof value === 'string'

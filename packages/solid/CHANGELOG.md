@@ -1,5 +1,12 @@
 # @quarkcss/solid
 
+## 1.0.0-beta.3
+
+### Patch Changes
+
+- Point package entrypoints to the built dist files.
+- @quarkcss/core@1.0.0-beta.3
+
 ## 1.0.0-beta.2
 
 ### Patch Changes

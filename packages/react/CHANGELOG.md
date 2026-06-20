@@ -1,5 +1,12 @@
 # @quarkcss/react
 
+## 1.0.0-beta.3
+
+### Patch Changes
+
+- Re-export the full core helper and type surface from the React entrypoints.
+  - @quarkcss/core@1.0.0-beta.3
+
 ## 1.0.0-beta.2
 
 ### Patch Changes

@@ -2,10 +2,56 @@
 
 import { render } from '@testing-library/react'
 import React from 'react'
-import { styled } from '.'
-import { css as cssMerge, styled as styledMerge } from './merge'
+import { expectTypeOf } from 'vitest'
+import { createCss, css, getQuarkConfig, mergeQuarkConfigs, styled, type QuarkProps } from '.'
+import {
+  createCss as createCssFromMerge,
+  css as cssMerge,
+  getQuarkConfig as getQuarkConfigFromMerge,
+  mergeQuarkConfigs as mergeQuarkConfigsFromMerge,
+  styled as styledMerge,
+  type QuarkProps as MergeQuarkProps,
+} from './merge'
 
 describe('styled with plugins', () => {
+  test('main entry re-exports core helpers and types', () => {
+    const button = css({
+      variants: {
+        tone: { neutral: 'text-slate-900', danger: 'text-red-600' },
+      },
+      defaults: {
+        tone: 'neutral',
+      },
+    })
+
+    expectTypeOf<QuarkProps<typeof button>>().toEqualTypeOf<{
+      tone?: 'neutral' | 'danger'
+    }>()
+    expect(getQuarkConfig(button).defaults).toEqual({ tone: 'neutral' })
+    expect(mergeQuarkConfigs({ base: 'p-2' }, { base: 'p-4' }).base).toEqual(['p-2', 'p-4'])
+    expect(createCss((classNames) => `${classNames} plugin`)('base')()).toBe('base plugin')
+  })
+
+  test('merge entry re-exports core helpers and keeps merged css configured', () => {
+    const button = cssMerge({
+      base: 'p-2',
+      variants: {
+        size: { large: 'p-4' },
+      },
+    })
+
+    expectTypeOf<MergeQuarkProps<typeof button>>().toEqualTypeOf<{
+      size: 'large'
+    }>()
+    expect(button({ size: 'large' }, 'p-8')).toBe('p-8')
+    expect(getQuarkConfigFromMerge(button).base).toBe('p-2')
+    expect(mergeQuarkConfigsFromMerge({ base: 'w-2' }, { base: 'w-4' }).base).toEqual([
+      'w-2',
+      'w-4',
+    ])
+    expect(createCssFromMerge((classNames) => classNames.toUpperCase())('base')()).toBe('BASE')
+  })
+
   test('exports css with plugins applied', () => {
     const button = cssMerge({
       base: 'p-4',

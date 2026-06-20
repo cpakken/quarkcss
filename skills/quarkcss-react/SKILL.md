@@ -139,7 +139,9 @@ const StyledButton = styled.button({
 
 Use variants for named visual concepts owned by the component. A variant should represent a styling decision the component API intentionally exposes, not just a way to toggle arbitrary classes.
 
-Use `defaults` for normal enum defaults. Use `null` or `false` branches when falsey input should map to explicit fallback classes.
+Use `defaults` when omission should select a styled variant, such as a normal enum default. Use `null` or `false` branches when absence means no style/state and should pass through cleanly from callers; this often keeps boundary types easier to wrangle.
+
+Avoid empty enum variants like `default: ''` or `none: ''` when they only mean “no extra classes.” Prefer a falsey fallback such as `null: ''`.
 
 ## Composition
 
