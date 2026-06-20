@@ -194,11 +194,11 @@ Button({ cx: ['text-white', enabled.val && 'opacity-100'] }, 'Save')
 Button({ cx: { hidden: hidden.val } }, 'Save')
 ```
 
-Prefer `cx` for quark-specific class extensions, and use `class` when forwarding ordinary Van props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or use `createStyled(twMerge)`.
+Prefer `cx` for quark-specific class extensions, and use `class` when forwarding ordinary Van props. If those classes may conflict with Tailwind utilities from the config, design the config to avoid the conflict or configure a class engine.
 
 ## Tailwind Conflicts
 
-Quark appends class names in this order: `base`, `variants`, `compound`, then `class` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
+Quark appends class names in this order: `base`, `variants`, `compound`, then `class` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or merge Tailwind conflicts unless you configure a class engine, so conflicting Tailwind utilities can both appear:
 
 ```ts
 const Button = styled.button({
@@ -244,13 +244,19 @@ const Button = styled.button({
 
 Tailwind CSS v4 custom property shorthand like `bg-(--button-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
-For automatic conflict resolution, create a configured `styled` function with `tailwind-merge`:
+For automatic conflict resolution, create a configured `styled` function with a class engine:
 
 ```ts
 import { createStyled } from '@quarkcss/van'
 import { twMerge } from 'tailwind-merge'
 
-const styledMerge = createStyled(twMerge)
+const styledMerge = createStyled({
+  merge: twMerge,
+  variants: {
+    cache: true,
+    precompute: 256
+  }
+})
 
 const Button = styledMerge.button({
   base: 'p-4',
@@ -265,15 +271,19 @@ Button({ size: 'large' })
 // class: 'p-8'
 ```
 
-If an app uses plugins with `createStyled`, re-export that configured `styled` from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/van`.
+If an app uses a class engine with `createStyled`, re-export that configured `styled` from a local module. If no engine is needed, import `styled` directly from `@quarkcss/van`.
 
 ```ts
 // lib/quarkcss.ts
 import { createStyled } from '@quarkcss/van'
 import { twMerge } from 'tailwind-merge'
 
-// Re-export styled with the tailwind-merge plugin applied.
-export const styled = createStyled(twMerge)
+export const styled = createStyled({
+  merge: twMerge,
+  variants: {
+    cache: true
+  }
+})
 ```
 
 ```ts
@@ -283,7 +293,7 @@ import { styled } from '@/lib/quarkcss'
 const Button = styled.button('p-4')
 ```
 
-`tailwind-merge` is optional so projects can choose whether the extra dependency and bundle size are worth it.
+`tailwind-merge` and other class engines are optional so projects can choose whether the extra dependency and bundle size are worth it.
 
 If all else fails, Tailwind's important modifier can still force an override: `!bg-red-500`.
 

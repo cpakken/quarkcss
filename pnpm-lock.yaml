@@ -57,6 +57,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.15)
+      cnfast:
+        specifier: ^0.0.5
+        version: 0.0.5
       happy-dom:
         specifier: ^20.9.0
         version: 20.9.0
@@ -69,9 +72,6 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.6(react@19.2.6)
-      tailwind-merge:
-        specifier: ^3
-        version: 3.6.0
       tsdown:
         specifier: ^0.22.1
         version: 0.22.1(typescript@6.0.3)
@@ -1120,6 +1120,10 @@ packages:
 
   chardet@2.1.1:
     resolution: {integrity: sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==}
+
+  cnfast@0.0.5:
+    resolution: {integrity: sha512-9Jg30S0fKqMMze/6qaoq5Y+ItatPXH7gENaoI7yilgUdq8ZFVRHRPeEkuZTRZKa5w4N73C1Zna5irL/XuvzWyA==}
+    hasBin: true
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
@@ -2943,6 +2947,8 @@ snapshots:
   chai@6.2.2: {}
 
   chardet@2.1.1: {}
+
+  cnfast@0.0.5: {}
 
   convert-source-map@2.0.0: {}
 

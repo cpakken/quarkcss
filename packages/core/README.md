@@ -269,7 +269,7 @@ Keep each style concern owned in one place. If a variant controls a concept, avo
 
 ## Tailwind Conflicts
 
-Quark appends class names in this order: `base`, `variants`, `compound`, then additional class values passed to the generated function. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear.
+Quark appends class names in this order: `base`, `variants`, `compound`, then additional class values passed to the generated function. It does not scope classes, apply CSS-in-JS specificity rules, or merge Tailwind conflicts unless you configure a class engine, so conflicting Tailwind utilities can both appear.
 
 The next example intentionally contains conflicting utilities to show merge behavior. This can be useful for consumer overrides or resilience against styling mistakes, but avoid relying on conflicts when the config can be organized cleanly.
 
@@ -336,13 +336,19 @@ const badge = css({
 
 Tailwind CSS v4 custom property shorthand like `bg-(--badge-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
-For automatic conflict resolution, create a configured `css` function with `tailwind-merge`:
+For automatic conflict resolution, create a configured `css` function with a class engine. Merge-only engines such as `tailwind-merge` receive Quark's joined class string:
 
 ```ts
 import { createCss } from '@quarkcss/core'
 import { twMerge } from 'tailwind-merge'
 
-const cssMerge = createCss(twMerge)
+const cssMerge = createCss({
+  merge: twMerge,
+  variants: {
+    cache: true,
+    precompute: 256
+  }
+})
 
 const button = cssMerge({
   base: 'p-4',
@@ -357,15 +363,21 @@ button({ size: 'large' })
 // 'p-8'
 ```
 
-If an app uses plugins with `createCss`, re-export that configured `css` from a local module. If no plugins are needed, import `css` directly from `@quarkcss/core`.
+`variants.cache` stores component-owned `base` + `variants` + `compound` output before per-call extensions are added. `variants.precompute` fills that cache during `css(...)` construction when the variant matrix is small enough.
+
+If an app uses a class engine with `createCss`, re-export that configured `css` from a local module. If no engine is needed, import `css` directly from `@quarkcss/core`.
 
 ```ts
 // lib/quarkcss.ts
 import { createCss } from '@quarkcss/core'
 import { twMerge } from 'tailwind-merge'
 
-// Re-export css with the tailwind-merge plugin applied.
-export const css = createCss(twMerge)
+export const css = createCss({
+  merge: twMerge,
+  variants: {
+    cache: true
+  }
+})
 ```
 
 ```ts
@@ -375,7 +387,7 @@ import { css } from '@/lib/quarkcss'
 const button = css('p-4 p-8')
 ```
 
-`tailwind-merge` is optional so projects can choose whether the extra dependency and bundle size are worth it.
+`tailwind-merge` and other merge engines are optional so projects can choose whether the extra dependency and bundle size are worth it.
 
 If all else fails, Tailwind's important modifier can still force an override: `!bg-red-500`.
 

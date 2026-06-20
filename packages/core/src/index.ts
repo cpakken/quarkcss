@@ -116,9 +116,17 @@ export type MergeQuarkConfig<
 >
 
 const $quark = Symbol('quark')
+const $quarkCssFactory = Symbol('quark.css.factory')
 
-type Falsey = false | null | undefined | 0 | ''
-export type MixedCX = string | (string | Falsey)[] | { [key: string]: any } | Falsey
+export type MixedCX =
+  | string
+  | number
+  | bigint
+  | boolean
+  | null
+  | undefined
+  | readonly MixedCX[]
+  | { [key: string]: any }
 
 export interface QuarkCss<
   VariantsMap extends QuarkVariantsMap = {},
@@ -126,37 +134,61 @@ export interface QuarkCss<
 > {
   (variants?: PropsOfVariantsMap<VariantsMap, Defaults>, ...rest: MixedCX[]): string
   [$quark]: NamedQuarkConfig<VariantsMap, Defaults>
+  [$quarkCssFactory]: QuarkCssFactoryId
 }
 
 export type AnyQuarkCss = QuarkCss<any, any>
+export type QuarkCssFactoryId = object
 
 export type QuarkProps<Quark> =
   Quark extends QuarkCss<infer VariantsMap, infer Defaults>
     ? PropsOfVariantsMap<VariantsMap, Defaults>
     : never
 
-// export function css<Config extends QuarkConfig>(config: Config): QuarkCss<Config> {
+export type QuarkClassComposer = (...values: MixedCX[]) => string
 
-export type QuarkPlugin = (classnames: string) => string
+export type QuarkVariantOptions = {
+  cache?: boolean | { max?: number }
+  precompute?: false | number
+}
 
-export function createCss(...plugins: QuarkPlugin[]): typeof css {
-  if (plugins.length === 0) return css
+export type QuarkOptions = {
+  compose?: QuarkClassComposer
+  merge?: (className: string) => string
+  variants?: QuarkVariantOptions
+}
 
-  return ((config: any) => {
-    const quark = css(config)
+type NormalizedClassEngine = {
+  compose?: QuarkClassComposer
+  merge?: (className: string) => string
+  cacheSize: number
+  precomputeLimit: false | number
+}
 
-    if (plugins.length === 0) {
-      return quark
-    }
+const defaultClassEngine: NormalizedClassEngine = {
+  cacheSize: 0,
+  precomputeLimit: false,
+}
 
-    return Object.assign(
-      (...props: any) => {
-        const classnames = quark(...props)
-        return plugins.reduce((acc, plugin) => plugin(acc), classnames)
-      },
-      { [$quark]: quark[$quark] }
-    )
-  }) as any
+const DEFAULT_VARIANT_CACHE_SIZE = 512
+const defaultCssFactoryId: QuarkCssFactoryId = {}
+
+export type QuarkCssFactory = typeof css & {
+  [$quarkCssFactory]: QuarkCssFactoryId
+}
+
+export function createCss(options?: QuarkOptions): QuarkCssFactory {
+  const classEngine = normalizeClassEngine(options)
+
+  if (classEngine === defaultClassEngine) return css as QuarkCssFactory
+
+  const cssFactoryId: QuarkCssFactoryId = {}
+  const cssFactory = ((config: any) =>
+    createQuarkCss(config, classEngine, cssFactoryId)) as QuarkCssFactory
+
+  return Object.assign(cssFactory, {
+    [$quarkCssFactory]: cssFactoryId,
+  })
 }
 
 //Overloading css() ruins type inference, so have to do it this way
@@ -173,13 +205,24 @@ export function css<
   VariantsMap extends QuarkVariantsMap = {},
   Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
 >(configOrString: MaybeQuarkConfig<VariantsMap, Defaults>): QuarkCss<VariantsMap, Defaults> {
+  return createQuarkCss(configOrString, defaultClassEngine, defaultCssFactoryId)
+}
+
+function createQuarkCss<
+  VariantsMap extends QuarkVariantsMap = {},
+  Defaults extends PartialPropsOfVariantsMap<VariantsMap> = {},
+>(
+  configOrString: MaybeQuarkConfig<VariantsMap, Defaults>,
+  classEngine: NormalizedClassEngine,
+  cssFactoryId: QuarkCssFactoryId
+): QuarkCss<VariantsMap, Defaults> {
   const config =
     typeof configOrString === 'string' || Array.isArray(configOrString)
       ? { base: configOrString }
       : configOrString
 
   const { base, variants, defaults, compound } = config
-  const baseClass = base ? cleanMultiLine(Array.isArray(base) ? base.join(' ') : base) : base
+  const baseClassNames = base ? normalizeClassNames(base) : []
   const variantsEntries = variants && normalizeVariantEntries(variants)
   const compoundEntries = compound?.map((variant) => {
     const conditions: [string, string | string[]][] = []
@@ -209,11 +252,6 @@ export function css<
     return normalize(value === undefined ? defaults?.[key] : value)
   }
 
-  const getVariantClass = (map: QuarkVariants, key: string) => {
-    if (key === 'false') return map.false !== undefined ? map.false : map.null
-    return map[key]
-  }
-
   const isCompoundMatch = (props: any, key: string, value: string | string[]) => {
     const propValue = getNormalizedProp(props, key)
 
@@ -228,9 +266,8 @@ export function css<
     return propValue === value
   }
 
-  const _css = (props: any = {}, ...rest: MixedCX[]) => {
-    const classNames: string[] = baseClass ? [baseClass] : []
-    let shouldCleanClassNames = false
+  const getOwnedClassValues = (props: any) => {
+    const classNames: string[] = baseClassNames.length > 0 ? [...baseClassNames] : []
 
     //Process Variants
     if (variantsEntries) {
@@ -260,38 +297,106 @@ export function css<
       }
     }
 
-    //Add Rest
-    for (const className of rest) {
-      if (className) {
-        if (typeof className === 'string') {
-          if (needsCleanMultiLine(className)) shouldCleanClassNames = true
-          classNames.push(className)
-        } else if (Array.isArray(className)) {
-          for (const value of className) {
-            if (value) {
-              if (needsCleanMultiLine(value)) shouldCleanClassNames = true
-              classNames.push(value)
-            }
-          }
-        } else {
-          for (const key in className) {
-            if (className[key]) {
-              if (needsCleanMultiLine(key)) shouldCleanClassNames = true
-              classNames.push(key)
-            }
-          }
-        }
+    return classNames
+  }
+
+  const hasDynamicOwnedClasses = Boolean(variantsEntries || compoundEntries)
+  const variantCache =
+    hasDynamicOwnedClasses && (classEngine.cacheSize > 0 || classEngine.precomputeLimit !== false)
+      ? createStringCache(classEngine.cacheSize || DEFAULT_VARIANT_CACHE_SIZE)
+      : undefined
+
+  const getVariantCacheKey = (props: any) => {
+    if (!variantsEntries) return ''
+
+    let cacheKey = ''
+    for (const [key] of variantsEntries) {
+      const propKey = getNormalizedProp(props, key)
+      cacheKey += propKey.length + ':' + propKey + '|'
+    }
+
+    return cacheKey
+  }
+
+  const computeOwnedClassName = (props: any) =>
+    composeClassName(getOwnedClassValues(props), classEngine)
+
+  const staticOwnedClassName = hasDynamicOwnedClasses
+    ? undefined
+    : composeClassName(baseClassNames, classEngine)
+
+  const getOwnedClassName = hasDynamicOwnedClasses
+    ? (props: any) => {
+        if (!variantCache) return computeOwnedClassName(props)
+
+        const cacheKey = getVariantCacheKey(props)
+        const cached = variantCache.get(cacheKey)
+        if (cached !== undefined) return cached
+
+        const className = computeOwnedClassName(props)
+        variantCache.set(cacheKey, className)
+        return className
+      }
+    : () => staticOwnedClassName!
+
+  if (variantCache && variantsEntries && classEngine.precomputeLimit !== false) {
+    precomputeVariantClasses(
+      variantsEntries,
+      classEngine.precomputeLimit,
+      getVariantCacheKey,
+      computeOwnedClassName,
+      variantCache
+    )
+  }
+
+  const _css = function (props: any = {}) {
+    const ownedClassName = getOwnedClassName(props)
+    const restLength = arguments.length - 1
+
+    if (restLength <= 0) return ownedClassName
+
+    if (restLength === 1) {
+      const classValue = arguments[1] as MixedCX
+      return classValue
+        ? composeClassValues(classEngine, ownedClassName, classValue)
+        : ownedClassName
+    }
+
+    if (restLength === 2) {
+      const classValue = arguments[1] as MixedCX
+      const cxValue = arguments[2] as MixedCX
+      return classValue || cxValue
+        ? composeClassValues(classEngine, ownedClassName, classValue, cxValue)
+        : ownedClassName
+    }
+
+    let hasRestClassValues = false
+    for (let index = 1; index < arguments.length; index++) {
+      if (arguments[index]) {
+        hasRestClassValues = true
+        break
       }
     }
 
-    const className = classNames.join(' ')
-    return shouldCleanClassNames ? cleanMultiLine(className) : className
+    if (!hasRestClassValues) return ownedClassName
+
+    const classValues: MixedCX[] = [ownedClassName]
+    for (let index = 1; index < arguments.length; index++) {
+      classValues.push(arguments[index])
+    }
+
+    return composeClassName(classValues, classEngine)
   }
 
   return Object.assign(_css, {
     [$quark]: config,
+    [$quarkCssFactory]: cssFactoryId,
   })
 }
+
+Object.assign(css, {
+  [$quarkCssFactory]: defaultCssFactoryId,
+})
 
 export const isQuarkCss = (value: any): boolean => {
   return !!value?.[$quark]
@@ -304,6 +409,14 @@ export const getQuarkConfig = <
   quark: QuarkCss<VariantsMap, Defaults>
 ): NamedQuarkConfig<VariantsMap, Defaults> => {
   return quark[$quark]
+}
+
+export const getQuarkCssFactoryId = (quark: AnyQuarkCss): QuarkCssFactoryId => {
+  return quark[$quarkCssFactory]
+}
+
+export const getCssFactoryId = (cssFactory: QuarkCssFactory): QuarkCssFactoryId => {
+  return cssFactory[$quarkCssFactory]
 }
 
 export const mergeQuarkConfigs = <
@@ -384,7 +497,197 @@ const normalize = (key: string | boolean | null | undefined | 0): string => {
   return !key ? 'false' : key.toString()
 }
 
+const getVariantClass = (map: QuarkVariants, key: string) => {
+  if (key === 'false') return map.false !== undefined ? map.false : map.null
+  return map[key]
+}
+
 export const arrayify = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value])
+
+const normalizeClassEngine = (options?: QuarkOptions): NormalizedClassEngine => {
+  if (!options) return defaultClassEngine
+
+  const variantOptions = options.variants
+
+  const cacheSize =
+    variantOptions?.cache === true
+      ? DEFAULT_VARIANT_CACHE_SIZE
+      : variantOptions?.cache
+        ? (variantOptions.cache.max ?? DEFAULT_VARIANT_CACHE_SIZE)
+        : 0
+
+  return {
+    compose: options.compose,
+    merge: options.merge,
+    cacheSize,
+    precomputeLimit:
+      typeof variantOptions?.precompute === 'number' ? variantOptions.precompute : false,
+  }
+}
+
+const composeClassName = (
+  classValues: readonly MixedCX[],
+  classEngine: NormalizedClassEngine
+): string => {
+  const className = classEngine.compose
+    ? classEngine.compose(...classValues)
+    : joinClassValues(classValues)
+
+  return classEngine.merge ? classEngine.merge(className) : className
+}
+
+const composeClassValues = (
+  classEngine: NormalizedClassEngine,
+  first: MixedCX,
+  second: MixedCX,
+  third?: MixedCX
+): string => {
+  const className = classEngine.compose
+    ? third === undefined
+      ? classEngine.compose(first, second)
+      : classEngine.compose(first, second, third)
+    : third === undefined
+      ? joinTwoClassValues(first, second)
+      : joinThreeClassValues(first, second, third)
+
+  return classEngine.merge ? classEngine.merge(className) : className
+}
+
+const joinClassValues = (classValues: readonly MixedCX[]): string => {
+  let className = ''
+
+  for (const value of classValues) {
+    const resolvedValue = resolveClassValue(value)
+
+    if (resolvedValue) {
+      if (className) className += ' '
+      className += resolvedValue
+    }
+  }
+
+  return cleanJoinedClassName(className)
+}
+
+const joinTwoClassValues = (first: MixedCX, second: MixedCX): string => {
+  const firstClassName = resolveClassValue(first)
+  const secondClassName = resolveClassValue(second)
+
+  if (!firstClassName) return cleanJoinedClassName(secondClassName)
+  if (!secondClassName) return cleanJoinedClassName(firstClassName)
+
+  return cleanJoinedClassName(firstClassName + ' ' + secondClassName)
+}
+
+const joinThreeClassValues = (first: MixedCX, second: MixedCX, third: MixedCX): string => {
+  let className = ''
+  const firstClassName = resolveClassValue(first)
+  const secondClassName = resolveClassValue(second)
+  const thirdClassName = resolveClassValue(third)
+
+  if (firstClassName) className = firstClassName
+  if (secondClassName) className = className ? className + ' ' + secondClassName : secondClassName
+  if (thirdClassName) className = className ? className + ' ' + thirdClassName : thirdClassName
+
+  return cleanJoinedClassName(className)
+}
+
+const resolveClassValue = (value: MixedCX): string => {
+  if (!value) return ''
+
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'bigint') return value.toString()
+  if (typeof value === 'boolean') return ''
+
+  let className = ''
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const resolvedValue = resolveClassValue(item)
+
+      if (resolvedValue) {
+        if (className) className += ' '
+        className += resolvedValue
+      }
+    }
+
+    return className
+  }
+
+  const classMap = value as { [key: string]: any }
+
+  for (const key in classMap) {
+    if (classMap[key]) {
+      if (className) className += ' '
+      className += key
+    }
+  }
+
+  return className
+}
+
+const cleanJoinedClassName = (className: string) =>
+  needsCleanMultiLine(className) ? cleanMultiLine(className) : className
+
+type StringCache = ReturnType<typeof createStringCache>
+
+const createStringCache = (maxSize: number) => {
+  let cache: Record<string, string> = Object.create(null)
+  let previousCache: Record<string, string> = Object.create(null)
+  let cacheSize = 0
+
+  return {
+    get(key: string) {
+      return cache[key] ?? previousCache[key]
+    },
+    set(key: string, value: string) {
+      cache[key] = value
+
+      if (++cacheSize > maxSize) {
+        cacheSize = 0
+        previousCache = cache
+        cache = Object.create(null)
+      }
+    },
+  }
+}
+
+const precomputeVariantClasses = (
+  variantsEntries: [string, QuarkVariants][],
+  limit: number,
+  getVariantCacheKey: (props: any) => string,
+  computeOwnedClassName: (props: any) => string,
+  variantCache: StringCache
+) => {
+  if (limit <= 0) return
+
+  let total = 1
+  const valuesByVariant = variantsEntries.map(([key, map]) => {
+    const values = Object.keys(map)
+    total *= values.length
+
+    return [key, values] as const
+  })
+
+  if (total === 0 || total > limit) return
+
+  const props: Record<string, string> = {}
+
+  const visit = (index: number) => {
+    if (index === valuesByVariant.length) {
+      variantCache.set(getVariantCacheKey(props), computeOwnedClassName(props))
+      return
+    }
+
+    const [key, values] = valuesByVariant[index]!
+
+    for (const value of values) {
+      props[key] = value
+      visit(index + 1)
+    }
+  }
+
+  visit(0)
+}
 
 const multiWhitespace = /\s+/g
 const needsMultiWhitespaceCleanup = /(^\s|\s$|\s{2,}|[^\S ])/

@@ -342,7 +342,7 @@ The `defaultValidator` fallback preserves Quark's default behavior for all other
 
 Keep each style concern owned in one place. If a variant controls a concept, avoid repeating competing utilities in `base`, `className`, `cx`, or nested child components.
 
-Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear.
+Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or merge Tailwind conflicts unless you configure a class engine, so conflicting Tailwind utilities can both appear.
 
 Prefer configs where each style concern has one owner. The next example intentionally contains conflicting utilities to show merge behavior. This can be useful for composed components, consumer overrides, or resilience against styling mistakes, but avoid relying on conflicts when the config can be organized cleanly.
 
@@ -361,7 +361,7 @@ const Button = styled.button({
 
 <Button size="large" tone="danger" cx="px-6" />
 // without merge: 'rounded-md bg-slate-900 px-3 px-5 bg-red-600 px-6'
-// with @quarkcss/react/merge: 'rounded-md bg-red-600 px-6'
+// with @quarkcss/react/cnfast: 'rounded-md bg-red-600 px-6'
 ```
 
 If a style concern is variant-controlled, keep that concern's utilities inside its variant and use `defaults` for the normal cases:
@@ -426,15 +426,12 @@ Pass the same variant through child components only when those children have ind
 
 Tailwind CSS v4 custom property shorthand like `bg-(--badge-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
-For automatic conflict resolution, create a configured `styled` function with `tailwind-merge`:
+For automatic conflict resolution with fast clsx-style composition, use the preconfigured `cnfast` entrypoint:
 
 ```tsx
-import { createStyled } from '@quarkcss/react'
-import { twMerge } from 'tailwind-merge'
+import { cn, styled } from '@quarkcss/react/cnfast'
 
-const styledMerge = createStyled(twMerge)
-
-const Button = styledMerge.button({
+const Button = styled.button({
   base: 'p-4',
   variants: {
     size: {
@@ -445,15 +442,29 @@ const Button = styledMerge.button({
 
 <Button size="large" />
 // className: 'p-8'
+
+cn('px-2', true && 'px-4')
+// 'px-4'
 ```
 
-If your React project already depends on `tailwind-merge`, use the preconfigured entrypoint.
-It exports the same `styled` API as `createStyled(twMerge)` and a `css` export with `tailwind-merge` applied:
+`@quarkcss/react/cnfast` exports the same `styled` API plus `css` and `cn`. It configures Quark with `cnfast`, enables component-owned variant caching, and precomputes small variant matrices.
+
+If your project needs a merge-only engine such as `tailwind-merge`, pass it through `merge`:
 
 ```tsx
-import { css, styled } from '@quarkcss/react/merge'
+import { createCss, createStyled } from '@quarkcss/react'
+import { twMerge } from 'tailwind-merge'
 
-const buttonCSS = css({
+const cssMerge = createCss({
+  merge: twMerge,
+  variants: {
+    cache: true,
+    precompute: 256
+  }
+})
+const styledMerge = createStyled({ css: cssMerge })
+
+const Button = styledMerge.button({
   base: 'p-4',
   variants: {
     size: {
@@ -461,19 +472,22 @@ const buttonCSS = css({
     }
   }
 })
-
-const Button = styled.button(buttonCSS)
 ```
 
-If an app uses plugins with `createStyled`, re-export that configured `styled` from a local module. If no plugins are needed, import `styled` directly from `@quarkcss/react`.
+If an app uses a class engine, re-export a matched `css` and `styled` pair from a local module. A configured `styled` factory only accepts Quark CSS created by its paired `css` factory. If no engine is needed, import `styled` directly from `@quarkcss/react`.
 
 ```ts
 // lib/quarkcss.ts
-import { createStyled } from '@quarkcss/react'
+import { createCss, createStyled } from '@quarkcss/react'
 import { twMerge } from 'tailwind-merge'
 
-// Re-export styled with the tailwind-merge plugin applied.
-export const styled = createStyled(twMerge)
+export const css = createCss({
+  merge: twMerge,
+  variants: {
+    cache: true
+  }
+})
+export const styled = createStyled({ css })
 ```
 
 ```tsx
@@ -483,7 +497,7 @@ import { styled } from '@/lib/quarkcss'
 const Button = styled.button('p-4')
 ```
 
-`tailwind-merge` is optional so projects can choose whether the extra dependency and bundle size are worth it.
+`cnfast`, `tailwind-merge`, and other class engines are optional so projects can choose whether the extra dependency and bundle size are worth it.
 
 If all else fails, Tailwind's important modifier can still force an override: `!bg-red-500`.
 

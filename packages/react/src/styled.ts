@@ -7,12 +7,14 @@ import {
   type PartialPropsOfVariantsMap,
   type PropsOfVariantsMap,
   type QuarkCss,
-  type QuarkPlugin,
+  type QuarkCssFactory,
+  type QuarkCssFactoryId,
+  type QuarkOptions,
   type QuarkVariantsMap,
-  arrayify,
   createCss,
-  css,
+  getCssFactoryId,
   getQuarkConfig,
+  getQuarkCssFactoryId,
   isQuarkCss,
   mergeQuarkConfigs,
 } from '@quarkcss/core'
@@ -185,7 +187,6 @@ export type StyledProxy = {
       DefaultProps extends object = {},
     >(
       config: StyledQuarkConfig<VariantsMap, Defaults>,
-      // config: QuarkConfig<VariantsMap, Defaults>,
       defaultComponentProps?: DefaultComponentPropsInput<K, DefaultProps>
     ): QuarkComponent<K, VariantsMap, Defaults, DefaultProps>
     <
@@ -201,6 +202,8 @@ export type StyledProxy = {
 
 export type Styled = StyledFnOverload & StyledProxy
 
+export type CreateStyledOptions = QuarkOptions | { css: QuarkCssFactory }
+
 const quarkComponentMeta = Symbol.for('quarkcss.react.component')
 
 type AnyNamedQuarkConfig = NamedQuarkConfig<any, any>
@@ -213,6 +216,7 @@ type NormalizedShouldForwardPropConfig = {
 
 type QuarkComponentMeta = {
   element: ElementType
+  cssFactoryId: QuarkCssFactoryId
   defaultComponentProps?: Record<any, any>
   shouldForwardProp?: NormalizedShouldForwardPropConfig
 }
@@ -228,14 +232,23 @@ function _styled<
   Defaults extends PartialPropsOfVariantsMap<VariantsMap>,
   DefaultProps extends object = {},
 >(
-  this: typeof css,
+  this: QuarkCssFactory,
   element: Element,
   configOrCssOrClassStrings: StyledConfigInput<VariantsMap, Defaults>,
   defaultComponentProps?: DefaultComponentPropsInput<Element, DefaultProps>
 ): QuarkComponent<Element, VariantsMap, Defaults, DefaultProps> {
   const CSS = this
+  const cssFactoryId = getCssFactoryId(CSS)
 
   const baseMeta = getQuarkComponentMeta(element)
+  if (baseMeta && baseMeta.cssFactoryId !== cssFactoryId) {
+    throw new Error(differentFactoryMessage)
+  }
+
+  if (isQuarkCss(configOrCssOrClassStrings)) {
+    assertSameCssFactory(configOrCssOrClassStrings as AnyQuarkCss, cssFactoryId)
+  }
+
   const elementToRender = baseMeta?.element ?? element
   const styledConfig = toStyledConfig(configOrCssOrClassStrings)
   let quark: AnyQuarkCss
@@ -250,7 +263,6 @@ function _styled<
     quark = CSS(config)
     name = config.name
   } else if (isQuarkCss(configOrCssOrClassStrings)) {
-    //quarkCSS
     quark = configOrCssOrClassStrings as AnyQuarkCss
     name = getQuarkConfig(quark).name
   } else {
@@ -270,15 +282,20 @@ function _styled<
   const shouldForwardProp = createShouldForwardProp(shouldForwardPropConfig)
   const separateQuarkProps = createSeparateQuarkPropsFn(quark, shouldForwardProp)
 
-  const _CSS = quark || CSS({})
-
   const Component: ForwardRefRenderFunction<any, any> = (
     { className: _className, cx, ...props },
     ref
   ) => {
     const [quarkProps, rest] = separateQuarkProps(props)
 
-    const className = quark(quarkProps as any, _className, ...arrayify(cx))
+    const className =
+      _className && cx
+        ? quark(quarkProps as any, _className, cx)
+        : _className
+          ? quark(quarkProps as any, _className)
+          : cx
+            ? quark(quarkProps as any, cx)
+            : quark(quarkProps as any)
 
     // @ts-ignore
     return createElement(elementToRender, {
@@ -296,17 +313,18 @@ function _styled<
   Forwarded.displayName = name || `Quark_${displayName}`
 
   return Object.assign(Forwarded, {
-    CSS: _CSS,
+    CSS: quark,
     [quarkComponentMeta]: {
       element: elementToRender,
+      cssFactoryId,
       defaultComponentProps: mergedDefaultComponentProps,
       shouldForwardProp: shouldForwardPropConfig,
     } satisfies QuarkComponentMeta,
   }) as any
 }
 
-export function createStyled(...plugins: QuarkPlugin[]): Styled {
-  const CSS = createCss(...plugins)
+export function createStyled(options?: CreateStyledOptions): Styled {
+  const CSS = isCssFactoryOptions(options) ? options.css : createCss(options)
 
   return new Proxy(_styled.bind(CSS), {
     get(target, prop) {
@@ -324,6 +342,19 @@ export * from '@quarkcss/core'
 export type { ShouldForwardProp }
 
 const isString = (value: any): value is string => typeof value === 'string'
+
+function isCssFactoryOptions(options?: CreateStyledOptions): options is { css: QuarkCssFactory } {
+  return !!options && 'css' in options
+}
+
+const differentFactoryMessage =
+  'Cannot use Quark CSS created by a different styled/css factory. Import both css and styled from the same configured QuarkCSS module.'
+
+const assertSameCssFactory = (quark: AnyQuarkCss, cssFactoryId: QuarkCssFactoryId) => {
+  if (getQuarkCssFactoryId(quark) !== cssFactoryId) {
+    throw new Error(differentFactoryMessage)
+  }
+}
 
 const getQuarkComponentMeta = (element: any): QuarkComponentMeta | undefined => {
   return element?.[quarkComponentMeta]

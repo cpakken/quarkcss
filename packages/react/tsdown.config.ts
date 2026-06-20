@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/merge.ts'],
+  entry: ['src/index.ts', 'src/cnfast.ts'],
   format: ['esm'],
   fixedExtension: false,
   // format: ['cjs', 'esm'],

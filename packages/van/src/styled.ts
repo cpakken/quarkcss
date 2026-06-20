@@ -6,9 +6,8 @@ import {
   type PropsOfVariantsMap,
   type QuarkConfig,
   type QuarkCss,
-  type QuarkPlugin,
+  type QuarkOptions,
   type QuarkVariantsMap,
-  arrayify,
   createCss,
   css,
   getQuarkConfig,
@@ -207,7 +206,16 @@ function _styled<
         quarkProps[key] = val(_quarkProps[key])
       }
 
-      return quark(quarkProps, val(_className), ...arrayify(val(cx)))
+      const classValue = val(_className)
+      const cxValue = val(cx)
+
+      return classValue && cxValue
+        ? quark(quarkProps, classValue, cxValue)
+        : classValue
+          ? quark(quarkProps, classValue)
+          : cxValue
+            ? quark(quarkProps, cxValue)
+            : quark(quarkProps)
     }
 
     return tagFunc({ ...defaultComponentProps, class: className, ...rest }, ...children)
@@ -218,8 +226,8 @@ function _styled<
 
 const isString = (value: any): value is string => typeof value === 'string'
 
-export function createStyled(...plugins: QuarkPlugin[]): Styled {
-  const CSS = createCss(...plugins)
+export function createStyled(options?: QuarkOptions): Styled {
+  const CSS = createCss(options)
 
   return new Proxy(_styled.bind(CSS), {
     get(target, prop) {

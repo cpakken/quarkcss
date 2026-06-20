@@ -6,9 +6,8 @@ import {
   type PropsOfVariantsMap,
   type QuarkConfig,
   type QuarkCss,
-  type QuarkPlugin,
+  type QuarkOptions,
   type QuarkVariantsMap,
-  arrayify,
   createCss,
   css,
   getQuarkConfig,
@@ -186,7 +185,14 @@ function _styled<
     const [cl, quarkProps, rest] = separateQuarkProps(props)
 
     const merged = mergeProps(defaultComponentProps, rest)
-    const className = () => quark(quarkProps, cl.class, ...arrayify(cl.cx))
+    const className = () =>
+      cl.class && cl.cx
+        ? quark(quarkProps, cl.class, cl.cx)
+        : cl.class
+          ? quark(quarkProps, cl.class)
+          : cl.cx
+            ? quark(quarkProps, cl.cx)
+            : quark(quarkProps)
 
     return <Dynamic component={element as any} {...merged} class={className()} />
   }
@@ -199,8 +205,8 @@ function _styled<
 
 const isString = (value: any): value is string => typeof value === 'string'
 
-export function createStyled(...plugins: QuarkPlugin[]): Styled {
-  const CSS = createCss(...plugins)
+export function createStyled(options?: QuarkOptions): Styled {
+  const CSS = createCss(options)
 
   return new Proxy(_styled.bind(CSS), {
     get(target, prop) {

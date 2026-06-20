@@ -273,7 +273,7 @@ When converting JSX or a UI primitive into a Quark component, review static prop
 
 Keep each style concern owned in one place. If a variant controls a concept, avoid repeating competing utilities in `base`, `className`, `cx`, or nested child components.
 
-Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or run `tailwind-merge` unless you opt into a plugin, so conflicting Tailwind utilities can both appear:
+Quark appends class names in this order: `base`, `variants`, `compound`, then `className` and `cx`. It does not scope classes, apply CSS-in-JS specificity rules, or merge Tailwind conflicts unless you configure a class engine, so conflicting Tailwind utilities can both appear:
 
 Prefer configs where each style concern has one owner. The next example intentionally contains conflicting utilities to show merge behavior. This can be useful for composed components, consumer overrides, or resilience against styling mistakes, but avoid relying on conflicts when the config can be organized cleanly.
 
@@ -292,7 +292,7 @@ const Button = styled.button({
 
 <Button size="large" tone="danger" cx="px-6" />
 // without merge: 'rounded-md bg-slate-900 px-3 px-5 bg-red-600 px-6'
-// with @quarkcss/react/merge: 'rounded-md bg-red-600 px-6'
+// with @quarkcss/react/cnfast: 'rounded-md bg-red-600 px-6'
 ```
 
 If a style concern is variant-controlled, keep that concern's utilities inside its variant and use `defaults` for the normal cases:
@@ -357,9 +357,10 @@ Pass the same variant through child components only when those children have ind
 
 Tailwind CSS v4 custom property shorthand like `bg-(--badge-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
-For automatic conflict resolution in React projects that already depend on `tailwind-merge`, import the preconfigured entrypoint:
+For automatic conflict resolution with fast clsx-style composition, import the preconfigured `cnfast` entrypoint:
 
 ```tsx
-// Exports the same styled API as createStyled(twMerge).
-import { styled } from '@quarkcss/react/merge'
+import { css, styled } from '@quarkcss/react/cnfast'
 ```
+
+Configured `css` and `styled` exports are a matched pair. Do not pass Quark CSS from one configured module to `styled` from another.

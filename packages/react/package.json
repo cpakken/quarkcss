@@ -27,9 +27,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./merge": {
-      "types": "./dist/merge.d.ts",
-      "import": "./dist/merge.js"
+    "./cnfast": {
+      "types": "./dist/cnfast.d.ts",
+      "import": "./dist/cnfast.js"
     }
   },
   "scripts": {
@@ -49,21 +49,21 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
+    "cnfast": "^0.0.5",
     "happy-dom": "^20.9.0",
     "motion": "^12.40.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwind-merge": "^3",
     "tsdown": "^0.22.1",
     "vite": "^8.0.14",
     "vitest": "^4.1.7"
   },
   "peerDependencies": {
-    "react": "^18.2.0 || ^19.0.0",
-    "tailwind-merge": "^3"
+    "cnfast": "^0.0.5",
+    "react": "^18.2.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
-    "tailwind-merge": {
+    "cnfast": {
       "optional": true
     }
   },

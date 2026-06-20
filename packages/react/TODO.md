@@ -1,3 +1,11 @@
+- forwardProp example  
+StyledCheckbox = styled.input({
+  variants: {
+    checked: {true: '...', false: '...'}, 
+  },
+  shouldForwardProp: ['checked']
+}, { checked: false})
+
 ## Apparently, many people have the same idea as me
 
 https://windstitch.vercel.app/docs/create-a-component
