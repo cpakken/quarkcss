@@ -426,7 +426,7 @@ Pass the same variant through child components only when those children have ind
 
 Tailwind CSS v4 custom property shorthand like `bg-(--badge-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
-For automatic conflict resolution with fast clsx-style composition, use the preconfigured `cnfast` entrypoint:
+For automatic conflict resolution, use a preconfigured class-engine entrypoint. Prefer `cnfast` for the fast compose-and-merge path:
 
 ```tsx
 import { cn, styled } from '@quarkcss/react/cnfast'
@@ -449,7 +449,30 @@ cn('px-2', true && 'px-4')
 
 `@quarkcss/react/cnfast` exports the same `styled` API plus `css` and `cn`. It configures Quark with `cnfast`, enables component-owned variant caching, and precomputes small variant matrices.
 
-If your project needs a merge-only engine such as `tailwind-merge`, pass it through `merge`:
+If your project needs direct `tailwind-merge` compatibility, use the preconfigured `merge` entrypoint:
+
+```tsx
+import { styled, twMerge } from '@quarkcss/react/merge'
+
+const Button = styled.button({
+  base: 'p-4',
+  variants: {
+    size: {
+      large: 'p-8'
+    }
+  }
+})
+
+<Button size="large" />
+// className: 'p-8'
+
+twMerge('px-2 px-4')
+// 'px-4'
+```
+
+`@quarkcss/react/merge` exports the same `styled` API plus `css` and `twMerge`. It configures Quark with `tailwind-merge`, enables component-owned variant caching, and precomputes small variant matrices.
+
+For a custom class engine, create a matched `css` and `styled` pair:
 
 ```tsx
 import { createCss, createStyled } from '@quarkcss/react'
@@ -478,16 +501,7 @@ If an app uses a class engine, re-export a matched `css` and `styled` pair from 
 
 ```ts
 // lib/quarkcss.ts
-import { createCss, createStyled } from '@quarkcss/react'
-import { twMerge } from 'tailwind-merge'
-
-export const css = createCss({
-  merge: twMerge,
-  variants: {
-    cache: true
-  }
-})
-export const styled = createStyled({ css })
+export { css, styled } from '@quarkcss/react/cnfast'
 ```
 
 ```tsx

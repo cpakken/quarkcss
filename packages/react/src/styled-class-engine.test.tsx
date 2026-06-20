@@ -12,6 +12,14 @@ import {
   styled as styledCnfast,
   type QuarkProps as CnfastQuarkProps,
 } from './cnfast'
+import {
+  createCss as createCssFromMerge,
+  css as cssMerge,
+  getQuarkConfig as getQuarkConfigFromMerge,
+  mergeQuarkConfigs as mergeQuarkConfigsFromMerge,
+  styled as styledMerge,
+  type QuarkProps as MergeQuarkProps,
+} from './merge'
 
 describe('styled with class engines', () => {
   const differentFactoryMessage =
@@ -59,8 +67,43 @@ describe('styled with class engines', () => {
     ).toBe('BASE')
   })
 
+  test('merge entry re-exports core helpers and keeps css configured', () => {
+    const button = cssMerge({
+      base: 'p-2',
+      variants: {
+        size: { large: 'p-4' },
+      },
+    })
+
+    expectTypeOf<MergeQuarkProps<typeof button>>().toEqualTypeOf<{
+      size: 'large'
+    }>()
+    expect(button({ size: 'large' }, 'p-8')).toBe('p-8')
+    expect(getQuarkConfigFromMerge(button).base).toBe('p-2')
+    expect(mergeQuarkConfigsFromMerge({ base: 'w-2' }, { base: 'w-4' }).base).toEqual([
+      'w-2',
+      'w-4',
+    ])
+    expect(
+      createCssFromMerge({
+        merge: (classNames) => classNames.toUpperCase(),
+      })('base')()
+    ).toBe('BASE')
+  })
+
   test('exports css with cnfast applied', () => {
     const button = cssCnfast({
+      base: 'p-4',
+      variants: {
+        size: { large: 'p-8' },
+      },
+    })
+
+    expect(button({ size: 'large' })).toEqual('p-8')
+  })
+
+  test('exports css with tailwind-merge applied', () => {
+    const button = cssMerge({
       base: 'p-4',
       variants: {
         size: { large: 'p-8' },
@@ -99,13 +142,47 @@ describe('styled with class engines', () => {
     `)
   })
 
+  test('merge css and styled are a matched factory pair', () => {
+    const buttonCSS = cssMerge({ base: 'p-2 p-4' })
+    const Button = styledMerge.button(buttonCSS)
+    const DangerButton = styledMerge(Button, { base: 'bg-red-500' })
+    const Copy = styledMerge('button', Button.CSS)
+
+    const { container } = render(
+      <>
+        <Button />
+        <DangerButton />
+        <Copy />
+      </>
+    )
+
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <button
+          class="p-4"
+        />
+        <button
+          class="p-4 bg-red-500"
+        />
+        <button
+          class="p-4"
+        />
+      </div>
+    `)
+  })
+
   test('throws when mixing css and styled factories', () => {
     const buttonCSS = cssCnfast({ base: 'p-2 p-4' })
     const Button = styledCnfast.button('p-2 p-4')
+    const mergeCSS = cssMerge({ base: 'p-2 p-4' })
+    const MergeButton = styledMerge.button('p-2 p-4')
 
     expect(() => styled.button(buttonCSS)).toThrow(differentFactoryMessage)
     expect(() => styled(Button, { base: 'bg-red-500' })).toThrow(differentFactoryMessage)
     expect(() => styled('button', Button.CSS)).toThrow(differentFactoryMessage)
+    expect(() => styled.button(mergeCSS)).toThrow(differentFactoryMessage)
+    expect(() => styledCnfast.button(mergeCSS)).toThrow(differentFactoryMessage)
+    expect(() => styledCnfast(MergeButton, { base: 'bg-red-500' })).toThrow(differentFactoryMessage)
   })
 
   const Container = styledCnfast('div', {

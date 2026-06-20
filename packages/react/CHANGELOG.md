@@ -1,5 +1,12 @@
 # @quarkcss/react
 
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- Restore the React `merge` entrypoint as a class-engine preset paired with `tailwind-merge`.
+  - @quarkcss/core@1.0.0-beta.4
+
 ## 1.0.0-beta.3
 
 ### Patch Changes

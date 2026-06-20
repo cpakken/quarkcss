@@ -357,10 +357,13 @@ Pass the same variant through child components only when those children have ind
 
 Tailwind CSS v4 custom property shorthand like `bg-(--badge-bg)` expands to the equivalent `var(...)` arbitrary value; variable values can be explicit values or theme token vars.
 
-For automatic conflict resolution with fast clsx-style composition, import the preconfigured `cnfast` entrypoint:
+For automatic conflict resolution, choose one preconfigured React class-engine entrypoint. Prefer `cnfast` for the fast compose-and-merge path, or use `merge` when the project specifically wants direct `tailwind-merge` compatibility while keeping Quark's built-in clsx-style composition:
 
 ```tsx
 import { css, styled } from '@quarkcss/react/cnfast'
+
+// or
+// import { css, styled } from '@quarkcss/react/merge'
 ```
 
 Configured `css` and `styled` exports are a matched pair. Do not pass Quark CSS from one configured module to `styled` from another.
