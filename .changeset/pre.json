@@ -13,6 +13,7 @@
     "react-core-reexports",
     "react-data-attributes",
     "react-default-props",
+    "relax-peer-ranges",
     "tame-pears-forward",
     "tidy-walls-brake"
   ]

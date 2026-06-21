@@ -1,5 +1,13 @@
 # @quarkcss/solid
 
+## 1.0.0-beta.5
+
+### Patch Changes
+
+- Relax framework peer dependency ranges for the beta release.
+- Updated dependencies
+  - @quarkcss/core@1.0.0-beta.5
+
 ## 1.0.0-beta.4
 
 ### Patch Changes
